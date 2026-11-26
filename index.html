@@ -1198,8 +1198,8 @@
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
           </div>
 
-          <p id="auth-error-msg" class="hidden text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 p-2.5 rounded-xl"></p>
-          <p id="auth-info-msg" class="hidden text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl"></p>
+          <p id="auth-error-msg" class="hidden text-xs font-medium text-rose-700 bg-rose-50 border border-rose-200 p-3 rounded-xl leading-relaxed"></p>
+          <p id="auth-info-msg" class="hidden text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl leading-relaxed"></p>
 
           <button type="submit" id="btn-email-auth-submit"
             class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-colors cursor-pointer">
@@ -1213,7 +1213,7 @@
           <div class="border-t border-slate-200 w-full"></div>
         </div>
 
-        <!-- Google Sign In Button (Opsional jika Google Provider diaktifkan di Supabase) -->
+        <!-- Google Sign In Button (Memeriksa status provider di Supabase sebelum redirect) -->
         <button type="button" onclick="handleGoogleLogin()" id="btn-google-login"
           class="w-full py-2.5 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.99] text-slate-800 text-xs sm:text-sm font-semibold shadow-2xs flex items-center justify-center gap-2.5 transition-all cursor-pointer">
           <svg class="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
@@ -1478,7 +1478,6 @@ alter publication supabase_realtime add table public.recurring_bills;</pre>
      * =========================================================================
      */
     function resolveSupabaseConfig() {
-      // 1. Cek CUSTOM_SUPABASE_URL & CUSTOM_SUPABASE_ANON_KEY di kode (untuk GitHub Pages)
       if (CUSTOM_SUPABASE_URL && CUSTOM_SUPABASE_URL.trim() && CUSTOM_SUPABASE_ANON_KEY && CUSTOM_SUPABASE_ANON_KEY.trim()) {
         configSourceType = 'hardcoded';
         return {
@@ -1487,7 +1486,6 @@ alter publication supabase_realtime add table public.recurring_bills;</pre>
         };
       }
 
-      // 2. Cek konfigurasi yang disimpan user via UI Modal 'Pengaturan Supabase'
       try {
         const savedRaw = localStorage.getItem(CUSTOM_SUPABASE_STORAGE_KEY);
         if (savedRaw) {
@@ -1614,7 +1612,6 @@ alter publication supabase_realtime add table public.recurring_bills;</pre>
       try {
         supabase = createClient(config.url, config.anonKey);
 
-        // Periksa sesi login aktif saat halaman dibuka
         const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
         if (sessionErr) throw sessionErr;
 
@@ -1628,7 +1625,6 @@ alter publication supabase_realtime add table public.recurring_bills;</pre>
           refreshAllViews();
         }
 
-        // Dengarkan perubahan status autentikasi (Login / Logout / OAuth Redirect)
         const { data: listenerData } = supabase.auth.onAuthStateChange(async (_event, session) => {
           if (session && session.user) {
             const isNewUserLogin = !currentUser || currentUser.id !== session.user.id;
@@ -1793,10 +1789,9 @@ alter publication supabase_realtime add table public.recurring_bills;</pre>
       return `${months[m - 1]} ${y}`;
     }
 
-    // Menghitung rentang Senin - Minggu berdasarkan tanggal jangkar
     function getWeekRange(anchorDateStr) {
       const date = parseLocalDate(anchorDateStr);
-      const dayOfWeek = date.getDay(); // 0 (Min) - 6 (Sab)
+      const dayOfWeek = date.getDay();
       const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 
       const start = new Date(date);
@@ -2937,7 +2932,6 @@ alter publication supabase_realtime add table public.recurring_bills;</pre>
         return;
       }
 
-      // Mode Lokal
       if (id) {
         const idx = appState.transactions.findIndex(t => t.id === id);
         if (idx !== -1) {
@@ -3736,14 +3730,40 @@ alter publication supabase_realtime add table public.recurring_bills;</pre>
       if (msg.includes('user already registered')) return 'Alamat email ini sudah terdaftar. Silakan pindah ke tab Masuk (Login).';
       if (msg.includes('email not confirmed')) return 'Email belum dikonfirmasi. Cek inbox Anda atau nonaktifkan "Confirm email" di Supabase Authentication.';
       if (msg.includes('password should be at least')) return 'Kata sandi terlalu pendek (minimal 6 karakter).';
-      if (msg.includes('provider is not enabled')) return 'Login Google belum diaktifkan di Supabase Dashboard (Authentication -> Providers -> Google).';
+      if (msg.includes('provider is not enabled')) return 'Provider Google belum diaktifkan di Supabase Dashboard (Authentication -> Sign In / Providers -> Google).';
       return message || 'Terjadi kendala autentikasi Supabase.';
     }
 
     async function handleGoogleLogin() {
       if (!supabase) return;
       const errBox = document.getElementById('auth-error-msg');
+      const btnGoogle = document.getElementById('btn-google-login');
       errBox.classList.add('hidden');
+
+      // Periksa status Google Provider di Supabase Auth Settings agar tidak terpental ke halaman error JSON
+      const config = resolveSupabaseConfig();
+      if (config && config.url && config.anonKey) {
+        try {
+          if (btnGoogle) btnGoogle.disabled = true;
+          const res = await fetch(`${config.url}/auth/v1/settings`, {
+            headers: { apikey: config.anonKey }
+          });
+          if (res.ok) {
+            const settings = await res.json();
+            if (settings && settings.external && settings.external.google === false) {
+              errBox.innerHTML = '<strong>Provider Google belum diaktifkan di proyek Supabase Anda.</strong><br>Silakan gunakan form <strong>Email &amp; Password</strong> di atas (langsung aktif), atau aktifkan Google OAuth di <em>Supabase Dashboard &rarr; Authentication &rarr; Sign In / Providers &rarr; Google</em>.';
+              errBox.classList.remove('hidden');
+              if (btnGoogle) btnGoogle.disabled = false;
+              return;
+            }
+          }
+        } catch (checkErr) {
+          console.warn('Info pengecekan settings Supabase:', checkErr);
+        } finally {
+          if (btnGoogle) btnGoogle.disabled = false;
+        }
+      }
+
       try {
         const redirectTarget = window.location.origin + window.location.pathname;
         const { error } = await supabase.auth.signInWithOAuth({
