@@ -1,0 +1,3954 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DompetKu - Manajemen Keuangan Pribadi</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Custom scrollbar & smooth transitions */
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Hide scrollbar for horizontal pill containers on mobile */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Subtle fade-in animation for view switching and modals */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-fade-in {
+      animation: fadeSlideUp 0.22s ease-out forwards;
+    }
+
+    /* Desktop Sidebar Collapse (Mini Mode) Styles */
+    @media (min-width: 768px) {
+      #desktop-sidebar[data-collapsed="true"] {
+        width: 5rem; /* 80px */
+      }
+      #desktop-sidebar[data-collapsed="true"] .sidebar-hide-collapsed {
+        display: none !important;
+      }
+      #desktop-sidebar[data-collapsed="true"] .sidebar-header {
+        flex-direction: column;
+        height: auto;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        gap: 0.625rem;
+      }
+      #desktop-sidebar[data-collapsed="true"] .nav-item {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+      #desktop-sidebar[data-collapsed="true"] .nav-item-content {
+        justify-content: center;
+        gap: 0;
+      }
+      #desktop-sidebar[data-collapsed="true"] .sidebar-account-card {
+        margin-left: 0.625rem;
+        margin-right: 0.625rem;
+        padding: 0.625rem 0.5rem;
+        align-items: center;
+      }
+      #desktop-sidebar[data-collapsed="true"] .sidebar-db-row {
+        justify-content: center;
+      }
+      #desktop-sidebar[data-collapsed="true"] .sidebar-auth-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+      #desktop-sidebar[data-collapsed="true"] .sidebar-auth-actions button {
+        width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+        justify-content: center;
+      }
+      #desktop-sidebar[data-collapsed="true"] .sidebar-user-row {
+        justify-content: center;
+      }
+      #main-wrapper[data-sidebar-collapsed="true"] {
+        padding-left: 5rem; /* 80px */
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row bg-slate-50 text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-900">
+
+  <!-- =====================================================================
+       DESKTOP SIDEBAR NAVIGATION (EXPANDABLE / COLLAPSIBLE)
+  ====================================================================== -->
+  <aside id="desktop-sidebar" data-collapsed="false"
+    class="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-slate-900 text-white z-30 border-r border-slate-800 transition-all duration-300 ease-in-out">
+    <!-- Brand Logo & Collapse Toggle -->
+    <div class="sidebar-header flex items-center justify-between px-4 h-20 border-b border-slate-800/80 shrink-0">
+      <div class="flex items-center gap-3 min-w-0">
+        <div onclick="toggleSidebarCollapse()" title="Perkecil / Perluas Sidebar"
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-900/40 shrink-0 cursor-pointer hover:brightness-105 transition-all">
+          <i data-lucide="wallet" class="w-5 h-5 text-white"></i>
+        </div>
+        <div class="sidebar-hide-collapsed min-w-0">
+          <h1 class="text-base font-bold tracking-tight text-white leading-tight truncate">DompetKu</h1>
+          <p class="text-[11px] text-slate-400 font-medium truncate">Keuangan Pribadi</p>
+        </div>
+      </div>
+
+      <button id="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Perkecil Sidebar"
+        aria-label="Perkecil atau Perluas Sidebar"
+        class="w-8 h-8 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/70 flex items-center justify-center transition-colors shrink-0 cursor-pointer">
+        <i id="sidebar-collapse-icon" data-lucide="panel-left-close" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto no-scrollbar" aria-label="Menu Utama">
+      <button onclick="switchTab('dashboard')" data-nav="dashboard" title="Ringkasan"
+        class="nav-item w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-150 bg-emerald-600 text-white shadow-md shadow-emerald-950/50 cursor-pointer">
+        <div class="nav-item-content flex items-center gap-3.5 min-w-0">
+          <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+          <span class="sidebar-hide-collapsed truncate">Ringkasan</span>
+        </div>
+      </button>
+
+      <button onclick="switchTab('transactions')" data-nav="transactions" title="Transaksi"
+        class="nav-item w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition-all duration-150 cursor-pointer">
+        <div class="nav-item-content flex items-center gap-3.5 min-w-0">
+          <i data-lucide="arrow-left-right" class="w-5 h-5 shrink-0"></i>
+          <span class="sidebar-hide-collapsed truncate">Transaksi</span>
+        </div>
+      </button>
+
+      <button onclick="switchTab('recurring')" data-nav="recurring" title="Pembayaran Rutin"
+        class="nav-item relative w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition-all duration-150 cursor-pointer">
+        <div class="nav-item-content flex items-center gap-3.5 min-w-0">
+          <div class="relative shrink-0">
+            <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+            <span id="sidebar-unpaid-mini-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-slate-900"></span>
+          </div>
+          <span class="sidebar-hide-collapsed truncate">Pembayaran Rutin</span>
+        </div>
+        <span id="sidebar-unpaid-badge" class="sidebar-hide-collapsed hidden px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">0</span>
+      </button>
+
+      <button onclick="switchTab('reports')" data-nav="reports" title="Laporan & Data"
+        class="nav-item w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition-all duration-150 cursor-pointer">
+        <div class="nav-item-content flex items-center gap-3.5 min-w-0">
+          <i data-lucide="pie-chart" class="w-5 h-5 shrink-0"></i>
+          <span class="sidebar-hide-collapsed truncate">Laporan &amp; Data</span>
+        </div>
+      </button>
+    </nav>
+
+    <!-- Sidebar User Account & Cloud Storage Box -->
+    <div class="sidebar-account-card p-3.5 mx-3 mb-4 rounded-2xl bg-slate-800/75 border border-slate-700/70 flex flex-col gap-3 shrink-0">
+      <!-- Cloud Status Row -->
+      <div class="sidebar-db-row flex items-center justify-between gap-2 text-xs">
+        <span class="sidebar-hide-collapsed text-slate-400 font-medium">Database</span>
+        <span id="sidebar-sync-status" title="Status Database" class="inline-flex items-center gap-1.5 text-amber-300 font-semibold truncate">
+          <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
+          <span class="sidebar-hide-collapsed truncate">Mode Lokal</span>
+        </span>
+      </div>
+
+      <!-- Logged Out State -->
+      <div id="sidebar-auth-logged-out" class="space-y-2.5 w-full">
+        <p class="sidebar-hide-collapsed text-[11px] text-slate-300 leading-relaxed">
+          Masuk untuk menyinkronkan catatan keuangan Anda antara HP &amp; Laptop.
+        </p>
+        <div class="sidebar-auth-actions flex items-center gap-2">
+          <button onclick="openAuthModal()" title="Masuk Akun Cloud"
+            class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors cursor-pointer">
+            <i data-lucide="log-in" class="w-3.5 h-3.5 shrink-0"></i>
+            <span class="sidebar-hide-collapsed">Masuk Cloud</span>
+          </button>
+          <button onclick="openFirebaseConfigModal()" title="Pengaturan Database Firebase"
+            class="p-2 rounded-xl bg-slate-700/80 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer shrink-0">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Logged In State -->
+      <div id="sidebar-auth-logged-in" class="hidden space-y-2.5 pt-2.5 border-t border-slate-700/70 w-full">
+        <div class="sidebar-user-row flex items-center gap-2.5 min-w-0">
+          <img id="sidebar-user-avatar" src="" alt="Foto Profil" class="hidden w-8 h-8 rounded-full object-cover border border-emerald-400/50 shrink-0" />
+          <div id="sidebar-user-initials" title="Akun Pengguna" class="w-8 h-8 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">U</div>
+          <div class="sidebar-hide-collapsed min-w-0 flex-1">
+            <p id="sidebar-user-name" class="text-xs font-bold text-white truncate">Pengguna</p>
+            <p id="sidebar-user-email" class="text-[11px] text-slate-400 truncate">email@domain.com</p>
+          </div>
+        </div>
+        <div class="sidebar-auth-actions flex items-center gap-2">
+          <button onclick="handleLogout()" title="Keluar dari Akun Cloud"
+            class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-700/80 hover:bg-rose-600/90 text-slate-200 hover:text-white text-xs font-semibold transition-colors cursor-pointer">
+            <i data-lucide="log-out" class="w-3.5 h-3.5 shrink-0"></i>
+            <span class="sidebar-hide-collapsed">Keluar</span>
+          </button>
+          <button onclick="openFirebaseConfigModal()" title="Pengaturan Database Firebase"
+            class="p-2 rounded-xl bg-slate-700/80 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer shrink-0">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =====================================================================
+       MAIN CONTENT AREA
+  ====================================================================== -->
+  <div id="main-wrapper" data-sidebar-collapsed="false" class="flex-1 flex flex-col md:pl-64 min-w-0 transition-all duration-300 ease-in-out">
+
+    <!-- Top Sticky Header -->
+    <header class="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-3">
+        <!-- Mobile Brand Title -->
+        <div class="flex items-center gap-2.5 md:hidden">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-sm">
+            <i data-lucide="wallet" class="w-4 h-4 text-white"></i>
+          </div>
+          <div>
+            <span class="font-bold text-slate-900 text-base block leading-none">DompetKu</span>
+            <span class="text-[11px] text-slate-500 font-medium">Keuangan Pribadi</span>
+          </div>
+        </div>
+
+        <!-- Total Balance Pill (Desktop & Mobile) -->
+        <div class="flex items-center gap-3 sm:gap-4 bg-slate-50 border border-slate-200/90 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl">
+          <div class="hidden sm:flex w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 items-center justify-center shrink-0">
+            <i data-lucide="landmark" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <p class="text-[10px] sm:text-xs font-medium text-slate-500">Total Saldo Keseluruhan</p>
+            <p id="header-total-balance" class="text-xs sm:text-lg font-extrabold text-slate-900 tracking-tight">Rp 0</p>
+          </div>
+        </div>
+
+        <!-- Right Header Controls: Cloud Sync Pill + Quick Transaction Button -->
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <!-- Cloud Status / Account Button -->
+          <button onclick="handleHeaderCloudClick()" id="header-cloud-btn"
+            class="inline-flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors cursor-pointer">
+            <span id="header-cloud-dot" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+            <span id="header-cloud-label" class="hidden sm:inline">Mode Lokal</span>
+            <i data-lucide="cloud" class="w-4 h-4 text-slate-500 sm:hidden"></i>
+          </button>
+
+          <!-- Primary Quick Action Button -->
+          <button onclick="openTransactionModal()"
+            class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-semibold text-xs sm:text-sm px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-sm shadow-emerald-600/20 transition-all cursor-pointer shrink-0">
+            <i data-lucide="plus" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            <span class="hidden sm:inline">Catat Transaksi</span>
+            <span class="sm:hidden">Catat</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main View Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-10">
+
+      <!-- Cloud Migration Banner (Shown when user logs in and has local data) -->
+      <div id="cloud-migration-banner" class="hidden mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
+        <div class="flex items-start sm:items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5 sm:mt-0 shadow-xs">
+            <i data-lucide="cloud-upload" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-emerald-950">Migrasi Data Lokal ke Cloud Tersedia</p>
+            <p id="cloud-migration-desc" class="text-xs text-emerald-800 mt-0.5">
+              Ditemukan catatan lokal di browser ini. Unggah ke database akun cloud Anda agar tersinkronisasi di semua perangkat.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="dismissMigrationBanner()"
+            class="px-3 py-2 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-100/50 text-emerald-800 text-xs font-semibold cursor-pointer">
+            Nanti Saja
+          </button>
+          <button onclick="migrateLocalDataToCloud()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs cursor-pointer">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+            <span>Unggah ke Cloud</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sample Data Alert Banner (Shown when sample data is active) -->
+      <div id="sample-data-banner" class="hidden mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
+        <div class="flex items-start sm:items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-amber-900">Mode Data Contoh Aktif</p>
+            <p class="text-xs text-amber-700">Aplikasi menampilkan simulasi transaksi &amp; tagihan rutin agar Anda bisa langsung mencoba fitur yang ada.</p>
+          </div>
+        </div>
+        <button onclick="confirmClearSampleData()"
+          class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-amber-100/70 text-amber-900 border border-amber-300 text-xs font-semibold shadow-2xs transition-colors shrink-0 cursor-pointer">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-amber-700"></i>
+          <span>Kosongkan Data Contoh</span>
+        </button>
+      </div>
+
+      <!-- =================================================================
+           GLOBAL PERIOD FILTER BAR (Visible on Ringkasan & Transaksi)
+      ================================================================== -->
+      <div id="period-filter-bar" class="mb-6 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="calendar-range" class="w-4 h-4 text-emerald-600"></i>
+            Periode Pantauan:
+          </span>
+          <!-- Period Mode Pills -->
+          <div class="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200/60 overflow-x-auto no-scrollbar">
+            <button onclick="setPeriodMode('daily')" data-period="daily"
+              class="period-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap">
+              Harian
+            </button>
+            <button onclick="setPeriodMode('weekly')" data-period="weekly"
+              class="period-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap">
+              Mingguan
+            </button>
+            <button onclick="setPeriodMode('monthly')" data-period="monthly"
+              class="period-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap">
+              Bulanan
+            </button>
+            <button onclick="setPeriodMode('all')" data-period="all"
+              class="period-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap">
+              Semua Waktu
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Date / Week / Month Selector -->
+        <div class="flex flex-wrap items-center gap-2.5">
+          <!-- Daily Date Picker -->
+          <div id="picker-daily" class="flex items-center gap-2">
+            <button onclick="stepPeriod(-1)" title="Hari Sebelumnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <input type="date" id="input-period-daily" onchange="handlePeriodValueChange()"
+              class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            <button onclick="stepPeriod(1)" title="Hari Berikutnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Weekly Date Anchor Picker -->
+          <div id="picker-weekly" class="hidden flex items-center gap-2">
+            <button onclick="stepPeriod(-1)" title="Minggu Sebelumnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50">
+              <span id="weekly-range-label" class="text-xs sm:text-sm font-semibold text-slate-700">Minggu Ini</span>
+              <input type="date" id="input-period-weekly" onchange="handlePeriodValueChange()"
+                class="w-6 opacity-75 hover:opacity-100 text-xs bg-transparent focus:outline-none cursor-pointer" title="Pilih tanggal dalam minggu" />
+            </div>
+            <button onclick="stepPeriod(1)" title="Minggu Berikutnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Monthly Month Picker -->
+          <div id="picker-monthly" class="hidden flex items-center gap-2">
+            <button onclick="stepPeriod(-1)" title="Bulan Sebelumnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <input type="month" id="input-period-monthly" onchange="handlePeriodValueChange()"
+              class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            <button onclick="stepPeriod(1)" title="Bulan Berikutnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- All Time Badge -->
+          <div id="picker-all" class="hidden px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/70 text-xs sm:text-sm font-semibold">
+            Menampilkan Seluruh Riwayat Transaksi
+          </div>
+
+          <button onclick="resetPeriodToToday()" id="btn-reset-today"
+            class="px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 transition-colors cursor-pointer">
+            Hari Ini
+          </button>
+        </div>
+      </div>
+
+      <!-- =================================================================
+           VIEW 1: RINGKASAN (DASHBOARD)
+      ================================================================== -->
+      <section id="view-dashboard" class="space-y-6 animate-fade-in">
+        <!-- 4 KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <!-- Card 1: Pemasukan -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Total Pemasukan</span>
+              <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <i data-lucide="trending-up" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div>
+              <p id="kpi-income" class="text-xl sm:text-2xl font-extrabold text-emerald-600 tracking-tight">Rp 0</p>
+              <p id="kpi-period-subtitle-1" class="text-xs text-slate-400 mt-1">Bulan ini</p>
+            </div>
+          </div>
+
+          <!-- Card 2: Pengeluaran -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Total Pengeluaran</span>
+              <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                <i data-lucide="trending-down" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div>
+              <p id="kpi-expense" class="text-xl sm:text-2xl font-extrabold text-rose-600 tracking-tight">Rp 0</p>
+              <p id="kpi-period-subtitle-2" class="text-xs text-slate-400 mt-1">Bulan ini</p>
+            </div>
+          </div>
+
+          <!-- Card 3: Selisih (Net Cashflow) -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Selisih Arus Kas</span>
+              <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                <i data-lucide="scale" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div>
+              <p id="kpi-net" class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Rp 0</p>
+              <p id="kpi-net-status" class="text-xs text-slate-500 mt-1">Surplus periode terpilih</p>
+            </div>
+          </div>
+
+          <!-- Card 4: Tagihan Rutin Belum Lunas -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Sisa Tagihan Rutin</span>
+              <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <i data-lucide="bell-ring" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div>
+              <p id="kpi-unpaid-routine" class="text-xl sm:text-2xl font-extrabold text-amber-600 tracking-tight">Rp 0</p>
+              <p id="kpi-unpaid-count" class="text-xs text-slate-400 mt-1">0 tagihan belum dibayar</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Chart 1: Arus Kas (Grouped Bar) -->
+          <div class="lg:col-span-7 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">Arus Kas (Pemasukan vs Pengeluaran)</h2>
+                <p id="cashflow-chart-subtitle" class="text-xs text-slate-500">Perbandingan pemasukan dan pengeluaran</p>
+              </div>
+              <div class="flex items-center gap-3 text-xs font-medium">
+                <span class="inline-flex items-center gap-1.5 text-slate-600">
+                  <span class="w-2.5 h-2.5 rounded-xs bg-emerald-500"></span> Pemasukan
+                </span>
+                <span class="inline-flex items-center gap-1.5 text-slate-600">
+                  <span class="w-2.5 h-2.5 rounded-xs bg-rose-500"></span> Pengeluaran
+                </span>
+              </div>
+            </div>
+            <div class="relative h-64 sm:h-72 w-full">
+              <canvas id="cashflowChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Pengeluaran per Kategori (Doughnut) -->
+          <div class="lg:col-span-5 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col">
+            <div class="mb-4">
+              <h2 class="text-base font-bold text-slate-900">Pengeluaran per Kategori</h2>
+              <p id="category-chart-subtitle" class="text-xs text-slate-500">Proporsi belanja berdasarkan periode</p>
+            </div>
+            <div id="category-chart-wrapper" class="relative h-56 sm:h-60 w-full flex items-center justify-center">
+              <canvas id="categoryChart"></canvas>
+              <div id="category-chart-empty" class="hidden text-center py-8">
+                <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2">
+                  <i data-lucide="pie-chart" class="w-6 h-6"></i>
+                </div>
+                <p class="text-sm font-medium text-slate-600">Belum ada pengeluaran</p>
+                <p class="text-xs text-slate-400">Tidak ada data pengeluaran pada periode ini.</p>
+              </div>
+            </div>
+            <!-- Custom Percentage Breakdown List -->
+            <div id="category-legend-list" class="mt-4 pt-3 border-t border-slate-100 space-y-2 max-h-36 overflow-y-auto text-xs"></div>
+          </div>
+        </div>
+
+        <!-- Bottom Grid: Routine Payment Reminders & Recent Transactions -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Pengingat Tagihan Rutin Card -->
+          <div class="lg:col-span-6 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col">
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <div>
+                <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <span>Pengingat Tagihan Rutin</span>
+                  <span id="dashboard-unpaid-pill" class="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-100 text-amber-800">0</span>
+                </h2>
+                <p class="text-xs text-slate-500">Kewajiban rutin yang perlu segera diselesaikan</p>
+              </div>
+              <button onclick="switchTab('recurring')" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1 cursor-pointer">
+                <span>Kelola Semua</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <div id="dashboard-routine-list" class="space-y-3 flex-1">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Transaksi Terbaru Card -->
+          <div class="lg:col-span-6 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col">
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">Transaksi Periode Ini</h2>
+                <p id="dashboard-recent-subtitle" class="text-xs text-slate-500">Catatan pemasukan &amp; pengeluaran terbaru</p>
+              </div>
+              <button onclick="switchTab('transactions')" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1 cursor-pointer">
+                <span>Lihat Semua</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <div id="dashboard-recent-list" class="space-y-2.5 flex-1">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           VIEW 2: TRANSAKSI (INCOME & EXPENSE LEDGER)
+      ================================================================== -->
+      <section id="view-transactions" class="hidden space-y-6 animate-fade-in">
+        <!-- Header & Summary -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Buku Kas &amp; Transaksi</h2>
+            <p class="text-xs sm:text-sm text-slate-500">Kelola seluruh catatan pemasukan dan pengeluaran Anda</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <div class="px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200/70 text-emerald-800 font-semibold">
+              Masuk: <span id="tx-summary-in">Rp 0</span>
+            </div>
+            <div class="px-3 py-2 rounded-xl bg-rose-50 border border-rose-200/70 text-rose-800 font-semibold">
+              Keluar: <span id="tx-summary-out">Rp 0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs grid grid-cols-1 sm:grid-cols-12 gap-3">
+          <!-- Search -->
+          <div class="sm:col-span-5 relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="tx-search-input" oninput="renderTransactionsView()"
+              placeholder="Cari keterangan atau catatan..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+
+          <!-- Type Filter -->
+          <div class="sm:col-span-3">
+            <select id="tx-filter-type" onchange="updateCategoryFilterOptions(); renderTransactionsView();"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="all">Semua Tipe</option>
+              <option value="income">Pemasukan Saja</option>
+              <option value="expense">Pengeluaran Saja</option>
+            </select>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="sm:col-span-4">
+            <select id="tx-filter-category" onchange="renderTransactionsView()"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="all">Semua Kategori</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Transaction List Container -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+          <div id="transactions-list-container" class="divide-y divide-slate-100">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           VIEW 3: PEMBAYARAN RUTIN (RECURRING BILLS)
+      ================================================================== -->
+      <section id="view-recurring" class="hidden space-y-6 animate-fade-in">
+        <!-- Header & Actions -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Pembayaran &amp; Tagihan Rutin</h2>
+            <p class="text-xs sm:text-sm text-slate-500">Pantau tagihan air (PDAM), listrik (PLN), cicilan kendaraan, internet, dan kewajiban berkala</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button onclick="confirmResetMonthlyBills()"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold shadow-2xs transition-colors cursor-pointer">
+              <i data-lucide="rotate-ccw" class="w-4 h-4 text-slate-500"></i>
+              <span>Reset Status Bulan Baru</span>
+            </button>
+            <button onclick="openRecurringModal()"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-colors cursor-pointer">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>Tambah Tagihan Rutin</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recurring Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <p class="text-xs font-semibold text-slate-500 uppercase">Total Estimasi Rutin</p>
+            <p id="rec-total-est" class="text-lg sm:text-2xl font-extrabold text-slate-900 mt-1">Rp 0</p>
+            <p id="rec-total-count" class="text-xs text-slate-400 mt-0.5">0 jadwal terdaftar</p>
+          </div>
+          <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <p class="text-xs font-semibold text-slate-500 uppercase">Sudah Dibayar (Lunas)</p>
+            <p id="rec-total-paid" class="text-lg sm:text-2xl font-extrabold text-emerald-600 mt-1">Rp 0</p>
+            <p id="rec-paid-count" class="text-xs text-slate-400 mt-0.5">0 tagihan lunas</p>
+          </div>
+          <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <p class="text-xs font-semibold text-slate-500 uppercase">Belum Dibayar</p>
+            <p id="rec-total-unpaid" class="text-lg sm:text-2xl font-extrabold text-amber-600 mt-1">Rp 0</p>
+            <p id="rec-unpaid-count" class="text-xs text-slate-400 mt-0.5">0 menunggu pembayaran</p>
+          </div>
+        </div>
+
+        <!-- Status Filter Tabs -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <button onclick="setRecurringFilter('all')" data-rec-filter="all"
+            class="rec-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer bg-slate-900 text-white">
+            Semua Tagihan
+          </button>
+          <button onclick="setRecurringFilter('unpaid')" data-rec-filter="unpaid"
+            class="rec-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer bg-white text-slate-600 border border-slate-200 hover:bg-slate-50">
+            Belum Dibayar
+          </button>
+          <button onclick="setRecurringFilter('paid')" data-rec-filter="paid"
+            class="rec-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer bg-white text-slate-600 border border-slate-200 hover:bg-slate-50">
+            Sudah Dibayar
+          </button>
+        </div>
+
+        <!-- Recurring Bills Grid -->
+        <div id="recurring-cards-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- =================================================================
+           VIEW 4: LAPORAN & DATA (ANALYTICS & BACKUP)
+      ================================================================== -->
+      <section id="view-reports" class="hidden space-y-6 animate-fade-in">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Laporan Keuangan &amp; Cadangan Data</h2>
+          <p class="text-xs sm:text-sm text-slate-500">Analisis kesehatan finansial serta ekspor atau pulihkan data lokal Anda</p>
+        </div>
+
+        <!-- Financial Health Highlights -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <i data-lucide="piggy-bank" class="w-5 h-5"></i>
+              </div>
+              <span class="text-xs font-semibold text-slate-500 uppercase">Rasio Tabungan (Keseluruhan)</span>
+            </div>
+            <p id="report-savings-rate" class="text-2xl font-extrabold text-slate-900">0%</p>
+            <p id="report-savings-desc" class="text-xs text-slate-500 mt-1">Persentase pemasukan yang tersisa setelah pengeluaran</p>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                <i data-lucide="flame" class="w-5 h-5"></i>
+              </div>
+              <span class="text-xs font-semibold text-slate-500 uppercase">Pos Pengeluaran Terbesar</span>
+            </div>
+            <p id="report-top-category" class="text-lg font-extrabold text-slate-900 truncate">-</p>
+            <p id="report-top-category-amount" class="text-xs text-slate-500 mt-1">Rp 0 dari total pengeluaran</p>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                <i data-lucide="database" class="w-5 h-5"></i>
+              </div>
+              <span class="text-xs font-semibold text-slate-500 uppercase">Total Catatan Tersimpan</span>
+            </div>
+            <p id="report-record-count" class="text-2xl font-extrabold text-slate-900">0 Catatan</p>
+            <p id="report-routine-count" class="text-xs text-slate-500 mt-1">0 jadwal pembayaran rutin</p>
+          </div>
+        </div>
+
+        <!-- Export & Backup Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Export CSV & JSON -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between space-y-5">
+            <div>
+              <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+                <i data-lucide="download" class="w-5 h-5"></i>
+              </div>
+              <h3 class="text-base font-bold text-slate-900">Ekspor &amp; Unduh Laporan</h3>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
+                Unduh seluruh riwayat transaksi Anda ke format spreadsheet (CSV) untuk dibuka di Microsoft Excel / Google Sheets, atau simpan cadangan lengkap (JSON).
+              </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+              <button onclick="exportToCSV()"
+                class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-colors cursor-pointer">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                <span>Ekspor CSV (Excel)</span>
+              </button>
+              <button onclick="exportToJSON()"
+                class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold shadow-sm transition-colors cursor-pointer">
+                <i data-lucide="file-json" class="w-4 h-4"></i>
+                <span>Cadangan JSON</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Import JSON & Reset Data -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col justify-between space-y-5">
+            <div>
+              <div class="w-11 h-11 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center mb-4">
+                <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+              </div>
+              <h3 class="text-base font-bold text-slate-900">Pulihkan, Simulasi, atau Atur Ulang</h3>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
+                Impor file cadangan JSON sebelumnya, muat ulang data simulasi contoh, atau kosongkan seluruh data pencatatan Anda.
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2.5 pt-2">
+              <label class="flex-1 min-w-[130px] inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold transition-colors cursor-pointer">
+                <i data-lucide="folder-up" class="w-4 h-4"></i>
+                <span>Impor JSON</span>
+                <input type="file" id="import-json-input" accept=".json,application/json" onchange="handleImportJSON(event)" class="hidden" />
+              </label>
+              <button onclick="confirmLoadSampleData()"
+                class="flex-1 min-w-[130px] inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs sm:text-sm font-semibold transition-colors cursor-pointer">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <span>Isi Data Contoh</span>
+              </button>
+              <button onclick="confirmClearAllData()"
+                class="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs sm:text-sm font-semibold transition-colors cursor-pointer">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                <span>Kosongkan Data</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cloud Database & GitHub Pages Hosting Card -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <i data-lucide="cloud-cog" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-base font-bold text-slate-900">Sinkronisasi Database Cloud (Firebase Firestore)</h3>
+                <span id="report-cloud-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Mode Lokal</span>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
+                Hubungkan aplikasi ini dengan proyek Firebase Anda agar seluruh transaksi dan jadwal tagihan tersimpan aman di cloud dan otomatis sinkron saat diakses melalui GitHub Pages di HP maupun Laptop.
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button onclick="openFirebaseConfigModal()"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold cursor-pointer">
+              <i data-lucide="settings" class="w-4 h-4"></i>
+              <span>Pengaturan Database Cloud</span>
+            </button>
+            <button onclick="openAuthModal()" id="report-auth-btn"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer">
+              <i data-lucide="log-in" class="w-4 h-4"></i>
+              <span>Masuk Akun Cloud</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- =====================================================================
+       MOBILE BOTTOM NAVIGATION BAR
+  ====================================================================== -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shadow-lg" aria-label="Navigasi Bawah">
+    <button onclick="switchTab('dashboard')" data-mobile-nav="dashboard"
+      class="mobile-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-xl text-emerald-600 font-semibold transition-colors">
+      <i data-lucide="layout-dashboard" class="w-5 h-5 mb-0.5"></i>
+      <span class="text-[11px]">Ringkasan</span>
+    </button>
+
+    <button onclick="switchTab('transactions')" data-mobile-nav="transactions"
+      class="mobile-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-xl text-slate-500 font-medium transition-colors">
+      <i data-lucide="arrow-left-right" class="w-5 h-5 mb-0.5"></i>
+      <span class="text-[11px]">Transaksi</span>
+    </button>
+
+    <button onclick="switchTab('recurring')" data-mobile-nav="recurring"
+      class="mobile-nav-item relative flex flex-col items-center justify-center py-1.5 px-3 rounded-xl text-slate-500 font-medium transition-colors">
+      <i data-lucide="calendar-clock" class="w-5 h-5 mb-0.5"></i>
+      <span class="text-[11px]">Tagihan Rutin</span>
+      <span id="mobile-unpaid-dot" class="hidden absolute top-1 right-3 w-2 h-2 rounded-full bg-amber-500"></span>
+    </button>
+
+    <button onclick="switchTab('reports')" data-mobile-nav="reports"
+      class="mobile-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-xl text-slate-500 font-medium transition-colors">
+      <i data-lucide="pie-chart" class="w-5 h-5 mb-0.5"></i>
+      <span class="text-[11px]">Laporan</span>
+    </button>
+  </nav>
+
+  <!-- =====================================================================
+       MODAL 1: TAMBAH / EDIT TRANSAKSI
+  ====================================================================== -->
+  <div id="modal-transaction" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in max-h-[92vh] flex flex-col">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h3 id="modal-tx-title" class="text-base sm:text-lg font-bold text-slate-900">Catat Transaksi Baru</h3>
+        <button onclick="closeModal('modal-transaction')" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-transaction" onsubmit="saveTransaction(event)" class="p-6 space-y-4 overflow-y-auto">
+        <input type="hidden" id="tx-id" />
+
+        <!-- Tipe Selector (Pemasukan vs Pengeluaran) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">Tipe Transaksi</label>
+          <div class="grid grid-cols-2 gap-2.5 p-1 rounded-xl bg-slate-100 border border-slate-200/70">
+            <button type="button" id="btn-type-expense" onclick="setTxFormType('expense')"
+              class="py-2.5 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer bg-rose-600 text-white shadow-xs">
+              <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+              <span>Pengeluaran</span>
+            </button>
+            <button type="button" id="btn-type-income" onclick="setTxFormType('income')"
+              class="py-2.5 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer text-slate-600 hover:text-slate-900">
+              <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+              <span>Pemasukan</span>
+            </button>
+          </div>
+          <input type="hidden" id="tx-type" value="expense" />
+        </div>
+
+        <!-- Nominal (Rp) -->
+        <div>
+          <label for="tx-amount" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Nominal (Rupiah)</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
+            <input type="text" id="tx-amount" inputmode="numeric" required placeholder="0"
+              oninput="formatRupiahInput(this)"
+              class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 text-lg font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+          </div>
+        </div>
+
+        <!-- Kategori -->
+        <div>
+          <label for="tx-category" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Kategori</label>
+          <select id="tx-category" required
+            class="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <!-- Dynamically populated based on type -->
+          </select>
+        </div>
+
+        <!-- Tanggal -->
+        <div>
+          <label for="tx-date" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Tanggal</label>
+          <input type="date" id="tx-date" required
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <!-- Keterangan / Catatan -->
+        <div>
+          <label for="tx-note" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Keterangan / Catatan</label>
+          <input type="text" id="tx-note" required placeholder="Contoh: Makan siang, Gaji bulanan, Isi bensin..."
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-transaction')"
+            class="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+            Batal
+          </button>
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm cursor-pointer">
+            Simpan Transaksi
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 2: TAMBAH / EDIT PEMBAYARAN RUTIN
+  ====================================================================== -->
+  <div id="modal-recurring" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in max-h-[92vh] flex flex-col">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h3 id="modal-rec-title" class="text-base sm:text-lg font-bold text-slate-900">Tambah Pembayaran Rutin</h3>
+        <button onclick="closeModal('modal-recurring')" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-recurring" onsubmit="saveRecurringBill(event)" class="p-6 space-y-4 overflow-y-auto">
+        <input type="hidden" id="rec-id" />
+
+        <!-- Nama Tagihan -->
+        <div>
+          <label for="rec-name" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Nama Tagihan / Kewajiban</label>
+          <input type="text" id="rec-name" required placeholder="Contoh: Listrik PLN, Air PDAM, Cicilan Motor..."
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <!-- Kategori Rutin -->
+        <div>
+          <label for="rec-category" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Kategori Tagihan</label>
+          <select id="rec-category" required
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="Air">Air (PDAM)</option>
+            <option value="Listrik">Listrik (PLN / Token)</option>
+            <option value="Kendaraan">Kendaraan (Cicilan / Servis / Pajak)</option>
+            <option value="Internet">Internet &amp; Pulsa</option>
+            <option value="Hunian">Hunian (Sewa / Kontrakan / KPR)</option>
+            <option value="Asuransi">Asuransi (Kesehatan / Jiwa / Kendaraan)</option>
+            <option value="Langganan">Langganan Digital &amp; Streaming</option>
+            <option value="Lainnya">Kewajiban Rutin Lainnya</option>
+          </select>
+        </div>
+
+        <!-- Nominal Estimasi -->
+        <div>
+          <label for="rec-amount" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Nominal Estimasi (Rp)</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
+            <input type="text" id="rec-amount" inputmode="numeric" required placeholder="0"
+              oninput="formatRupiahInput(this)"
+              class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-300 text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+        </div>
+
+        <!-- Siklus & Tanggal Jatuh Tempo -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="rec-cycle" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Siklus</label>
+            <select id="rec-cycle" required
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="Bulanan">Bulanan</option>
+              <option value="Mingguan">Mingguan</option>
+              <option value="Tahunan">Tahunan</option>
+            </select>
+          </div>
+          <div>
+            <label for="rec-due-day" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Tgl Jatuh Tempo</label>
+            <input type="number" id="rec-due-day" min="1" max="31" required placeholder="1 - 31"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div>
+          <label for="rec-status" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Status Saat Ini</label>
+          <select id="rec-status"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="unpaid">Belum Dibayar</option>
+            <option value="paid">Sudah Dibayar (Lunas)</option>
+          </select>
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-recurring')"
+            class="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+            Batal
+          </button>
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm cursor-pointer">
+            Simpan Jadwal
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 3: KONFIRMASI BAYAR TAGIHAN RUTIN (SMART WORKFLOW)
+  ====================================================================== -->
+  <div id="modal-pay-bill" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
+      <div class="px-6 py-4 bg-emerald-600 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+          <h3 class="text-base sm:text-lg font-bold">Konfirmasi Pembayaran Tagihan</h3>
+        </div>
+        <button onclick="closeModal('modal-pay-bill')" class="p-1.5 rounded-xl text-emerald-100 hover:text-white hover:bg-emerald-700/60 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-pay-bill" onsubmit="submitBillPayment(event)" class="p-6 space-y-4">
+        <input type="hidden" id="pay-bill-id" />
+
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+          <p class="text-xs text-slate-500">Tagihan yang akan dibayar:</p>
+          <p id="pay-bill-name-display" class="text-base font-bold text-slate-900 mt-0.5">-</p>
+          <p id="pay-bill-meta-display" class="text-xs text-slate-500 mt-0.5">-</p>
+        </div>
+
+        <!-- Nominal Aktual (dapat disesuaikan) -->
+        <div>
+          <label for="pay-bill-amount" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
+            Nominal Pembayaran Aktual (Rp)
+          </label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
+            <input type="text" id="pay-bill-amount" inputmode="numeric" required
+              oninput="formatRupiahInput(this)"
+              class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 text-lg font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">Sesuaikan nominal jika tagihan listrik/air bulan ini berbeda dari estimasi.</p>
+        </div>
+
+        <!-- Tanggal Bayar -->
+        <div>
+          <label for="pay-bill-date" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Tanggal Pembayaran</label>
+          <input type="date" id="pay-bill-date" required
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <!-- Catatan Transaksi -->
+        <div>
+          <label for="pay-bill-note" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Catatan di Buku Kas</label>
+          <input type="text" id="pay-bill-note" required
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <div class="p-3 rounded-xl bg-emerald-50/80 border border-emerald-200/70 text-xs text-emerald-800 flex items-start gap-2">
+          <i data-lucide="info" class="w-4 h-4 shrink-0 text-emerald-600 mt-0.5"></i>
+          <span>Pembayaran ini akan otomatis tercatat sebagai <strong>Pengeluaran (Tagihan Rutin)</strong> dan menandai jadwal ini menjadi <strong>Lunas</strong>.</span>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeModal('modal-pay-bill')"
+            class="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+            Batal
+          </button>
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm cursor-pointer">
+            Bayar &amp; Catat Pengeluaran
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 4: DIALOG KONFIRMASI UMUM (PENGGANTI CONFIRM/ALERT)
+  ====================================================================== -->
+  <div id="modal-confirm" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-6 animate-fade-in">
+      <div id="confirm-icon-wrapper" class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
+        <i id="confirm-icon" data-lucide="alert-triangle" class="w-5 h-5"></i>
+      </div>
+      <h3 id="confirm-title" class="text-base sm:text-lg font-bold text-slate-900">Konfirmasi Tindakan</h3>
+      <p id="confirm-message" class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">Apakah Anda yakin ingin melanjutkan?</p>
+
+      <div class="mt-6 flex items-center justify-end gap-2.5">
+        <button type="button" onclick="closeModal('modal-confirm')"
+          class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+          Batal
+        </button>
+        <button type="button" id="confirm-action-btn"
+          class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-semibold shadow-sm cursor-pointer">
+          Ya, Lanjutkan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 5: AUTENTIKASI AKUN CLOUD (GOOGLE & EMAIL/PASSWORD)
+  ====================================================================== -->
+  <div id="modal-auth" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in max-h-[92vh] flex flex-col">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <i data-lucide="cloud" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-base sm:text-lg font-bold text-slate-900">Akun Cloud DompetKu</h3>
+        </div>
+        <button onclick="closeModal('modal-auth')" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-5 overflow-y-auto">
+        <!-- Warning if Firebase Config is not set yet -->
+        <div id="auth-no-config-alert" class="hidden p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-2.5">
+          <div class="flex items-start gap-2.5">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+            <div>
+              <p class="text-xs sm:text-sm font-bold text-amber-900">Database Firebase Belum Dikonfigurasi</p>
+              <p class="text-xs text-amber-800 mt-0.5 leading-relaxed">
+                Untuk mengaktifkan fitur Login &amp; Sinkronisasi Cloud di GitHub Pages, masukkan konfigurasi proyek Firebase Anda terlebih dahulu.
+              </p>
+            </div>
+          </div>
+          <button type="button" onclick="closeModal('modal-auth'); openFirebaseConfigModal();"
+            class="w-full py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold cursor-pointer">
+            Buka Pengaturan Database Cloud
+          </button>
+        </div>
+
+        <!-- Google Sign In Button -->
+        <button type="button" onclick="handleGoogleLogin()" id="btn-google-login"
+          class="w-full py-3 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.99] text-slate-800 text-sm font-semibold shadow-2xs flex items-center justify-center gap-3 transition-all cursor-pointer">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+            <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+          </svg>
+          <span>Lanjutkan dengan Akun Google</span>
+        </button>
+
+        <div class="relative flex items-center justify-center">
+          <div class="border-t border-slate-200 w-full"></div>
+          <span class="bg-white px-3 text-xs font-medium text-slate-400">atau dengan Email</span>
+          <div class="border-t border-slate-200 w-full"></div>
+        </div>
+
+        <!-- Mode Switcher (Login vs Register) -->
+        <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200/70">
+          <button type="button" id="tab-auth-login" onclick="switchAuthMode('login')"
+            class="py-2 rounded-lg text-xs font-bold bg-white text-emerald-700 shadow-2xs cursor-pointer">
+            Masuk (Login)
+          </button>
+          <button type="button" id="tab-auth-register" onclick="switchAuthMode('register')"
+            class="py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer">
+            Daftar Akun Baru
+          </button>
+        </div>
+
+        <!-- Email & Password Form -->
+        <form id="form-email-auth" onsubmit="handleEmailAuthSubmit(event)" class="space-y-3.5">
+          <input type="hidden" id="auth-mode" value="login" />
+
+          <div>
+            <label for="auth-email" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1">Alamat Email</label>
+            <input type="email" id="auth-email" required placeholder="nama@email.com"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+
+          <div>
+            <label for="auth-password" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1">Kata Sandi (Password)</label>
+            <input type="password" id="auth-password" required minlength="6" placeholder="Minimal 6 karakter"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+
+          <p id="auth-error-msg" class="hidden text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 p-2.5 rounded-xl"></p>
+
+          <button type="submit" id="btn-email-auth-submit"
+            class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-colors cursor-pointer">
+            Masuk dengan Email
+          </button>
+        </form>
+
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          <span>Ingin mengatur project Firebase?</span>
+          <button type="button" onclick="closeModal('modal-auth'); openFirebaseConfigModal();"
+            class="font-semibold text-emerald-600 hover:text-emerald-700 underline cursor-pointer">
+            Pengaturan Database
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 6: PENGATURAN DATABASE CLOUD (FIREBASE CONFIG & RULES)
+  ====================================================================== -->
+  <div id="modal-firebase-config" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in max-h-[92vh] flex flex-col">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="database" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900">Pengaturan Database Firebase</h3>
+            <p class="text-[11px] text-slate-500">Hubungkan ke Firebase Firestore untuk hosting di GitHub Pages</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-firebase-config')" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-5 overflow-y-auto">
+        <!-- Step 1: Paste Config -->
+        <form onsubmit="saveCustomFirebaseConfig(event)" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label for="firebase-config-textarea" class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+              1. Tempel Kode <code class="text-emerald-700">firebaseConfig</code> Anda
+            </label>
+            <span id="config-source-badge" class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-600">
+              Belum Terkonfigurasi
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            Salin objek <code>firebaseConfig</code> dari <strong>Firebase Console &rarr; Project Settings &rarr; Your apps (Web)</strong>, lalu tempel di bawah ini (mendukung format JSON maupun kode JavaScript langsung):
+          </p>
+          <textarea id="firebase-config-textarea" rows="6" required
+            placeholder='{
+  "apiKey": "AIzaSy...",
+  "authDomain": "proyek-anda.firebaseapp.com",
+  "projectId": "proyek-anda",
+  "storageBucket": "proyek-anda.firebasestorage.app",
+  "messagingSenderId": "123456789",
+  "appId": "1:123456789:web:abcdef"
+}'
+            class="w-full p-3.5 rounded-xl border border-slate-300 font-mono text-xs text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <button type="button" id="btn-remove-firebase-config" onclick="removeCustomFirebaseConfig()"
+              class="hidden px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold cursor-pointer">
+              Putuskan &amp; Hapus Konfigurasi
+            </button>
+            <div class="flex items-center gap-2 ml-auto">
+              <button type="button" onclick="closeModal('modal-firebase-config')"
+                class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+                Tutup
+              </button>
+              <button type="submit"
+                class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs cursor-pointer">
+                Simpan &amp; Hubungkan Cloud
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Step 2: Firestore Security Rules & GitHub Pages Checklist -->
+        <div class="pt-4 border-t border-slate-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">
+              2. Aturan Keamanan Firestore (Firestore Rules)
+            </span>
+            <button type="button" onclick="copyFirestoreRules()"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>Salin Rules</span>
+            </button>
+          </div>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            Pastikan <strong>Authentication</strong> (Google &amp; Email/Password) dan <strong>Cloud Firestore</strong> aktif di Firebase Console. Tempel aturan berikut pada tab <strong>Firestore Database &rarr; Rules</strong> agar setiap pengguna hanya dapat mengakses datanya sendiri:
+          </p>
+          <pre id="firestore-rules-code" class="p-3 rounded-xl bg-slate-900 text-emerald-300 font-mono text-[11px] overflow-x-auto leading-relaxed">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}</pre>
+          <p class="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+            <strong>Tips GitHub Pages:</strong> Tambahkan domain <code>username.github.io</code> Anda di <em>Firebase Console &rarr; Authentication &rarr; Settings &rarr; Authorized domains</em> agar Login Google berjalan lancar.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       TOAST NOTIFICATION CONTAINER
+  ====================================================================== -->
+  <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-50 flex flex-col gap-2 max-w-xs sm:max-w-sm pointer-events-none"></div>
+
+  <!-- =====================================================================
+       APPLICATION JAVASCRIPT LOGIC (FIREBASE MODULAR SDK + LOCAL FALLBACK)
+  ====================================================================== -->
+  <script type="module">
+    import { initializeApp, getApps, deleteApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      signInWithCustomToken,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      setDoc,
+      deleteDoc,
+      onSnapshot,
+      writeBatch
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    /**
+     * =========================================================================
+     * 0. KONFIGURASI FIREBASE UNTUK GITHUB PAGES (OPSIONAL HARDCODE)
+     *    Anda bisa mengisi objek di bawah ini sebelum meng-upload ke GitHub,
+     *    ATAU langsung menempelkannya melalui menu "Pengaturan Database Cloud" di web.
+     * =========================================================================
+     */
+    const CUSTOM_FIREBASE_CONFIG = {
+      apiKey: "",
+      authDomain: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
+    };
+
+    const CUSTOM_CONFIG_STORAGE_KEY = 'dompetku_custom_firebase_config_v1';
+
+    /**
+     * =========================================================================
+     * 1. KONFIGURASI KATEGORI, IKON & KONSTANTA PENYIMPANAN
+     * =========================================================================
+     */
+    const STORAGE_KEY = 'dompetku_finance_data_v1';
+
+    const CATEGORIES = {
+      income: [
+        'Gaji',
+        'Usaha/Freelance',
+        'Investasi',
+        'Hadiah',
+        'Lainnya'
+      ],
+      expense: [
+        'Makanan & Minuman',
+        'Transportasi & BBM',
+        'Belanja Harian',
+        'Tagihan Rutin',
+        'Kesehatan',
+        'Hiburan',
+        'Lainnya'
+      ]
+    };
+
+    const CATEGORY_STYLES = {
+      // Income categories
+      'Gaji': { icon: 'briefcase', bg: 'bg-emerald-50', text: 'text-emerald-600', hex: '#10b981' },
+      'Usaha/Freelance': { icon: 'laptop', bg: 'bg-teal-50', text: 'text-teal-600', hex: '#14b8a6' },
+      'Investasi': { icon: 'trending-up', bg: 'bg-cyan-50', text: 'text-cyan-600', hex: '#06b6d4' },
+      'Hadiah': { icon: 'gift', bg: 'bg-indigo-50', text: 'text-indigo-600', hex: '#6366f1' },
+
+      // Expense categories
+      'Makanan & Minuman': { icon: 'utensils', bg: 'bg-orange-50', text: 'text-orange-600', hex: '#f97316' },
+      'Transportasi & BBM': { icon: 'fuel', bg: 'bg-blue-50', text: 'text-blue-600', hex: '#3b82f6' },
+      'Belanja Harian': { icon: 'shopping-bag', bg: 'bg-purple-50', text: 'text-purple-600', hex: '#a855f7' },
+      'Tagihan Rutin': { icon: 'receipt', bg: 'bg-amber-50', text: 'text-amber-600', hex: '#f59e0b' },
+      'Kesehatan': { icon: 'heart-pulse', bg: 'bg-rose-50', text: 'text-rose-600', hex: '#f43f5e' },
+      'Hiburan': { icon: 'film', bg: 'bg-pink-50', text: 'text-pink-600', hex: '#ec4899' },
+      'Lainnya': { icon: 'layers', bg: 'bg-slate-100', text: 'text-slate-600', hex: '#64748b' }
+    };
+
+    const RECURRING_CATEGORY_STYLES = {
+      'Air': { icon: 'droplets', bg: 'bg-sky-50', text: 'text-sky-600', border: 'border-sky-200/70' },
+      'Listrik': { icon: 'zap', bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200/70' },
+      'Kendaraan': { icon: 'car', bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-200/70' },
+      'Internet': { icon: 'wifi', bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200/70' },
+      'Hunian': { icon: 'home', bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200/70' },
+      'Asuransi': { icon: 'shield-check', bg: 'bg-teal-50', text: 'text-teal-600', border: 'border-teal-200/70' },
+      'Langganan': { icon: 'tv', bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-200/70' },
+      'Lainnya': { icon: 'calendar-clock', bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200/70' }
+    };
+
+    /**
+     * =========================================================================
+     * 2. STATE APLIKASI GLOBAL & STATE FIREBASE CLOUD
+     * =========================================================================
+     */
+    let firebaseApp = null;
+    let auth = null;
+    let db = null;
+    let currentUser = null;
+    let configSourceType = 'none'; // 'preview' | 'hardcoded' | 'local_ui' | 'none'
+    let unsubscribeTransactions = null;
+    let unsubscribeRecurring = null;
+    let migrationBannerDismissed = false;
+
+    let appState = {
+      transactions: [],
+      recurringBills: [],
+      isSampleData: false
+    };
+
+    let uiState = {
+      activeTab: 'dashboard',
+      periodMode: 'monthly', // 'daily' | 'weekly' | 'monthly' | 'all'
+      dailyDate: '',
+      weeklyAnchorDate: '',
+      monthlyValue: '',
+      recurringFilter: 'all' // 'all' | 'unpaid' | 'paid'
+    };
+
+    let cashflowChartInstance = null;
+    let categoryChartInstance = null;
+    let pendingConfirmCallback = null;
+
+    /**
+     * =========================================================================
+     * 2B. INISIALISASI FIREBASE DUAL-MODE, AUTENTIKASI & REAL-TIME SYNC
+     * =========================================================================
+     */
+    function resolveFirebaseConfig() {
+      // 1. Cek environment preview sandbox (__firebase_config)
+      if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+        try {
+          const parsed = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+          if (parsed && parsed.apiKey && parsed.projectId) {
+            configSourceType = 'preview';
+            return parsed;
+          }
+        } catch (e) {
+          console.warn('Gagal mem-parsing __firebase_config:', e);
+        }
+      }
+
+      // 2. Cek CUSTOM_FIREBASE_CONFIG yang diisi langsung di kode (untuk GitHub Pages)
+      if (CUSTOM_FIREBASE_CONFIG && CUSTOM_FIREBASE_CONFIG.apiKey && CUSTOM_FIREBASE_CONFIG.projectId) {
+        configSourceType = 'hardcoded';
+        return CUSTOM_FIREBASE_CONFIG;
+      }
+
+      // 3. Cek konfigurasi yang disimpan user via UI Modal 'Pengaturan Database Cloud'
+      try {
+        const savedRaw = localStorage.getItem(CUSTOM_CONFIG_STORAGE_KEY);
+        if (savedRaw) {
+          const parsed = JSON.parse(savedRaw);
+          if (parsed && parsed.apiKey && parsed.projectId) {
+            configSourceType = 'local_ui';
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('Gagal membaca konfigurasi Firebase lokal:', e);
+      }
+
+      configSourceType = 'none';
+      return null;
+    }
+
+    function isCloudConfigured() {
+      return Boolean(firebaseApp && auth && db);
+    }
+
+    function isCloudAuthenticated() {
+      return Boolean(isCloudConfigured() && currentUser);
+    }
+
+    function getUserTransactionsCollection(uid) {
+      // Gunakan path /artifacts/{appId}/users/{uid}/transactions di mode sandbox preview,
+      // dan users/{uid}/transactions saat di-host di GitHub Pages dengan Firebase pribadi
+      if (configSourceType === 'preview' && typeof __app_id !== 'undefined' && __app_id) {
+        return collection(db, 'artifacts', __app_id, 'users', uid, 'transactions');
+      }
+      return collection(db, 'users', uid, 'transactions');
+    }
+
+    function getUserRecurringCollection(uid) {
+      if (configSourceType === 'preview' && typeof __app_id !== 'undefined' && __app_id) {
+        return collection(db, 'artifacts', __app_id, 'users', uid, 'recurring_bills');
+      }
+      return collection(db, 'users', uid, 'recurring_bills');
+    }
+
+    function stopRealtimeListeners() {
+      if (typeof unsubscribeTransactions === 'function') {
+        unsubscribeTransactions();
+        unsubscribeTransactions = null;
+      }
+      if (typeof unsubscribeRecurring === 'function') {
+        unsubscribeRecurring();
+        unsubscribeRecurring = null;
+      }
+    }
+
+    function startRealtimeListeners(uid) {
+      if (!db || !uid) return;
+      stopRealtimeListeners();
+
+      const txCol = getUserTransactionsCollection(uid);
+      const recCol = getUserRecurringCollection(uid);
+
+      // Listener real-time Transaksi (tanpa orderBy/where kompleks agar bebas error indeks)
+      unsubscribeTransactions = onSnapshot(
+        txCol,
+        (snapshot) => {
+          const items = [];
+          snapshot.forEach((docSnap) => {
+            items.push({ id: docSnap.id, ...docSnap.data() });
+          });
+          appState.transactions = items;
+          appState.isSampleData = false;
+          refreshAllViews();
+        },
+        (error) => {
+          console.error('Firestore transactions listener error:', error);
+          showToast('Gagal menyinkronkan transaksi cloud. Periksa Firestore Rules Anda.', 'error');
+        }
+      );
+
+      // Listener real-time Pembayaran Rutin
+      unsubscribeRecurring = onSnapshot(
+        recCol,
+        (snapshot) => {
+          const items = [];
+          snapshot.forEach((docSnap) => {
+            items.push({ id: docSnap.id, ...docSnap.data() });
+          });
+          appState.recurringBills = items;
+          refreshAllViews();
+        },
+        (error) => {
+          console.error('Firestore recurring_bills listener error:', error);
+          showToast('Gagal menyinkronkan tagihan rutin cloud.', 'error');
+        }
+      );
+    }
+
+    async function initFirebaseService() {
+      stopRealtimeListeners();
+      currentUser = null;
+
+      // Bersihkan instance lama jika user baru saja memperbarui konfigurasi
+      const existingApps = getApps();
+      for (const appInstance of existingApps) {
+        try {
+          await deleteApp(appInstance);
+        } catch (e) {
+          console.warn('Info deleteApp:', e);
+        }
+      }
+
+      firebaseApp = null;
+      auth = null;
+      db = null;
+
+      const config = resolveFirebaseConfig();
+      if (!config) {
+        loadLocalState();
+        refreshAllViews();
+        return;
+      }
+
+      try {
+        firebaseApp = initializeApp(config);
+        auth = getAuth(firebaseApp);
+        db = getFirestore(firebaseApp);
+
+        // Jika di lingkungan preview dan tersedia __initial_auth_token, login otomatis
+        if (configSourceType === 'preview' && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          try {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } catch (tokenErr) {
+            console.warn('Custom token sign-in skipped:', tokenErr);
+          }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            currentUser = user;
+            checkLocalDataForMigration();
+            startRealtimeListeners(user.uid);
+            refreshAllViews();
+          } else {
+            currentUser = null;
+            stopRealtimeListeners();
+            document.getElementById('cloud-migration-banner').classList.add('hidden');
+            loadLocalState();
+            refreshAllViews();
+          }
+        });
+      } catch (err) {
+        console.error('Gagal menginisialisasi Firebase:', err);
+        firebaseApp = null;
+        auth = null;
+        db = null;
+        showToast('Konfigurasi Firebase tidak valid. Beralih ke Mode Lokal.', 'error');
+        loadLocalState();
+        refreshAllViews();
+      }
+    }
+
+    function checkLocalDataForMigration() {
+      if (migrationBannerDismissed || !isCloudAuthenticated()) return;
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const localParsed = JSON.parse(raw);
+        if (localParsed && !localParsed.isSampleData) {
+          const txCount = Array.isArray(localParsed.transactions) ? localParsed.transactions.length : 0;
+          const recCount = Array.isArray(localParsed.recurringBills) ? localParsed.recurringBills.length : 0;
+          if (txCount > 0 || recCount > 0) {
+            document.getElementById('cloud-migration-desc').textContent =
+              `Ditemukan ${txCount} transaksi dan ${recCount} jadwal tagihan rutin di penyimpanan browser ini. Unggah ke akun Cloud Anda?`;
+            document.getElementById('cloud-migration-banner').classList.remove('hidden');
+          }
+        }
+      } catch (e) {
+        console.warn('Gagal memeriksa migrasi data lokal:', e);
+      }
+    }
+
+    function dismissMigrationBanner() {
+      migrationBannerDismissed = true;
+      document.getElementById('cloud-migration-banner').classList.add('hidden');
+    }
+
+    async function migrateLocalDataToCloud() {
+      if (!isCloudAuthenticated() || !db) return;
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          dismissMigrationBanner();
+          return;
+        }
+        const localParsed = JSON.parse(raw);
+        const localTxs = Array.isArray(localParsed.transactions) ? localParsed.transactions : [];
+        const localRecs = Array.isArray(localParsed.recurringBills) ? localParsed.recurringBills : [];
+
+        const batch = writeBatch(db);
+        const txCol = getUserTransactionsCollection(currentUser.uid);
+        const recCol = getUserRecurringCollection(currentUser.uid);
+
+        localTxs.forEach((tx) => {
+          const docId = tx.id || generateId('tx');
+          batch.set(doc(txCol, docId), { ...tx, id: docId });
+        });
+
+        localRecs.forEach((rec) => {
+          const docId = rec.id || generateId('rec');
+          batch.set(doc(recCol, docId), { ...rec, id: docId });
+        });
+
+        await batch.commit();
+
+        // Bersihkan draft lokal setelah sukses diunggah ke cloud agar tidak ditanyakan berulang kali
+        localStorage.removeItem(STORAGE_KEY);
+        dismissMigrationBanner();
+        showToast(`${localTxs.length} transaksi & ${localRecs.length} tagihan berhasil diunggah ke Cloud!`, 'success');
+      } catch (err) {
+        console.error('Gagal migrasi data ke Firestore:', err);
+        showToast('Gagal mengunggah data lokal ke Cloud. Periksa aturan Firestore.', 'error');
+      }
+    }
+
+    /**
+     * =========================================================================
+     * 3. UTILITAS TANGGAL & FORMAT RUPIAH INDONESIA
+     * =========================================================================
+     */
+    function getTodayStr() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function getCurrentMonthStr() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      return `${y}-${m}`;
+    }
+
+    function parseLocalDate(dateStr) {
+      if (!dateStr) return new Date();
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return new Date(y, m - 1, d, 0, 0, 0, 0);
+    }
+
+    function toDateStr(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function addDaysToStr(dateStr, days) {
+      const d = parseLocalDate(dateStr);
+      d.setDate(d.getDate() + days);
+      return toDateStr(d);
+    }
+
+    function formatDateIndo(dateStr, includeDay = false) {
+      const dateObj = parseLocalDate(dateStr);
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+      const dayName = days[dateObj.getDay()];
+      const dayNum = dateObj.getDate();
+      const monthName = months[dateObj.getMonth()];
+      const yearNum = dateObj.getFullYear();
+      return includeDay ? `${dayName}, ${dayNum} ${monthName} ${yearNum}` : `${dayNum} ${monthName} ${yearNum}`;
+    }
+
+    function formatMonthIndo(monthStr) {
+      const [y, m] = monthStr.split('-').map(Number);
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      return `${months[m - 1]} ${y}`;
+    }
+
+    // Menghitung rentang Senin - Minggu berdasarkan tanggal jangkar
+    function getWeekRange(anchorDateStr) {
+      const date = parseLocalDate(anchorDateStr);
+      const dayOfWeek = date.getDay(); // 0 (Min) - 6 (Sab)
+      const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+      const start = new Date(date);
+      start.setDate(date.getDate() + diffToMonday);
+
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+
+      const startStr = toDateStr(start);
+      const endStr = toDateStr(end);
+
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      const label = `${start.getDate()} ${months[start.getMonth()]} - ${end.getDate()} ${months[end.getMonth()]} ${end.getFullYear()}`;
+
+      return { start, end, startStr, endStr, label };
+    }
+
+    function formatRupiah(amount) {
+      const num = Math.round(Number(amount) || 0);
+      const isNegative = num < 0;
+      const formatted = Math.abs(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return `${isNegative ? '-' : ''}Rp ${formatted}`;
+    }
+
+    function formatRupiahInput(inputEl) {
+      const rawDigits = inputEl.value.replace(/\D/g, '');
+      if (!rawDigits) {
+        inputEl.value = '';
+        return;
+      }
+      inputEl.value = rawDigits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function parseRupiahInput(strValue) {
+      if (!strValue) return 0;
+      return parseInt(String(strValue).replace(/\D/g, ''), 10) || 0;
+    }
+
+    function generateId(prefix = 'id') {
+      return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /**
+     * =========================================================================
+     * 4. DATA CONTOH AWAL & PENYIMPANAN LOCALSTORAGE
+     * =========================================================================
+     */
+    function createSampleData() {
+      const today = getTodayStr();
+      const todayObj = parseLocalDate(today);
+      const currentDay = todayObj.getDate();
+
+      // Hitung jatuh tempo dinamis relatif terhadap tanggal hari ini agar badge status langsung informatif
+      const dueSoonDay = Math.min(28, currentDay + 3);
+      const dueLaterDay = Math.min(28, currentDay + 8);
+      const overdueDay = currentDay > 3 ? currentDay - 2 : 1;
+
+      const sampleTransactions = [
+        {
+          id: generateId('tx'),
+          type: 'expense',
+          amount: 45000,
+          category: 'Makanan & Minuman',
+          date: today,
+          note: 'Makan siang nasi padang & es teh'
+        },
+        {
+          id: generateId('tx'),
+          type: 'expense',
+          amount: 50000,
+          category: 'Transportasi & BBM',
+          date: today,
+          note: 'Isi Pertamax motor'
+        },
+        {
+          id: generateId('tx'),
+          type: 'income',
+          amount: 1250000,
+          category: 'Usaha/Freelance',
+          date: addDaysToStr(today, -1),
+          note: 'Termin proyek desain UI aplikasi'
+        },
+        {
+          id: generateId('tx'),
+          type: 'expense',
+          amount: 165000,
+          category: 'Belanja Harian',
+          date: addDaysToStr(today, -2),
+          note: 'Belanja buah, sayur, dan kebutuhan dapur'
+        },
+        {
+          id: generateId('tx'),
+          type: 'expense',
+          amount: 385000,
+          category: 'Tagihan Rutin',
+          date: addDaysToStr(today, -4),
+          note: 'Pembayaran Internet WiFi Fiber'
+        },
+        {
+          id: generateId('tx'),
+          type: 'expense',
+          amount: 215000,
+          category: 'Transportasi & BBM',
+          date: addDaysToStr(today, -6),
+          note: 'Servis rutin & ganti oli kendaraan'
+        },
+        {
+          id: generateId('tx'),
+          type: 'expense',
+          amount: 95000,
+          category: 'Kesehatan',
+          date: addDaysToStr(today, -8),
+          note: 'Vitamin & obat flu di apotek'
+        },
+        {
+          id: generateId('tx'),
+          type: 'expense',
+          amount: 110000,
+          category: 'Hiburan',
+          date: addDaysToStr(today, -10),
+          note: 'Tiket bioskop akhir pekan'
+        },
+        {
+          id: generateId('tx'),
+          type: 'income',
+          amount: 9500000,
+          category: 'Gaji',
+          date: `${getCurrentMonthStr()}-01`,
+          note: 'Gaji bulanan utama'
+        }
+      ];
+
+      const sampleRecurring = [
+        {
+          id: generateId('rec'),
+          name: 'Tagihan Air PDAM',
+          category: 'Air',
+          amount: 125000,
+          cycle: 'Bulanan',
+          dueDay: dueSoonDay,
+          status: 'unpaid'
+        },
+        {
+          id: generateId('rec'),
+          name: 'Tagihan Listrik PLN',
+          category: 'Listrik',
+          amount: 420000,
+          cycle: 'Bulanan',
+          dueDay: overdueDay,
+          status: 'unpaid'
+        },
+        {
+          id: generateId('rec'),
+          name: 'Cicilan & Perawatan Kendaraan',
+          category: 'Kendaraan',
+          amount: 1350000,
+          cycle: 'Bulanan',
+          dueDay: dueLaterDay,
+          status: 'unpaid'
+        },
+        {
+          id: generateId('rec'),
+          name: 'Internet WiFi & Paket Data',
+          category: 'Internet',
+          amount: 385000,
+          cycle: 'Bulanan',
+          dueDay: 10,
+          status: 'paid'
+        },
+        {
+          id: generateId('rec'),
+          name: 'Iuran Lingkungan & Keamanan',
+          category: 'Hunian',
+          amount: 100000,
+          cycle: 'Bulanan',
+          dueDay: 15,
+          status: 'paid'
+        }
+      ];
+
+      return {
+        transactions: sampleTransactions,
+        recurringBills: sampleRecurring,
+        isSampleData: true
+      };
+    }
+
+    function loadLocalState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          appState.transactions = Array.isArray(parsed.transactions) ? parsed.transactions : [];
+          appState.recurringBills = Array.isArray(parsed.recurringBills) ? parsed.recurringBills : [];
+          appState.isSampleData = Boolean(parsed.isSampleData);
+        } else {
+          appState = createSampleData();
+          saveLocalState();
+        }
+      } catch (err) {
+        console.error('Gagal memuat data localStorage:', err);
+        appState = createSampleData();
+      }
+    }
+
+    function saveLocalState() {
+      if (isCloudAuthenticated()) return; // Saat login cloud, Firestore menjadi sumber utama
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (err) {
+        console.error('Gagal menyimpan data ke localStorage:', err);
+        showToast('Gagal menyimpan perubahan ke browser.', 'error');
+      }
+    }
+
+    /**
+     * =========================================================================
+     * 5. FILTER PERIODE (HARIAN / MINGGUAN / BULANAN / SEMUA WAKTU)
+     * =========================================================================
+     */
+    function initPeriodControls() {
+      const today = getTodayStr();
+      uiState.dailyDate = today;
+      uiState.weeklyAnchorDate = today;
+      uiState.monthlyValue = getCurrentMonthStr();
+
+      document.getElementById('input-period-daily').value = uiState.dailyDate;
+      document.getElementById('input-period-weekly').value = uiState.weeklyAnchorDate;
+      document.getElementById('input-period-monthly').value = uiState.monthlyValue;
+
+      updatePeriodUIControls();
+    }
+
+    function setPeriodMode(mode) {
+      uiState.periodMode = mode;
+      updatePeriodUIControls();
+      refreshAllViews();
+    }
+
+    function handlePeriodValueChange() {
+      if (uiState.periodMode === 'daily') {
+        const val = document.getElementById('input-period-daily').value;
+        if (val) uiState.dailyDate = val;
+      } else if (uiState.periodMode === 'weekly') {
+        const val = document.getElementById('input-period-weekly').value;
+        if (val) uiState.weeklyAnchorDate = val;
+      } else if (uiState.periodMode === 'monthly') {
+        const val = document.getElementById('input-period-monthly').value;
+        if (val) uiState.monthlyValue = val;
+      }
+      updatePeriodUIControls();
+      refreshAllViews();
+    }
+
+    function stepPeriod(direction) {
+      if (uiState.periodMode === 'daily') {
+        uiState.dailyDate = addDaysToStr(uiState.dailyDate, direction);
+        document.getElementById('input-period-daily').value = uiState.dailyDate;
+      } else if (uiState.periodMode === 'weekly') {
+        uiState.weeklyAnchorDate = addDaysToStr(uiState.weeklyAnchorDate, direction * 7);
+        document.getElementById('input-period-weekly').value = uiState.weeklyAnchorDate;
+      } else if (uiState.periodMode === 'monthly') {
+        const [y, m] = uiState.monthlyValue.split('-').map(Number);
+        const d = new Date(y, m - 1 + direction, 1);
+        uiState.monthlyValue = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        document.getElementById('input-period-monthly').value = uiState.monthlyValue;
+      }
+      updatePeriodUIControls();
+      refreshAllViews();
+    }
+
+    function resetPeriodToToday() {
+      const today = getTodayStr();
+      uiState.dailyDate = today;
+      uiState.weeklyAnchorDate = today;
+      uiState.monthlyValue = getCurrentMonthStr();
+
+      document.getElementById('input-period-daily').value = today;
+      document.getElementById('input-period-weekly').value = today;
+      document.getElementById('input-period-monthly').value = uiState.monthlyValue;
+
+      updatePeriodUIControls();
+      refreshAllViews();
+    }
+
+    function updatePeriodUIControls() {
+      // Update active button styling
+      document.querySelectorAll('.period-btn').forEach(btn => {
+        const isSelected = btn.dataset.period === uiState.periodMode;
+        if (isSelected) {
+          btn.className = 'period-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap bg-white text-emerald-700 shadow-xs';
+        } else {
+          btn.className = 'period-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap text-slate-600 hover:text-slate-900';
+        }
+      });
+
+      // Toggle picker visibility
+      document.getElementById('picker-daily').classList.toggle('hidden', uiState.periodMode !== 'daily');
+      document.getElementById('picker-weekly').classList.toggle('hidden', uiState.periodMode !== 'weekly');
+      document.getElementById('picker-monthly').classList.toggle('hidden', uiState.periodMode !== 'monthly');
+      document.getElementById('picker-all').classList.toggle('hidden', uiState.periodMode !== 'all');
+      document.getElementById('btn-reset-today').classList.toggle('hidden', uiState.periodMode === 'all');
+
+      if (uiState.periodMode === 'weekly') {
+        const range = getWeekRange(uiState.weeklyAnchorDate);
+        document.getElementById('weekly-range-label').textContent = range.label;
+      }
+    }
+
+    function getFilteredTransactionsByPeriod() {
+      const mode = uiState.periodMode;
+      return appState.transactions
+        .filter(tx => {
+          if (mode === 'all') return true;
+          if (mode === 'daily') {
+            return tx.date === uiState.dailyDate;
+          }
+          if (mode === 'weekly') {
+            const { startStr, endStr } = getWeekRange(uiState.weeklyAnchorDate);
+            return tx.date >= startStr && tx.date <= endStr;
+          }
+          if (mode === 'monthly') {
+            return tx.date && tx.date.startsWith(uiState.monthlyValue);
+          }
+          return true;
+        })
+        .sort((a, b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : 0));
+    }
+
+    function getActivePeriodLabel() {
+      if (uiState.periodMode === 'daily') {
+        return `Tanggal ${formatDateIndo(uiState.dailyDate, true)}`;
+      }
+      if (uiState.periodMode === 'weekly') {
+        return `Minggu (${getWeekRange(uiState.weeklyAnchorDate).label})`;
+      }
+      if (uiState.periodMode === 'monthly') {
+        return `Bulan ${formatMonthIndo(uiState.monthlyValue)}`;
+      }
+      return 'Semua Waktu';
+    }
+
+    /**
+     * =========================================================================
+     * 6. NAVIGASI ANTAR TAB / HALAMAN & SIDEBAR COLLAPSE
+     * =========================================================================
+     */
+    const SIDEBAR_COLLAPSED_KEY = 'dompetku_sidebar_collapsed_v1';
+
+    function initSidebarState() {
+      try {
+        const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+        applySidebarState(saved === 'true');
+      } catch (e) {
+        applySidebarState(false);
+      }
+    }
+
+    function toggleSidebarCollapse() {
+      const sidebar = document.getElementById('desktop-sidebar');
+      if (!sidebar) return;
+      const nextCollapsed = sidebar.dataset.collapsed !== 'true';
+      applySidebarState(nextCollapsed);
+      try {
+        localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(nextCollapsed));
+      } catch (e) {
+        // Abaikan jika penyimpanan lokal dibatasi
+      }
+    }
+
+    function applySidebarState(isCollapsed) {
+      const sidebar = document.getElementById('desktop-sidebar');
+      const wrapper = document.getElementById('main-wrapper');
+      const btn = document.getElementById('sidebar-collapse-btn');
+      const icon = document.getElementById('sidebar-collapse-icon');
+
+      if (!sidebar || !wrapper) return;
+
+      sidebar.dataset.collapsed = String(isCollapsed);
+      wrapper.dataset.sidebarCollapsed = String(isCollapsed);
+
+      if (btn && icon) {
+        btn.title = isCollapsed ? 'Perluas Sidebar' : 'Perkecil Sidebar';
+        icon.setAttribute('data-lucide', isCollapsed ? 'panel-left-open' : 'panel-left-close');
+      }
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    function switchTab(tabName) {
+      uiState.activeTab = tabName;
+
+      // Sembunyikan semua section
+      ['dashboard', 'transactions', 'recurring', 'reports'].forEach(view => {
+        document.getElementById(`view-${view}`).classList.toggle('hidden', view !== tabName);
+      });
+
+      // Tampilkan global period bar hanya di Ringkasan & Transaksi
+      const showPeriodBar = tabName === 'dashboard' || tabName === 'transactions';
+      document.getElementById('period-filter-bar').classList.toggle('hidden', !showPeriodBar);
+
+      // Update Desktop Sidebar Active State (konsisten menjaga perataan ikon & teks)
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        const active = btn.dataset.nav === tabName;
+        const isRecurring = btn.dataset.nav === 'recurring';
+        const baseClasses = `nav-item ${isRecurring ? 'relative ' : ''}w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm transition-all duration-150 cursor-pointer`;
+        if (active) {
+          btn.className = `${baseClasses} font-semibold bg-emerald-600 text-white shadow-md shadow-emerald-950/50`;
+        } else {
+          btn.className = `${baseClasses} font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white`;
+        }
+      });
+
+      // Update Mobile Bottom Nav Active State
+      document.querySelectorAll('.mobile-nav-item').forEach(btn => {
+        const active = btn.dataset.mobileNav === tabName;
+        if (active) {
+          btn.classList.remove('text-slate-500', 'font-medium');
+          btn.classList.add('text-emerald-600', 'font-semibold');
+        } else {
+          btn.classList.remove('text-emerald-600', 'font-semibold');
+          btn.classList.add('text-slate-500', 'font-medium');
+        }
+      });
+
+      refreshAllViews();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /**
+     * =========================================================================
+     * 7. RENDER UTAMA: HEADER, DASHBOARD, CHARTS, TRANSAKSI, TAGIHAN & LAPORAN
+     * =========================================================================
+     */
+    function refreshAllViews() {
+      updateHeaderAndBadges();
+      renderDashboardView();
+      renderTransactionsView();
+      renderRecurringView();
+      renderReportsView();
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    function updateHeaderAndBadges() {
+      // Total Saldo Keseluruhan (Seluruh Pemasukan - Seluruh Pengeluaran)
+      let totalIn = 0;
+      let totalOut = 0;
+      appState.transactions.forEach(tx => {
+        if (tx.type === 'income') totalIn += Number(tx.amount) || 0;
+        else totalOut += Number(tx.amount) || 0;
+      });
+      const totalBalance = totalIn - totalOut;
+      const balanceEl = document.getElementById('header-total-balance');
+      balanceEl.textContent = formatRupiah(totalBalance);
+      balanceEl.className = `text-xs sm:text-lg font-extrabold tracking-tight ${totalBalance < 0 ? 'text-rose-600' : 'text-slate-900'}`;
+
+      // Banner Data Contoh (hanya tampil di mode lokal saat sample data aktif)
+      document.getElementById('sample-data-banner').classList.toggle('hidden', !appState.isSampleData || isCloudAuthenticated());
+
+      // Update Indikator Status Cloud & Profil Pengguna
+      const cloudSynced = isCloudAuthenticated();
+      const cloudReady = isCloudConfigured();
+
+      const headerBtn = document.getElementById('header-cloud-btn');
+      const headerDot = document.getElementById('header-cloud-dot');
+      const headerLabel = document.getElementById('header-cloud-label');
+      const sidebarStatus = document.getElementById('sidebar-sync-status');
+      const reportCloudBadge = document.getElementById('report-cloud-badge');
+      const reportAuthBtn = document.getElementById('report-auth-btn');
+
+      if (cloudSynced) {
+        headerBtn.className = 'inline-flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-xs font-semibold text-emerald-800 transition-colors cursor-pointer';
+        headerDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0';
+        headerLabel.textContent = 'Tersinkronisasi Cloud';
+
+        sidebarStatus.className = 'inline-flex items-center gap-1.5 text-emerald-400 font-semibold truncate';
+        sidebarStatus.title = 'Database: Tersinkronisasi Cloud';
+        sidebarStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span><span class="sidebar-hide-collapsed truncate">Tersinkronisasi Cloud</span>`;
+
+        reportCloudBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800';
+        reportCloudBadge.textContent = 'Tersinkronisasi Cloud';
+
+        reportAuthBtn.innerHTML = `<i data-lucide="log-out" class="w-4 h-4"></i><span>Keluar Akun</span>`;
+        reportAuthBtn.onclick = handleLogout;
+
+        // Tampilkan Profil Pengguna di Sidebar
+        document.getElementById('sidebar-auth-logged-out').classList.add('hidden');
+        document.getElementById('sidebar-auth-logged-in').classList.remove('hidden');
+
+        const displayName = currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Pengguna Cloud');
+        const emailText = currentUser.email || `ID: ${currentUser.uid.slice(0, 10)}...`;
+        document.getElementById('sidebar-user-name').textContent = displayName;
+        document.getElementById('sidebar-user-email').textContent = emailText;
+
+        const avatarImg = document.getElementById('sidebar-user-avatar');
+        const initialsBox = document.getElementById('sidebar-user-initials');
+        initialsBox.title = `${displayName} (${emailText})`;
+        if (currentUser.photoURL) {
+          avatarImg.src = currentUser.photoURL;
+          avatarImg.title = `${displayName} (${emailText})`;
+          avatarImg.classList.remove('hidden');
+          initialsBox.classList.add('hidden');
+        } else {
+          avatarImg.classList.add('hidden');
+          initialsBox.classList.remove('hidden');
+          initialsBox.textContent = displayName.charAt(0).toUpperCase();
+        }
+      } else {
+        headerBtn.className = 'inline-flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors cursor-pointer';
+        headerDot.className = `w-2 h-2 rounded-full ${cloudReady ? 'bg-sky-500' : 'bg-amber-500'} shrink-0`;
+        headerLabel.textContent = cloudReady ? 'Mode Lokal (Masuk)' : 'Mode Lokal';
+
+        sidebarStatus.className = 'inline-flex items-center gap-1.5 text-amber-300 font-semibold truncate';
+        sidebarStatus.title = 'Database: Mode Lokal';
+        sidebarStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span><span class="sidebar-hide-collapsed truncate">Mode Lokal</span>`;
+
+        reportCloudBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800';
+        reportCloudBadge.textContent = cloudReady ? 'Mode Lokal (Siap Login)' : 'Mode Lokal';
+
+        reportAuthBtn.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i><span>Masuk Akun Cloud</span>`;
+        reportAuthBtn.onclick = openAuthModal;
+
+        document.getElementById('sidebar-auth-logged-out').classList.remove('hidden');
+        document.getElementById('sidebar-auth-logged-in').classList.add('hidden');
+      }
+
+      // Badge Tagihan Belum Dibayar di Sidebar (Expanded & Mini) & Mobile Nav
+      const unpaidBills = appState.recurringBills.filter(b => b.status === 'unpaid');
+      const sideBadge = document.getElementById('sidebar-unpaid-badge');
+      const sideMiniDot = document.getElementById('sidebar-unpaid-mini-dot');
+      const mobileDot = document.getElementById('mobile-unpaid-dot');
+
+      if (unpaidBills.length > 0) {
+        sideBadge.textContent = unpaidBills.length;
+        sideBadge.classList.remove('hidden');
+        sideMiniDot.classList.remove('hidden');
+        mobileDot.classList.remove('hidden');
+      } else {
+        sideBadge.classList.add('hidden');
+        sideMiniDot.classList.add('hidden');
+        mobileDot.classList.add('hidden');
+      }
+    }
+
+    function handleHeaderCloudClick() {
+      if (isCloudAuthenticated()) {
+        switchTab('reports');
+      } else {
+        openAuthModal();
+      }
+    }
+
+    /**
+     * =========================================================================
+     * 8. RENDER VIEW 1: RINGKASAN (DASHBOARD & GRAFIK)
+     * =========================================================================
+     */
+    function renderDashboardView() {
+      const periodTxs = getFilteredTransactionsByPeriod();
+      const periodLabel = getActivePeriodLabel();
+
+      let periodIncome = 0;
+      let periodExpense = 0;
+      periodTxs.forEach(tx => {
+        if (tx.type === 'income') periodIncome += Number(tx.amount) || 0;
+        else periodExpense += Number(tx.amount) || 0;
+      });
+      const netCashflow = periodIncome - periodExpense;
+
+      // Update KPI Cards
+      document.getElementById('kpi-income').textContent = formatRupiah(periodIncome);
+      document.getElementById('kpi-expense').textContent = formatRupiah(periodExpense);
+      document.getElementById('kpi-period-subtitle-1').textContent = periodLabel;
+      document.getElementById('kpi-period-subtitle-2').textContent = periodLabel;
+
+      const netEl = document.getElementById('kpi-net');
+      const netStatusEl = document.getElementById('kpi-net-status');
+      netEl.textContent = `${netCashflow > 0 ? '+' : ''}${formatRupiah(netCashflow)}`;
+      if (netCashflow > 0) {
+        netEl.className = 'text-xl sm:text-2xl font-extrabold text-emerald-600 tracking-tight';
+        netStatusEl.textContent = 'Surplus arus kas positif';
+      } else if (netCashflow < 0) {
+        netEl.className = 'text-xl sm:text-2xl font-extrabold text-rose-600 tracking-tight';
+        netStatusEl.textContent = 'Defisit (pengeluaran lebih besar)';
+      } else {
+        netEl.className = 'text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight';
+        netStatusEl.textContent = 'Arus kas seimbang';
+      }
+
+      // Unpaid Routine Bills KPI
+      const unpaidBills = appState.recurringBills.filter(b => b.status === 'unpaid');
+      const unpaidSum = unpaidBills.reduce((acc, b) => acc + (Number(b.amount) || 0), 0);
+      document.getElementById('kpi-unpaid-routine').textContent = formatRupiah(unpaidSum);
+      document.getElementById('kpi-unpaid-count').textContent = `${unpaidBills.length} tagihan belum dibayar`;
+      document.getElementById('dashboard-unpaid-pill').textContent = unpaidBills.length;
+
+      // Render Routine Reminders on Dashboard
+      renderDashboardRoutineReminders(unpaidBills);
+
+      // Render Recent Transactions on Dashboard
+      renderDashboardRecentTransactions(periodTxs, periodLabel);
+
+      // Render Charts
+      renderCashflowChart();
+      renderCategoryDoughnutChart(periodTxs, periodLabel);
+    }
+
+    function renderDashboardRoutineReminders(unpaidBills) {
+      const container = document.getElementById('dashboard-routine-list');
+      if (unpaidBills.length === 0) {
+        container.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-center py-8 px-4 rounded-xl bg-emerald-50/50 border border-emerald-100">
+            <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2.5">
+              <i data-lucide="check-check" class="w-5 h-5"></i>
+            </div>
+            <p class="text-sm font-bold text-slate-800">Semua Tagihan Rutin Lunas!</p>
+            <p class="text-xs text-slate-500 mt-0.5">Tidak ada kewajiban rutin yang tertunggak saat ini.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Urutkan berdasarkan urgensi (terlambat / jatuh tempo terdekat)
+      const sorted = [...unpaidBills].sort((a, b) => getDueDayMeta(a).daysDiff - getDueDayMeta(b).daysDiff);
+
+      container.innerHTML = sorted.slice(0, 4).map(bill => {
+        const style = RECURRING_CATEGORY_STYLES[bill.category] || RECURRING_CATEGORY_STYLES['Lainnya'];
+        const dueMeta = getDueDayMeta(bill);
+        return `
+          <div class="p-3.5 rounded-xl border border-slate-200/80 hover:border-slate-300 bg-slate-50/60 flex items-center justify-between gap-3 transition-all">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 rounded-xl ${style.bg} ${style.text} flex items-center justify-center shrink-0">
+                <i data-lucide="${style.icon}" class="w-5 h-5"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-bold text-slate-900 truncate">${escapeHTML(bill.name)}</p>
+                <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
+                  <span class="text-xs font-semibold text-slate-700">${formatRupiah(bill.amount)}</span>
+                  <span class="text-slate-300">&bull;</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold ${dueMeta.badgeClass}">
+                    ${dueMeta.label}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button onclick="openPayBillModal('${bill.id}')"
+              class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-2xs shrink-0 cursor-pointer transition-colors">
+              Bayar
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderDashboardRecentTransactions(periodTxs, periodLabel) {
+      const container = document.getElementById('dashboard-recent-list');
+      document.getElementById('dashboard-recent-subtitle').textContent = `Catatan untuk ${periodLabel}`;
+
+      if (periodTxs.length === 0) {
+        container.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-center py-8 px-4 rounded-xl bg-slate-50 border border-slate-200/70">
+            <div class="w-11 h-11 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-2.5">
+              <i data-lucide="receipt" class="w-5 h-5"></i>
+            </div>
+            <p class="text-sm font-semibold text-slate-700">Belum Ada Transaksi</p>
+            <p class="text-xs text-slate-400 mt-0.5">Klik "+ Catat Transaksi" untuk menambah pemasukan atau pengeluaran.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = periodTxs.slice(0, 5).map(tx => {
+        const style = CATEGORY_STYLES[tx.category] || CATEGORY_STYLES['Lainnya'];
+        const isIncome = tx.type === 'income';
+        return `
+          <div class="p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200/70 flex items-center justify-between gap-3 transition-all">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 rounded-xl ${style.bg} ${style.text} flex items-center justify-center shrink-0">
+                <i data-lucide="${style.icon}" class="w-4 h-4"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-slate-900 truncate">${escapeHTML(tx.note)}</p>
+                <p class="text-xs text-slate-500 truncate">${escapeHTML(tx.category)} &bull; ${formatDateIndo(tx.date)}</p>
+              </div>
+            </div>
+            <span class="text-xs sm:text-sm font-bold shrink-0 ${isIncome ? 'text-emerald-600' : 'text-rose-600'}">
+              ${isIncome ? '+' : '-'} ${formatRupiah(tx.amount)}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /**
+     * =========================================================================
+     * 9. CHART.JS VISUALISASI (ARUS KAS & KATEGORI)
+     * =========================================================================
+     */
+    function renderCashflowChart() {
+      const ctx = document.getElementById('cashflowChart').getContext('2d');
+      const mode = uiState.periodMode;
+
+      let labels = [];
+      let incomeData = [];
+      let expenseData = [];
+      let subtitle = '';
+
+      if (mode === 'daily') {
+        // Menampilkan tren 7 hari terakhir hingga tanggal terpilih agar grafik batang informatif
+        subtitle = `Tren 7 hari hingga ${formatDateIndo(uiState.dailyDate)}`;
+        for (let i = 6; i >= 0; i--) {
+          const dStr = addDaysToStr(uiState.dailyDate, -i);
+          const dObj = parseLocalDate(dStr);
+          const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+          labels.push(`${dayNames[dObj.getDay()]} ${dObj.getDate()}/${dObj.getMonth() + 1}`);
+
+          let inc = 0;
+          let exp = 0;
+          appState.transactions.forEach(tx => {
+            if (tx.date === dStr) {
+              if (tx.type === 'income') inc += Number(tx.amount) || 0;
+              else exp += Number(tx.amount) || 0;
+            }
+          });
+          incomeData.push(inc);
+          expenseData.push(exp);
+        }
+      } else if (mode === 'weekly') {
+        // Menampilkan 7 hari (Senin - Minggu) dalam minggu terpilih
+        const { startStr, label } = getWeekRange(uiState.weeklyAnchorDate);
+        subtitle = `Rincian harian minggu (${label})`;
+        const dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+
+        for (let i = 0; i < 7; i++) {
+          const dStr = addDaysToStr(startStr, i);
+          labels.push(dayNames[i]);
+          let inc = 0;
+          let exp = 0;
+          appState.transactions.forEach(tx => {
+            if (tx.date === dStr) {
+              if (tx.type === 'income') inc += Number(tx.amount) || 0;
+              else exp += Number(tx.amount) || 0;
+            }
+          });
+          incomeData.push(inc);
+          expenseData.push(exp);
+        }
+      } else if (mode === 'monthly') {
+        // Menampilkan breakdown Minggu 1 s/d Minggu 5 pada bulan terpilih
+        subtitle = `Rincian mingguan bulan ${formatMonthIndo(uiState.monthlyValue)}`;
+        labels = ['Minggu 1 (1-7)', 'Minggu 2 (8-14)', 'Minggu 3 (15-21)', 'Minggu 4 (22-28)', 'Minggu 5 (29-31)'];
+        incomeData = [0, 0, 0, 0, 0];
+        expenseData = [0, 0, 0, 0, 0];
+
+        appState.transactions.forEach(tx => {
+          if (tx.date && tx.date.startsWith(uiState.monthlyValue)) {
+            const day = parseInt(tx.date.split('-')[2], 10);
+            const bucket = Math.min(4, Math.floor((day - 1) / 7));
+            if (tx.type === 'income') incomeData[bucket] += Number(tx.amount) || 0;
+            else expenseData[bucket] += Number(tx.amount) || 0;
+          }
+        });
+      } else {
+        // Semua Waktu: Kelompokkan per Bulan (maksimal 6 bulan terakhir yang memiliki data atau 6 bulan kalender terakhir)
+        subtitle = 'Perbandingan bulanan (Semua Waktu)';
+        const monthMap = {};
+        appState.transactions.forEach(tx => {
+          if (!tx.date) return;
+          const mKey = tx.date.slice(0, 7);
+          if (!monthMap[mKey]) monthMap[mKey] = { inc: 0, exp: 0 };
+          if (tx.type === 'income') monthMap[mKey].inc += Number(tx.amount) || 0;
+          else monthMap[mKey].exp += Number(tx.amount) || 0;
+        });
+
+        const sortedMonths = Object.keys(monthMap).sort();
+        if (sortedMonths.length === 0) {
+          labels = [formatMonthIndo(getCurrentMonthStr())];
+          incomeData = [0];
+          expenseData = [0];
+        } else {
+          sortedMonths.slice(-6).forEach(mKey => {
+            labels.push(formatMonthIndo(mKey));
+            incomeData.push(monthMap[mKey].inc);
+            expenseData.push(monthMap[mKey].exp);
+          });
+        }
+      }
+
+      document.getElementById('cashflow-chart-subtitle').textContent = subtitle;
+
+      if (cashflowChartInstance) {
+        cashflowChartInstance.destroy();
+      }
+
+      cashflowChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Pemasukan',
+              data: incomeData,
+              backgroundColor: '#10b981',
+              borderRadius: 6,
+              maxBarThickness: 28
+            },
+            {
+              label: 'Pengeluaran',
+              data: expenseData,
+              backgroundColor: '#f43f5e',
+              borderRadius: 6,
+              maxBarThickness: 28
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              padding: 12,
+              cornerRadius: 10,
+              callbacks: {
+                label: function (context) {
+                  return `${context.dataset.label}: ${formatRupiah(context.raw)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: '#64748b',
+                font: { size: 11, family: 'Inter' }
+              }
+            },
+            y: {
+              beginAtZero: true,
+              border: { display: false },
+              grid: { color: '#f1f5f9' },
+              ticks: {
+                color: '#64748b',
+                font: { size: 11, family: 'Inter' },
+                callback: function (value) {
+                  if (value >= 1000000) return `Rp ${(value / 1000000).toFixed(1)} jt`;
+                  if (value >= 1000) return `Rp ${(value / 1000).toFixed(0)} rb`;
+                  return `Rp ${value}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderCategoryDoughnutChart(periodTxs, periodLabel) {
+      const canvas = document.getElementById('categoryChart');
+      const emptyBox = document.getElementById('category-chart-empty');
+      const legendList = document.getElementById('category-legend-list');
+      document.getElementById('category-chart-subtitle').textContent = `Distribusi kategori (${periodLabel})`;
+
+      const expenseMap = {};
+      let totalExpense = 0;
+
+      periodTxs.forEach(tx => {
+        if (tx.type === 'expense') {
+          const amt = Number(tx.amount) || 0;
+          expenseMap[tx.category] = (expenseMap[tx.category] || 0) + amt;
+          totalExpense += amt;
+        }
+      });
+
+      if (categoryChartInstance) {
+        categoryChartInstance.destroy();
+        categoryChartInstance = null;
+      }
+
+      if (totalExpense === 0) {
+        canvas.classList.add('hidden');
+        emptyBox.classList.remove('hidden');
+        legendList.innerHTML = '';
+        return;
+      }
+
+      canvas.classList.remove('hidden');
+      emptyBox.classList.add('hidden');
+
+      const entries = Object.entries(expenseMap).sort((a, b) => b[1] - a[1]);
+      const labels = entries.map(e => e[0]);
+      const values = entries.map(e => e[1]);
+      const colors = labels.map(cat => (CATEGORY_STYLES[cat] ? CATEGORY_STYLES[cat].hex : '#64748b'));
+
+      categoryChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [
+            {
+              data: values,
+              backgroundColor: colors,
+              borderWidth: 2,
+              borderColor: '#ffffff',
+              hoverOffset: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '66%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              padding: 12,
+              cornerRadius: 10,
+              callbacks: {
+                label: function (context) {
+                  const val = context.raw;
+                  const pct = ((val / totalExpense) * 100).toFixed(1);
+                  return `${context.label}: ${formatRupiah(val)} (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Render Breakdown Percentage List
+      legendList.innerHTML = entries.map(([cat, val], idx) => {
+        const pct = ((val / totalExpense) * 100).toFixed(1);
+        return `
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${colors[idx]}"></span>
+              <span class="font-medium text-slate-700 truncate">${escapeHTML(cat)}</span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-slate-400 font-medium">${pct}%</span>
+              <span class="font-bold text-slate-800">${formatRupiah(val)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /**
+     * =========================================================================
+     * 10. RENDER VIEW 2: TRANSAKSI (LEDGER) & CRUD TRANSAKSI
+     * =========================================================================
+     */
+    function updateCategoryFilterOptions() {
+      const typeFilter = document.getElementById('tx-filter-type').value;
+      const catSelect = document.getElementById('tx-filter-category');
+      const currentVal = catSelect.value;
+
+      let cats = [];
+      if (typeFilter === 'income') {
+        cats = CATEGORIES.income;
+      } else if (typeFilter === 'expense') {
+        cats = CATEGORIES.expense;
+      } else {
+        cats = Array.from(new Set([...CATEGORIES.expense, ...CATEGORIES.income]));
+      }
+
+      catSelect.innerHTML = `<option value="all">Semua Kategori</option>` +
+        cats.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
+
+      if (cats.includes(currentVal)) {
+        catSelect.value = currentVal;
+      }
+    }
+
+    function renderTransactionsView() {
+      const periodTxs = getFilteredTransactionsByPeriod();
+      const searchQuery = (document.getElementById('tx-search-input').value || '').toLowerCase().trim();
+      const typeFilter = document.getElementById('tx-filter-type').value;
+      const catFilter = document.getElementById('tx-filter-category').value;
+
+      const filtered = periodTxs.filter(tx => {
+        if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
+        if (catFilter !== 'all' && tx.category !== catFilter) return false;
+        if (searchQuery) {
+          const matchNote = (tx.note || '').toLowerCase().includes(searchQuery);
+          const matchCat = (tx.category || '').toLowerCase().includes(searchQuery);
+          if (!matchNote && !matchCat) return false;
+        }
+        return true;
+      });
+
+      // Hitung ringkasan filter aktif
+      let sumIn = 0;
+      let sumOut = 0;
+      filtered.forEach(tx => {
+        if (tx.type === 'income') sumIn += Number(tx.amount) || 0;
+        else sumOut += Number(tx.amount) || 0;
+      });
+      document.getElementById('tx-summary-in').textContent = formatRupiah(sumIn);
+      document.getElementById('tx-summary-out').textContent = formatRupiah(sumOut);
+
+      const container = document.getElementById('transactions-list-container');
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="py-14 px-6 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="search-x" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800">Tidak Ada Transaksi Ditemukan</h3>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">
+              Belum ada catatan yang cocok dengan filter periode atau kata kunci pencarian saat ini.
+            </p>
+            <button onclick="openTransactionModal()"
+              class="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold cursor-pointer">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Catat Transaksi Baru</span>
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(tx => {
+        const style = CATEGORY_STYLES[tx.category] || CATEGORY_STYLES['Lainnya'];
+        const isIncome = tx.type === 'income';
+        return `
+          <div class="p-4 sm:px-6 hover:bg-slate-50/90 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-start sm:items-center gap-3.5 min-w-0">
+              <div class="w-11 h-11 rounded-xl ${style.bg} ${style.text} flex items-center justify-center shrink-0">
+                <i data-lucide="${style.icon}" class="w-5 h-5"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm sm:text-base font-bold text-slate-900 truncate">${escapeHTML(tx.note)}</p>
+                <div class="flex flex-wrap items-center gap-2 mt-1">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700">
+                    ${escapeHTML(tx.category)}
+                  </span>
+                  <span class="text-xs text-slate-400 flex items-center gap-1">
+                    <i data-lucide="calendar" class="w-3 h-3"></i>
+                    ${formatDateIndo(tx.date, true)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+              <span class="text-sm sm:text-base font-extrabold ${isIncome ? 'text-emerald-600' : 'text-rose-600'}">
+                ${isIncome ? '+' : '-'} ${formatRupiah(tx.amount)}
+              </span>
+              <div class="flex items-center gap-1">
+                <button onclick="openTransactionModal('${tx.id}')" title="Edit Transaksi"
+                  class="p-2 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer">
+                  <i data-lucide="pencil" class="w-4 h-4"></i>
+                </button>
+                <button onclick="confirmDeleteTransaction('${tx.id}')" title="Hapus Transaksi"
+                  class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openTransactionModal(txId = null) {
+      const form = document.getElementById('form-transaction');
+      form.reset();
+
+      if (txId) {
+        const tx = appState.transactions.find(item => item.id === txId);
+        if (!tx) return;
+        document.getElementById('modal-tx-title').textContent = 'Edit Transaksi';
+        document.getElementById('tx-id').value = tx.id;
+        setTxFormType(tx.type);
+        document.getElementById('tx-category').value = tx.category;
+        document.getElementById('tx-amount').value = String(tx.amount).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        document.getElementById('tx-date').value = tx.date;
+        document.getElementById('tx-note').value = tx.note;
+      } else {
+        document.getElementById('modal-tx-title').textContent = 'Catat Transaksi Baru';
+        document.getElementById('tx-id').value = '';
+        setTxFormType('expense');
+        document.getElementById('tx-date').value = uiState.periodMode === 'daily' ? uiState.dailyDate : getTodayStr();
+      }
+
+      openModal('modal-transaction');
+    }
+
+    function setTxFormType(type) {
+      document.getElementById('tx-type').value = type;
+      const btnExp = document.getElementById('btn-type-expense');
+      const btnInc = document.getElementById('btn-type-income');
+
+      if (type === 'expense') {
+        btnExp.className = 'py-2.5 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer bg-rose-600 text-white shadow-xs';
+        btnInc.className = 'py-2.5 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer text-slate-600 hover:text-slate-900';
+      } else {
+        btnInc.className = 'py-2.5 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer bg-emerald-600 text-white shadow-xs';
+        btnExp.className = 'py-2.5 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer text-slate-600 hover:text-slate-900';
+      }
+
+      const catSelect = document.getElementById('tx-category');
+      const list = CATEGORIES[type] || [];
+      catSelect.innerHTML = list.map(cat => `<option value="${escapeHTML(cat)}">${escapeHTML(cat)}</option>`).join('');
+    }
+
+    async function saveTransaction(event) {
+      event.preventDefault();
+      const id = document.getElementById('tx-id').value;
+      const type = document.getElementById('tx-type').value;
+      const amount = parseRupiahInput(document.getElementById('tx-amount').value);
+      const category = document.getElementById('tx-category').value;
+      const date = document.getElementById('tx-date').value;
+      const note = document.getElementById('tx-note').value.trim();
+
+      if (amount <= 0) {
+        showToast('Nominal transaksi harus lebih dari Rp 0.', 'error');
+        return;
+      }
+
+      const txId = id || generateId('tx');
+      const txPayload = { id: txId, type, amount, category, date, note };
+
+      if (isCloudAuthenticated()) {
+        try {
+          const txCol = getUserTransactionsCollection(currentUser.uid);
+          await setDoc(doc(txCol, txId), txPayload);
+          closeModal('modal-transaction');
+          showToast(id ? 'Transaksi cloud diperbarui.' : 'Transaksi tersimpan ke Cloud!', 'success');
+        } catch (err) {
+          console.error('Firestore saveTransaction error:', err);
+          showToast('Gagal menyimpan transaksi ke Cloud.', 'error');
+        }
+        return;
+      }
+
+      // Mode Lokal
+      if (id) {
+        const idx = appState.transactions.findIndex(t => t.id === id);
+        if (idx !== -1) {
+          appState.transactions[idx] = txPayload;
+          showToast('Transaksi berhasil diperbarui.', 'success');
+        }
+      } else {
+        appState.transactions.unshift(txPayload);
+        showToast('Transaksi baru berhasil dicatat!', 'success');
+      }
+
+      saveLocalState();
+      closeModal('modal-transaction');
+      refreshAllViews();
+    }
+
+    function confirmDeleteTransaction(txId) {
+      const tx = appState.transactions.find(t => t.id === txId);
+      if (!tx) return;
+
+      openConfirmDialog({
+        title: 'Hapus Transaksi?',
+        message: `Anda akan menghapus catatan "${tx.note}" senilai ${formatRupiah(tx.amount)}. Saldo keseluruhan akan disesuaikan otomatis.`,
+        confirmText: 'Ya, Hapus',
+        onConfirm: async () => {
+          if (isCloudAuthenticated()) {
+            try {
+              const txCol = getUserTransactionsCollection(currentUser.uid);
+              await deleteDoc(doc(txCol, txId));
+              showToast('Transaksi dihapus dari Cloud.', 'info');
+            } catch (err) {
+              console.error('Firestore deleteTransaction error:', err);
+              showToast('Gagal menghapus transaksi di Cloud.', 'error');
+            }
+            return;
+          }
+
+          appState.transactions = appState.transactions.filter(t => t.id !== txId);
+          saveLocalState();
+          refreshAllViews();
+          showToast('Transaksi telah dihapus.', 'info');
+        }
+      });
+    }
+
+    /**
+     * =========================================================================
+     * 11. RENDER VIEW 3: PEMBAYARAN RUTIN & SMART BILL PAYMENT WORKFLOW
+     * =========================================================================
+     */
+    function getDueDayMeta(bill) {
+      if (bill.status === 'paid') {
+        return {
+          daysDiff: 999,
+          label: 'Lunas',
+          badgeClass: 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+        };
+      }
+
+      const today = parseLocalDate(getTodayStr());
+      const currentDay = today.getDate();
+      const dueDay = Number(bill.dueDay) || 1;
+      const diff = dueDay - currentDay;
+
+      if (diff < 0) {
+        return {
+          daysDiff: diff,
+          label: `Terlambat ${Math.abs(diff)} hari`,
+          badgeClass: 'bg-rose-100 text-rose-800 border border-rose-200'
+        };
+      }
+      if (diff === 0) {
+        return {
+          daysDiff: 0,
+          label: 'Jatuh tempo hari ini',
+          badgeClass: 'bg-amber-100 text-amber-800 border border-amber-300'
+        };
+      }
+      if (diff <= 5) {
+        return {
+          daysDiff: diff,
+          label: `Jatuh tempo ${diff} hari lagi`,
+          badgeClass: 'bg-amber-50 text-amber-700 border border-amber-200'
+        };
+      }
+      return {
+        daysDiff: diff,
+        label: `Jatuh tempo ${diff} hari lagi`,
+        badgeClass: 'bg-slate-100 text-slate-600 border border-slate-200'
+      };
+    }
+
+    function setRecurringFilter(filter) {
+      uiState.recurringFilter = filter;
+      document.querySelectorAll('.rec-filter-btn').forEach(btn => {
+        const active = btn.dataset.recFilter === filter;
+        if (active) {
+          btn.className = 'rec-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer bg-slate-900 text-white';
+        } else {
+          btn.className = 'rec-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer bg-white text-slate-600 border border-slate-200 hover:bg-slate-50';
+        }
+      });
+      renderRecurringView();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderRecurringView() {
+      const allBills = appState.recurringBills;
+      const paidBills = allBills.filter(b => b.status === 'paid');
+      const unpaidBills = allBills.filter(b => b.status === 'unpaid');
+
+      const totalEst = allBills.reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
+      const totalPaid = paidBills.reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
+      const totalUnpaid = unpaidBills.reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
+
+      document.getElementById('rec-total-est').textContent = formatRupiah(totalEst);
+      document.getElementById('rec-total-count').textContent = `${allBills.length} jadwal terdaftar`;
+      document.getElementById('rec-total-paid').textContent = formatRupiah(totalPaid);
+      document.getElementById('rec-paid-count').textContent = `${paidBills.length} tagihan lunas`;
+      document.getElementById('rec-total-unpaid').textContent = formatRupiah(totalUnpaid);
+      document.getElementById('rec-unpaid-count').textContent = `${unpaidBills.length} menunggu pembayaran`;
+
+      let filtered = [...allBills];
+      if (uiState.recurringFilter === 'unpaid') filtered = unpaidBills;
+      if (uiState.recurringFilter === 'paid') filtered = paidBills;
+
+      // Urutkan: yang belum dibayar & paling mendesak di atas
+      filtered.sort((a, b) => {
+        if (a.status !== b.status) return a.status === 'unpaid' ? -1 : 1;
+        return Number(a.dueDay) - Number(b.dueDay);
+      });
+
+      const grid = document.getElementById('recurring-cards-grid');
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl border border-slate-200/80 p-12 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="calendar-check" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800">Tidak Ada Jadwal Tagihan</h3>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Tambahkan tagihan rutin seperti PDAM, Listrik PLN, atau cicilan kendaraan.</p>
+            <button onclick="openRecurringModal()"
+              class="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold cursor-pointer">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>Tambah Tagihan Rutin</span>
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(bill => {
+        const style = RECURRING_CATEGORY_STYLES[bill.category] || RECURRING_CATEGORY_STYLES['Lainnya'];
+        const dueMeta = getDueDayMeta(bill);
+        const isPaid = bill.status === 'paid';
+
+        return `
+          <div class="bg-white rounded-2xl border ${isPaid ? 'border-slate-200/80 opacity-90' : 'border-slate-200 shadow-2xs'} p-5 flex flex-col justify-between gap-4 transition-all hover:shadow-md">
+            <div>
+              <!-- Top Row: Icon + Status Badge -->
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-11 h-11 rounded-2xl ${style.bg} ${style.text} border ${style.border} flex items-center justify-center shrink-0">
+                    <i data-lucide="${style.icon}" class="w-5 h-5"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">${escapeHTML(bill.category)} &bull; ${escapeHTML(bill.cycle)}</span>
+                    <h3 class="text-base font-bold text-slate-900 truncate">${escapeHTML(bill.name)}</h3>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-1 shrink-0">
+                  <button onclick="openRecurringModal('${bill.id}')" title="Edit Jadwal"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 cursor-pointer">
+                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                  </button>
+                  <button onclick="confirmDeleteRecurring('${bill.id}')" title="Hapus Jadwal"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Amount & Due Date -->
+              <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-end justify-between gap-2">
+                <div>
+                  <p class="text-[11px] font-medium text-slate-400">Estimasi Tagihan</p>
+                  <p class="text-lg sm:text-xl font-extrabold text-slate-900">${formatRupiah(bill.amount)}</p>
+                </div>
+                <div class="text-right">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold ${dueMeta.badgeClass}">
+                    ${dueMeta.label}
+                  </span>
+                  <p class="text-[11px] text-slate-400 mt-1">Setiap tgl ${bill.dueDay}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Footer -->
+            <div class="pt-2">
+              ${isPaid ? `
+                <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200/70">
+                  <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700">
+                    <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                    Sudah Dibayar
+                  </span>
+                  <button onclick="toggleBillUnpaid('${bill.id}')"
+                    class="text-xs font-semibold text-slate-500 hover:text-slate-800 underline cursor-pointer">
+                    Batalkan Lunas
+                  </button>
+                </div>
+              ` : `
+                <button onclick="openPayBillModal('${bill.id}')"
+                  class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-xs sm:text-sm font-semibold shadow-2xs flex items-center justify-center gap-2 transition-all cursor-pointer">
+                  <i data-lucide="credit-card" class="w-4 h-4"></i>
+                  <span>Bayar Tagihan Sekarang</span>
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openRecurringModal(billId = null) {
+      const form = document.getElementById('form-recurring');
+      form.reset();
+
+      if (billId) {
+        const bill = appState.recurringBills.find(b => b.id === billId);
+        if (!bill) return;
+        document.getElementById('modal-rec-title').textContent = 'Edit Jadwal Pembayaran Rutin';
+        document.getElementById('rec-id').value = bill.id;
+        document.getElementById('rec-name').value = bill.name;
+        document.getElementById('rec-category').value = bill.category;
+        document.getElementById('rec-amount').value = String(bill.amount).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        document.getElementById('rec-cycle').value = bill.cycle;
+        document.getElementById('rec-due-day').value = bill.dueDay;
+        document.getElementById('rec-status').value = bill.status;
+      } else {
+        document.getElementById('modal-rec-title').textContent = 'Tambah Pembayaran Rutin';
+        document.getElementById('rec-id').value = '';
+        document.getElementById('rec-due-day').value = new Date().getDate();
+        document.getElementById('rec-status').value = 'unpaid';
+      }
+
+      openModal('modal-recurring');
+    }
+
+    async function saveRecurringBill(event) {
+      event.preventDefault();
+      const id = document.getElementById('rec-id').value;
+      const name = document.getElementById('rec-name').value.trim();
+      const category = document.getElementById('rec-category').value;
+      const amount = parseRupiahInput(document.getElementById('rec-amount').value);
+      const cycle = document.getElementById('rec-cycle').value;
+      const dueDay = Math.min(31, Math.max(1, parseInt(document.getElementById('rec-due-day').value, 10) || 1));
+      const status = document.getElementById('rec-status').value;
+
+      if (amount <= 0) {
+        showToast('Nominal estimasi harus lebih dari Rp 0.', 'error');
+        return;
+      }
+
+      const recId = id || generateId('rec');
+      const recPayload = { id: recId, name, category, amount, cycle, dueDay, status };
+
+      if (isCloudAuthenticated()) {
+        try {
+          const recCol = getUserRecurringCollection(currentUser.uid);
+          await setDoc(doc(recCol, recId), recPayload);
+          closeModal('modal-recurring');
+          showToast(id ? 'Jadwal tagihan cloud diperbarui.' : 'Tagihan rutin tersimpan ke Cloud!', 'success');
+        } catch (err) {
+          console.error('Firestore saveRecurringBill error:', err);
+          showToast('Gagal menyimpan tagihan rutin ke Cloud.', 'error');
+        }
+        return;
+      }
+
+      // Mode Lokal
+      if (id) {
+        const idx = appState.recurringBills.findIndex(b => b.id === id);
+        if (idx !== -1) {
+          appState.recurringBills[idx] = recPayload;
+          showToast('Jadwal pembayaran rutin diperbarui.', 'success');
+        }
+      } else {
+        appState.recurringBills.push(recPayload);
+        showToast('Tagihan rutin baru berhasil ditambahkan!', 'success');
+      }
+
+      saveLocalState();
+      closeModal('modal-recurring');
+      refreshAllViews();
+    }
+
+    function openPayBillModal(billId) {
+      const bill = appState.recurringBills.find(b => b.id === billId);
+      if (!bill) return;
+
+      document.getElementById('pay-bill-id').value = bill.id;
+      document.getElementById('pay-bill-name-display').textContent = bill.name;
+      document.getElementById('pay-bill-meta-display').textContent = `Kategori: ${bill.category} • Siklus: ${bill.cycle} • Jatuh tempo tgl ${bill.dueDay}`;
+      document.getElementById('pay-bill-amount').value = String(bill.amount).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      document.getElementById('pay-bill-date').value = getTodayStr();
+      document.getElementById('pay-bill-note').value = `Pembayaran Rutin: ${bill.name}`;
+
+      openModal('modal-pay-bill');
+    }
+
+    async function submitBillPayment(event) {
+      event.preventDefault();
+      const billId = document.getElementById('pay-bill-id').value;
+      const bill = appState.recurringBills.find(b => b.id === billId);
+      if (!bill) return;
+
+      const actualAmount = parseRupiahInput(document.getElementById('pay-bill-amount').value);
+      const payDate = document.getElementById('pay-bill-date').value;
+      const payNote = document.getElementById('pay-bill-note').value.trim() || `Pembayaran Rutin: ${bill.name}`;
+
+      if (actualAmount <= 0) {
+        showToast('Nominal pembayaran harus lebih dari Rp 0.', 'error');
+        return;
+      }
+
+      const newTxId = generateId('tx');
+      const newTxPayload = {
+        id: newTxId,
+        type: 'expense',
+        amount: actualAmount,
+        category: 'Tagihan Rutin',
+        date: payDate,
+        note: payNote
+      };
+
+      if (isCloudAuthenticated()) {
+        try {
+          const batch = writeBatch(db);
+          const recCol = getUserRecurringCollection(currentUser.uid);
+          const txCol = getUserTransactionsCollection(currentUser.uid);
+
+          batch.set(doc(recCol, bill.id), { ...bill, status: 'paid' });
+          batch.set(doc(txCol, newTxId), newTxPayload);
+
+          await batch.commit();
+          closeModal('modal-pay-bill');
+          showToast(`Tagihan "${bill.name}" lunas & tersimpan di Cloud!`, 'success');
+        } catch (err) {
+          console.error('Firestore submitBillPayment error:', err);
+          showToast('Gagal memproses pembayaran ke Cloud.', 'error');
+        }
+        return;
+      }
+
+      // Mode Lokal
+      bill.status = 'paid';
+      appState.transactions.unshift(newTxPayload);
+
+      saveLocalState();
+      closeModal('modal-pay-bill');
+      refreshAllViews();
+      showToast(`Tagihan "${bill.name}" lunas & tercatat di pengeluaran!`, 'success');
+    }
+
+    async function toggleBillUnpaid(billId) {
+      const bill = appState.recurringBills.find(b => b.id === billId);
+      if (!bill) return;
+
+      if (isCloudAuthenticated()) {
+        try {
+          const recCol = getUserRecurringCollection(currentUser.uid);
+          await setDoc(doc(recCol, bill.id), { ...bill, status: 'unpaid' });
+          showToast(`Status "${bill.name}" dikembalikan ke Belum Dibayar.`, 'info');
+        } catch (err) {
+          showToast('Gagal mengubah status tagihan di Cloud.', 'error');
+        }
+        return;
+      }
+
+      bill.status = 'unpaid';
+      saveLocalState();
+      refreshAllViews();
+      showToast(`Status "${bill.name}" dikembalikan ke Belum Dibayar.`, 'info');
+    }
+
+    function confirmResetMonthlyBills() {
+      if (appState.recurringBills.length === 0) {
+        showToast('Belum ada jadwal tagihan rutin yang terdaftar.', 'info');
+        return;
+      }
+      openConfirmDialog({
+        title: 'Reset Status Bulan Baru?',
+        message: 'Semua tagihan rutin akan diatur ulang menjadi "Belum Dibayar" untuk siklus penagihan bulan baru. Riwayat transaksi Anda tetap aman.',
+        confirmText: 'Ya, Reset Semua',
+        onConfirm: async () => {
+          if (isCloudAuthenticated()) {
+            try {
+              const batch = writeBatch(db);
+              const recCol = getUserRecurringCollection(currentUser.uid);
+              appState.recurringBills.forEach(bill => {
+                batch.set(doc(recCol, bill.id), { ...bill, status: 'unpaid' });
+              });
+              await batch.commit();
+              showToast('Status seluruh tagihan rutin direset di Cloud.', 'success');
+            } catch (err) {
+              showToast('Gagal mereset tagihan di Cloud.', 'error');
+            }
+            return;
+          }
+
+          appState.recurringBills.forEach(bill => {
+            bill.status = 'unpaid';
+          });
+          saveLocalState();
+          refreshAllViews();
+          showToast('Status seluruh tagihan rutin direset untuk bulan baru.', 'success');
+        }
+      });
+    }
+
+    function confirmDeleteRecurring(billId) {
+      const bill = appState.recurringBills.find(b => b.id === billId);
+      if (!bill) return;
+
+      openConfirmDialog({
+        title: 'Hapus Jadwal Tagihan?',
+        message: `Anda akan menghapus jadwal rutin "${bill.name}" (${formatRupiah(bill.amount)}). Riwayat transaksi yang sudah tercatat sebelumnya tidak akan terhapus.`,
+        confirmText: 'Ya, Hapus Jadwal',
+        onConfirm: async () => {
+          if (isCloudAuthenticated()) {
+            try {
+              const recCol = getUserRecurringCollection(currentUser.uid);
+              await deleteDoc(doc(recCol, billId));
+              showToast('Jadwal tagihan rutin dihapus dari Cloud.', 'info');
+            } catch (err) {
+              showToast('Gagal menghapus jadwal di Cloud.', 'error');
+            }
+            return;
+          }
+
+          appState.recurringBills = appState.recurringBills.filter(b => b.id !== billId);
+          saveLocalState();
+          refreshAllViews();
+          showToast('Jadwal tagihan rutin dihapus.', 'info');
+        }
+      });
+    }
+
+    /**
+     * =========================================================================
+     * 12. RENDER VIEW 4: LAPORAN & CADANGAN DATA (CSV & JSON)
+     * =========================================================================
+     */
+    function renderReportsView() {
+      let totalIn = 0;
+      let totalOut = 0;
+      const catTotals = {};
+
+      appState.transactions.forEach(tx => {
+        const amt = Number(tx.amount) || 0;
+        if (tx.type === 'income') {
+          totalIn += amt;
+        } else {
+          totalOut += amt;
+          catTotals[tx.category] = (catTotals[tx.category] || 0) + amt;
+        }
+      });
+
+      const savingsRate = totalIn > 0 ? Math.max(0, ((totalIn - totalOut) / totalIn) * 100) : 0;
+      document.getElementById('report-savings-rate').textContent = `${savingsRate.toFixed(1)}%`;
+
+      const sortedCats = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+      if (sortedCats.length > 0) {
+        document.getElementById('report-top-category').textContent = sortedCats[0][0];
+        document.getElementById('report-top-category-amount').textContent = `${formatRupiah(sortedCats[0][1])} dari total pengeluaran`;
+      } else {
+        document.getElementById('report-top-category').textContent = '-';
+        document.getElementById('report-top-category-amount').textContent = 'Belum ada catatan pengeluaran';
+      }
+
+      document.getElementById('report-record-count').textContent = `${appState.transactions.length} Transaksi`;
+      document.getElementById('report-routine-count').textContent = `${appState.recurringBills.length} jadwal pembayaran rutin`;
+    }
+
+    function exportToCSV() {
+      if (appState.transactions.length === 0) {
+        showToast('Tidak ada data transaksi untuk diekspor.', 'info');
+        return;
+      }
+
+      const headers = ['Tanggal', 'Tipe', 'Kategori', 'Keterangan', 'Nominal (Rp)'];
+      const rows = [...appState.transactions]
+        .sort((a, b) => (b.date > a.date ? 1 : -1))
+        .map(tx => [
+          tx.date,
+          tx.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
+          `"${(tx.category || '').replace(/"/g, '""')}"`,
+          `"${(tx.note || '').replace(/"/g, '""')}"`,
+          tx.amount
+        ]);
+
+      // Tambahkan UTF-8 BOM (\uFEFF) agar Excel membaca format teks Indonesia dengan sempurna
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `DompetKu_Transaksi_${getTodayStr()}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('File CSV berhasil diunduh!', 'success');
+    }
+
+    function exportToJSON() {
+      const payload = {
+        app: 'DompetKu - Manajemen Keuangan Pribadi',
+        exportedAt: new Date().toISOString(),
+        data: appState
+      };
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `DompetKu_Backup_${getTodayStr()}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('File cadangan JSON berhasil diunduh!', 'success');
+    }
+
+    function handleImportJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          const importedData = parsed.data ? parsed.data : parsed;
+
+          if (!Array.isArray(importedData.transactions) || !Array.isArray(importedData.recurringBills)) {
+            throw new Error('Struktur file JSON tidak valid.');
+          }
+
+          openConfirmDialog({
+            title: 'Pulihkan Data dari Cadangan?',
+            message: `Ditemukan ${importedData.transactions.length} transaksi dan ${importedData.recurringBills.length} tagihan rutin. Data saat ini akan digantikan oleh file cadangan ini.`,
+            confirmText: 'Ya, Pulihkan Data',
+            onConfirm: async () => {
+              if (isCloudAuthenticated()) {
+                try {
+                  const batch = writeBatch(db);
+                  const txCol = getUserTransactionsCollection(currentUser.uid);
+                  const recCol = getUserRecurringCollection(currentUser.uid);
+
+                  appState.transactions.forEach(t => batch.delete(doc(txCol, t.id)));
+                  appState.recurringBills.forEach(r => batch.delete(doc(recCol, r.id)));
+
+                  importedData.transactions.forEach(t => {
+                    const id = t.id || generateId('tx');
+                    batch.set(doc(txCol, id), { ...t, id });
+                  });
+                  importedData.recurringBills.forEach(r => {
+                    const id = r.id || generateId('rec');
+                    batch.set(doc(recCol, id), { ...r, id });
+                  });
+
+                  await batch.commit();
+                  showToast('Data berhasil dipulihkan ke Cloud!', 'success');
+                } catch (err) {
+                  showToast('Gagal memulihkan data ke Cloud.', 'error');
+                }
+                return;
+              }
+
+              appState = {
+                transactions: importedData.transactions,
+                recurringBills: importedData.recurringBills,
+                isSampleData: Boolean(importedData.isSampleData)
+              };
+              saveLocalState();
+              refreshAllViews();
+              showToast('Data berhasil dipulihkan dari file JSON!', 'success');
+            }
+          });
+        } catch (err) {
+          showToast('File JSON tidak valid atau rusak.', 'error');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function confirmLoadSampleData() {
+      openConfirmDialog({
+        title: 'Isi Data Simulasi Contoh?',
+        message: 'Aplikasi akan menambahkan contoh transaksi pemasukan, pengeluaran, dan tagihan rutin agar Anda dapat melihat simulasi grafik dan laporan.',
+        confirmText: 'Ya, Isi Data Contoh',
+        onConfirm: async () => {
+          const sample = createSampleData();
+          if (isCloudAuthenticated()) {
+            try {
+              const batch = writeBatch(db);
+              const txCol = getUserTransactionsCollection(currentUser.uid);
+              const recCol = getUserRecurringCollection(currentUser.uid);
+
+              sample.transactions.forEach(t => batch.set(doc(txCol, t.id), t));
+              sample.recurringBills.forEach(r => batch.set(doc(recCol, r.id), r));
+
+              await batch.commit();
+              showToast('Data contoh berhasil ditambahkan ke Cloud!', 'success');
+            } catch (err) {
+              showToast('Gagal menambahkan data contoh ke Cloud.', 'error');
+            }
+            return;
+          }
+
+          appState = sample;
+          saveLocalState();
+          refreshAllViews();
+          showToast('Data simulasi contoh berhasil dimuat!', 'success');
+        }
+      });
+    }
+
+    function confirmClearSampleData() {
+      openConfirmDialog({
+        title: 'Kosongkan Data Contoh?',
+        message: 'Seluruh transaksi simulasi dan tagihan contoh akan dihapus sehingga Anda dapat memulai pencatatan keuangan pribadi dari Rp 0.',
+        confirmText: 'Ya, Kosongkan Sekarang',
+        onConfirm: () => {
+          appState = {
+            transactions: [],
+            recurringBills: [],
+            isSampleData: false
+          };
+          saveLocalState();
+          refreshAllViews();
+          showToast('Data contoh dikosongkan. Selamat mencatat keuangan Anda!', 'success');
+        }
+      });
+    }
+
+    function confirmClearAllData() {
+      openConfirmDialog({
+        title: 'Hapus Seluruh Data?',
+        message: 'Tindakan ini akan menghapus permanen seluruh transaksi dan jadwal pembayaran rutin. Pastikan Anda sudah mengunduh cadangan jika diperlukan.',
+        confirmText: 'Hapus Permanen',
+        onConfirm: async () => {
+          if (isCloudAuthenticated()) {
+            try {
+              const batch = writeBatch(db);
+              const txCol = getUserTransactionsCollection(currentUser.uid);
+              const recCol = getUserRecurringCollection(currentUser.uid);
+
+              appState.transactions.forEach(t => batch.delete(doc(txCol, t.id)));
+              appState.recurringBills.forEach(r => batch.delete(doc(recCol, r.id)));
+
+              await batch.commit();
+              showToast('Seluruh data di Cloud berhasil dihapus.', 'info');
+            } catch (err) {
+              showToast('Gagal menghapus data di Cloud.', 'error');
+            }
+            return;
+          }
+
+          appState = {
+            transactions: [],
+            recurringBills: [],
+            isSampleData: false
+          };
+          saveLocalState();
+          refreshAllViews();
+          showToast('Seluruh data berhasil dihapus.', 'info');
+        }
+      });
+    }
+
+    /**
+     * =========================================================================
+     * 12B. HANDLER UI MODAL AUTENTIKASI & PENGATURAN FIREBASE CONFIG
+     * =========================================================================
+     */
+    function openAuthModal() {
+      const configured = isCloudConfigured();
+      document.getElementById('auth-no-config-alert').classList.toggle('hidden', configured);
+      document.getElementById('btn-google-login').disabled = !configured;
+      document.getElementById('btn-google-login').classList.toggle('opacity-50', !configured);
+      document.getElementById('btn-email-auth-submit').disabled = !configured;
+      document.getElementById('btn-email-auth-submit').classList.toggle('opacity-50', !configured);
+
+      document.getElementById('auth-error-msg').classList.add('hidden');
+      document.getElementById('form-email-auth').reset();
+      switchAuthMode('login');
+      openModal('modal-auth');
+    }
+
+    function switchAuthMode(mode) {
+      document.getElementById('auth-mode').value = mode;
+      const tabLogin = document.getElementById('tab-auth-login');
+      const tabReg = document.getElementById('tab-auth-register');
+      const submitBtn = document.getElementById('btn-email-auth-submit');
+
+      if (mode === 'login') {
+        tabLogin.className = 'py-2 rounded-lg text-xs font-bold bg-white text-emerald-700 shadow-2xs cursor-pointer';
+        tabReg.className = 'py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer';
+        submitBtn.textContent = 'Masuk dengan Email';
+      } else {
+        tabReg.className = 'py-2 rounded-lg text-xs font-bold bg-white text-emerald-700 shadow-2xs cursor-pointer';
+        tabLogin.className = 'py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer';
+        submitBtn.textContent = 'Daftar Akun Baru';
+      }
+      document.getElementById('auth-error-msg').classList.add('hidden');
+    }
+
+    function translateFirebaseAuthError(code) {
+      const map = {
+        'auth/invalid-email': 'Format alamat email tidak valid.',
+        'auth/user-not-found': 'Akun dengan email tersebut belum terdaftar.',
+        'auth/wrong-password': 'Kata sandi yang Anda masukkan salah.',
+        'auth/invalid-credential': 'Email atau kata sandi tidak cocok.',
+        'auth/email-already-in-use': 'Alamat email ini sudah terdaftar. Silakan masuk (Login).',
+        'auth/weak-password': 'Kata sandi terlalu lemah (minimal 6 karakter).',
+        'auth/popup-closed-by-user': 'Jendela login Google ditutup sebelum selesai.',
+        'auth/unauthorized-domain': 'Domain website ini belum diizinkan di Firebase Console (Authentication -> Settings -> Authorized domains).'
+      };
+      return map[code] || `Terjadi kendala autentikasi (${code || 'unknown'}).`;
+    }
+
+    async function handleGoogleLogin() {
+      if (!auth) return;
+      const errBox = document.getElementById('auth-error-msg');
+      errBox.classList.add('hidden');
+      try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+        closeModal('modal-auth');
+        showToast('Berhasil masuk dengan Akun Google!', 'success');
+      } catch (err) {
+        console.error('Google sign-in error:', err);
+        errBox.textContent = translateFirebaseAuthError(err.code);
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    async function handleEmailAuthSubmit(event) {
+      event.preventDefault();
+      if (!auth) return;
+
+      const mode = document.getElementById('auth-mode').value;
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const errBox = document.getElementById('auth-error-msg');
+      errBox.classList.add('hidden');
+
+      try {
+        if (mode === 'login') {
+          await signInWithEmailAndPassword(auth, email, password);
+          showToast('Berhasil masuk ke akun Cloud!', 'success');
+        } else {
+          await createUserWithEmailAndPassword(auth, email, password);
+          showToast('Pendaftaran berhasil! Akun Cloud aktif.', 'success');
+        }
+        closeModal('modal-auth');
+      } catch (err) {
+        console.error('Email auth error:', err);
+        errBox.textContent = translateFirebaseAuthError(err.code);
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    async function handleLogout() {
+      if (!auth) return;
+      try {
+        await signOut(auth);
+        showToast('Anda telah keluar dari akun Cloud (beralih ke Mode Lokal).', 'info');
+      } catch (err) {
+        showToast('Gagal keluar dari akun.', 'error');
+      }
+    }
+
+    function openFirebaseConfigModal() {
+      const textarea = document.getElementById('firebase-config-textarea');
+      const badge = document.getElementById('config-source-badge');
+      const removeBtn = document.getElementById('btn-remove-firebase-config');
+
+      const savedRaw = localStorage.getItem(CUSTOM_CONFIG_STORAGE_KEY);
+      if (savedRaw) {
+        try {
+          textarea.value = JSON.stringify(JSON.parse(savedRaw), null, 2);
+        } catch (e) {
+          textarea.value = savedRaw;
+        }
+        badge.textContent = 'Tersimpan di Browser';
+        badge.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-100 text-emerald-800';
+        removeBtn.classList.remove('hidden');
+      } else if (configSourceType === 'hardcoded') {
+        textarea.value = JSON.stringify(CUSTOM_FIREBASE_CONFIG, null, 2);
+        badge.textContent = 'Dari Kode Sumber';
+        badge.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-sky-100 text-sky-800';
+        removeBtn.classList.add('hidden');
+      } else if (configSourceType === 'preview') {
+        textarea.value = '';
+        badge.textContent = 'Mode Preview Aktif';
+        badge.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-100 text-emerald-800';
+        removeBtn.classList.add('hidden');
+      } else {
+        textarea.value = '';
+        badge.textContent = 'Belum Terkonfigurasi';
+        badge.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-600';
+        removeBtn.classList.add('hidden');
+      }
+
+      openModal('modal-firebase-config');
+    }
+
+    function parseFirebaseConfigInput(rawText) {
+      // Mendukung tempelan JSON murni ATAU potongan JS "const firebaseConfig = { apiKey: '...' };"
+      const firstBrace = rawText.indexOf('{');
+      const lastBrace = rawText.lastIndexOf('}');
+      if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+        throw new Error('Objek konfigurasi tidak ditemukan.');
+      }
+      const objectSlice = rawText.slice(firstBrace, lastBrace + 1);
+
+      try {
+        return JSON.parse(objectSlice);
+      } catch (jsonErr) {
+        // Konversi key JS tanpa tanda kutip & single quote menjadi JSON valid
+        const normalized = objectSlice
+          .replace(/\/\/.*$/gm, '')
+          .replace(/\/\*[\s\S]*?\*\//g, '')
+          .replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":')
+          .replace(/'/g, '"')
+          .replace(/,\s*}/g, '}');
+        return JSON.parse(normalized);
+      }
+    }
+
+    async function saveCustomFirebaseConfig(event) {
+      event.preventDefault();
+      const rawText = document.getElementById('firebase-config-textarea').value.trim();
+      try {
+        const parsed = parseFirebaseConfigInput(rawText);
+        if (!parsed.apiKey || !parsed.projectId) {
+          showToast('Konfigurasi wajib memiliki minimal "apiKey" dan "projectId".', 'error');
+          return;
+        }
+        localStorage.setItem(CUSTOM_CONFIG_STORAGE_KEY, JSON.stringify(parsed));
+        closeModal('modal-firebase-config');
+        showToast('Konfigurasi Firebase disimpan! Menghubungkan...', 'success');
+        await initFirebaseService();
+        if (isCloudConfigured() && !isCloudAuthenticated()) {
+          openAuthModal();
+        }
+      } catch (err) {
+        showToast('Format firebaseConfig tidak dikenali. Pastikan menyalin objek { ... } dengan benar.', 'error');
+      }
+    }
+
+    async function removeCustomFirebaseConfig() {
+      localStorage.removeItem(CUSTOM_CONFIG_STORAGE_KEY);
+      closeModal('modal-firebase-config');
+      showToast('Konfigurasi Firebase dihapus. Kembali ke Mode Lokal.', 'info');
+      await initFirebaseService();
+    }
+
+    function copyFirestoreRules() {
+      const rulesText = document.getElementById('firestore-rules-code').textContent;
+      const tempArea = document.createElement('textarea');
+      tempArea.value = rulesText;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      try {
+        document.execCommand('copy');
+        showToast('Firestore Rules berhasil disalin ke clipboard!', 'success');
+      } catch (err) {
+        showToast('Gagal menyalin teks.', 'error');
+      }
+      document.body.removeChild(tempArea);
+    }
+
+    /**
+     * =========================================================================
+     * 13. UTILITAS MODAL & TOAST NOTIFICATIONS
+     * =========================================================================
+     */
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    function openConfirmDialog({ title, message, confirmText = 'Ya, Lanjutkan', onConfirm }) {
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-message').textContent = message;
+      const btn = document.getElementById('confirm-action-btn');
+      btn.textContent = confirmText;
+
+      pendingConfirmCallback = onConfirm;
+      btn.onclick = () => {
+        closeModal('modal-confirm');
+        if (typeof pendingConfirmCallback === 'function') {
+          pendingConfirmCallback();
+        }
+      };
+
+      openModal('modal-confirm');
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      const styles = {
+        success: 'bg-slate-900 text-white border-emerald-500/40',
+        error: 'bg-rose-600 text-white border-rose-400/40',
+        info: 'bg-slate-800 text-white border-slate-600'
+      };
+      const icons = {
+        success: 'check-circle-2',
+        error: 'alert-circle',
+        info: 'info'
+      };
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg border text-xs sm:text-sm font-medium animate-fade-in ${styles[type] || styles.info}`;
+      toast.innerHTML = `
+        <i data-lucide="${icons[type] || 'info'}" class="w-4 h-4 shrink-0 ${type === 'success' ? 'text-emerald-400' : ''}"></i>
+        <span>${escapeHTML(message)}</span>
+      `;
+
+      container.appendChild(toast);
+      if (window.lucide) lucide.createIcons();
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => toast.remove(), 250);
+      }, 3200);
+    }
+
+    // Tutup modal saat mengklik area luar backdrop
+    window.addEventListener('click', (e) => {
+      ['modal-transaction', 'modal-recurring', 'modal-pay-bill', 'modal-confirm', 'modal-auth', 'modal-firebase-config'].forEach(id => {
+        const modal = document.getElementById(id);
+        if (e.target === modal) {
+          closeModal(id);
+        }
+      });
+    });
+
+    // Daftarkan semua fungsi handler ke global window agar dapat dipanggil dari atribut HTML onclick/onsubmit
+    Object.assign(window, {
+      toggleSidebarCollapse,
+      switchTab,
+      openTransactionModal,
+      setTxFormType,
+      saveTransaction,
+      confirmDeleteTransaction,
+      formatRupiahInput,
+      setPeriodMode,
+      stepPeriod,
+      handlePeriodValueChange,
+      resetPeriodToToday,
+      updateCategoryFilterOptions,
+      renderTransactionsView,
+      setRecurringFilter,
+      openRecurringModal,
+      saveRecurringBill,
+      openPayBillModal,
+      submitBillPayment,
+      toggleBillUnpaid,
+      confirmResetMonthlyBills,
+      confirmDeleteRecurring,
+      exportToCSV,
+      exportToJSON,
+      handleImportJSON,
+      confirmLoadSampleData,
+      confirmClearSampleData,
+      confirmClearAllData,
+      openModal,
+      closeModal,
+      handleHeaderCloudClick,
+      openAuthModal,
+      switchAuthMode,
+      handleGoogleLogin,
+      handleEmailAuthSubmit,
+      handleLogout,
+      openFirebaseConfigModal,
+      saveCustomFirebaseConfig,
+      removeCustomFirebaseConfig,
+      copyFirestoreRules,
+      migrateLocalDataToCloud,
+      dismissMigrationBanner
+    });
+
+    /**
+     * =========================================================================
+     * 14. INISIALISASI APLIKASI SAAT HALAMAN DIMUAT
+     * =========================================================================
+     */
+    window.addEventListener('DOMContentLoaded', async () => {
+      initSidebarState();
+      initPeriodControls();
+      updateCategoryFilterOptions();
+      await initFirebaseService();
+    });
+  </script>
+</body>
+</html>
