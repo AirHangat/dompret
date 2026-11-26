@@ -193,11 +193,11 @@
       </button>
     </nav>
 
-    <!-- Sidebar User Account & Cloud Storage Box -->
+    <!-- Sidebar User Account & Supabase Cloud Storage Box -->
     <div class="sidebar-account-card p-3.5 mx-3 mb-4 rounded-2xl bg-slate-800/75 border border-slate-700/70 flex flex-col gap-3 shrink-0">
       <!-- Cloud Status Row -->
       <div class="sidebar-db-row flex items-center justify-between gap-2 text-xs">
-        <span class="sidebar-hide-collapsed text-slate-400 font-medium">Database</span>
+        <span class="sidebar-hide-collapsed text-slate-400 font-medium">Supabase</span>
         <span id="sidebar-sync-status" title="Status Database" class="inline-flex items-center gap-1.5 text-amber-300 font-semibold truncate">
           <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
           <span class="sidebar-hide-collapsed truncate">Mode Lokal</span>
@@ -207,15 +207,15 @@
       <!-- Logged Out State -->
       <div id="sidebar-auth-logged-out" class="space-y-2.5 w-full">
         <p class="sidebar-hide-collapsed text-[11px] text-slate-300 leading-relaxed">
-          Masuk untuk menyinkronkan catatan keuangan Anda antara HP &amp; Laptop.
+          Masuk untuk menyinkronkan catatan keuangan Anda ke database Supabase.
         </p>
         <div class="sidebar-auth-actions flex items-center gap-2">
-          <button onclick="openAuthModal()" title="Masuk Akun Cloud"
+          <button onclick="openAuthModal()" title="Masuk Akun Supabase"
             class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors cursor-pointer">
             <i data-lucide="log-in" class="w-3.5 h-3.5 shrink-0"></i>
             <span class="sidebar-hide-collapsed">Masuk Cloud</span>
           </button>
-          <button onclick="openFirebaseConfigModal()" title="Pengaturan Database Firebase"
+          <button onclick="openSupabaseConfigModal()" title="Pengaturan Database Supabase"
             class="p-2 rounded-xl bg-slate-700/80 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer shrink-0">
             <i data-lucide="settings" class="w-4 h-4"></i>
           </button>
@@ -238,7 +238,7 @@
             <i data-lucide="log-out" class="w-3.5 h-3.5 shrink-0"></i>
             <span class="sidebar-hide-collapsed">Keluar</span>
           </button>
-          <button onclick="openFirebaseConfigModal()" title="Pengaturan Database Firebase"
+          <button onclick="openSupabaseConfigModal()" title="Pengaturan Database Supabase"
             class="p-2 rounded-xl bg-slate-700/80 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer shrink-0">
             <i data-lucide="settings" class="w-4 h-4"></i>
           </button>
@@ -284,7 +284,7 @@
             class="inline-flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors cursor-pointer">
             <span id="header-cloud-dot" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
             <span id="header-cloud-label" class="hidden sm:inline">Mode Lokal</span>
-            <i data-lucide="cloud" class="w-4 h-4 text-slate-500 sm:hidden"></i>
+            <i data-lucide="database" class="w-4 h-4 text-slate-500 sm:hidden"></i>
           </button>
 
           <!-- Primary Quick Action Button -->
@@ -308,9 +308,9 @@
             <i data-lucide="cloud-upload" class="w-5 h-5"></i>
           </div>
           <div>
-            <p class="text-sm font-bold text-emerald-950">Migrasi Data Lokal ke Cloud Tersedia</p>
+            <p class="text-sm font-bold text-emerald-950">Migrasi Data Lokal ke Supabase Tersedia</p>
             <p id="cloud-migration-desc" class="text-xs text-emerald-800 mt-0.5">
-              Ditemukan catatan lokal di browser ini. Unggah ke database akun cloud Anda agar tersinkronisasi di semua perangkat.
+              Ditemukan catatan lokal di browser ini. Unggah ke database Supabase Anda agar tersinkronisasi di semua perangkat.
             </p>
           </div>
         </div>
@@ -322,7 +322,7 @@
           <button onclick="migrateLocalDataToCloud()"
             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs cursor-pointer">
             <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-            <span>Unggah ke Cloud</span>
+            <span>Unggah ke Supabase</span>
           </button>
         </div>
       </div>
@@ -803,7 +803,7 @@
           </div>
         </div>
 
-        <!-- Cloud Database & GitHub Pages Hosting Card -->
+        <!-- Supabase Cloud Database & GitHub Pages Hosting Card -->
         <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div class="flex items-start gap-4">
             <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
@@ -811,19 +811,19 @@
             </div>
             <div>
               <div class="flex flex-wrap items-center gap-2">
-                <h3 class="text-base font-bold text-slate-900">Sinkronisasi Database Cloud (Firebase Firestore)</h3>
+                <h3 class="text-base font-bold text-slate-900">Sinkronisasi Database Cloud (Supabase PostgreSQL)</h3>
                 <span id="report-cloud-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Mode Lokal</span>
               </div>
               <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                Hubungkan aplikasi ini dengan proyek Firebase Anda agar seluruh transaksi dan jadwal tagihan tersimpan aman di cloud dan otomatis sinkron saat diakses melalui GitHub Pages di HP maupun Laptop.
+                Hubungkan aplikasi ini dengan proyek Supabase Anda agar seluruh transaksi dan jadwal tagihan tersimpan aman di PostgreSQL Cloud dan otomatis sinkron saat diakses melalui GitHub Pages di HP maupun Laptop.
               </p>
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-            <button onclick="openFirebaseConfigModal()"
+            <button onclick="openSupabaseConfigModal()"
               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold cursor-pointer">
               <i data-lucide="settings" class="w-4 h-4"></i>
-              <span>Pengaturan Database Cloud</span>
+              <span>Pengaturan Supabase</span>
             </button>
             <button onclick="openAuthModal()" id="report-auth-btn"
               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer">
@@ -1136,16 +1136,16 @@
   </div>
 
   <!-- =====================================================================
-       MODAL 5: AUTENTIKASI AKUN CLOUD (GOOGLE & EMAIL/PASSWORD)
+       MODAL 5: AUTENTIKASI AKUN SUPABASE (GOOGLE & EMAIL/PASSWORD)
   ====================================================================== -->
   <div id="modal-auth" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in max-h-[92vh] flex flex-col">
       <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
-            <i data-lucide="cloud" class="w-4 h-4"></i>
+            <i data-lucide="database" class="w-4 h-4"></i>
           </div>
-          <h3 class="text-base sm:text-lg font-bold text-slate-900">Akun Cloud DompetKu</h3>
+          <h3 class="text-base sm:text-lg font-bold text-slate-900">Akun Cloud Supabase</h3>
         </div>
         <button onclick="closeModal('modal-auth')" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -1153,39 +1153,21 @@
       </div>
 
       <div class="p-6 space-y-5 overflow-y-auto">
-        <!-- Warning if Firebase Config is not set yet -->
+        <!-- Warning if Supabase Config is not set yet -->
         <div id="auth-no-config-alert" class="hidden p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-2.5">
           <div class="flex items-start gap-2.5">
             <i data-lucide="alert-circle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
             <div>
-              <p class="text-xs sm:text-sm font-bold text-amber-900">Database Firebase Belum Dikonfigurasi</p>
+              <p class="text-xs sm:text-sm font-bold text-amber-900">Database Supabase Belum Dikonfigurasi</p>
               <p class="text-xs text-amber-800 mt-0.5 leading-relaxed">
-                Untuk mengaktifkan fitur Login &amp; Sinkronisasi Cloud di GitHub Pages, masukkan konfigurasi proyek Firebase Anda terlebih dahulu.
+                Untuk mengaktifkan fitur Login &amp; Sinkronisasi Cloud, masukkan <strong>Project URL</strong> dan <strong>Anon Key</strong> Supabase Anda terlebih dahulu.
               </p>
             </div>
           </div>
-          <button type="button" onclick="closeModal('modal-auth'); openFirebaseConfigModal();"
+          <button type="button" onclick="closeModal('modal-auth'); openSupabaseConfigModal();"
             class="w-full py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold cursor-pointer">
-            Buka Pengaturan Database Cloud
+            Buka Pengaturan Database Supabase
           </button>
-        </div>
-
-        <!-- Google Sign In Button -->
-        <button type="button" onclick="handleGoogleLogin()" id="btn-google-login"
-          class="w-full py-3 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.99] text-slate-800 text-sm font-semibold shadow-2xs flex items-center justify-center gap-3 transition-all cursor-pointer">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
-            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
-            <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
-            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
-          </svg>
-          <span>Lanjutkan dengan Akun Google</span>
-        </button>
-
-        <div class="relative flex items-center justify-center">
-          <div class="border-t border-slate-200 w-full"></div>
-          <span class="bg-white px-3 text-xs font-medium text-slate-400">atau dengan Email</span>
-          <div class="border-t border-slate-200 w-full"></div>
         </div>
 
         <!-- Mode Switcher (Login vs Register) -->
@@ -1217,6 +1199,7 @@
           </div>
 
           <p id="auth-error-msg" class="hidden text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 p-2.5 rounded-xl"></p>
+          <p id="auth-info-msg" class="hidden text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl"></p>
 
           <button type="submit" id="btn-email-auth-submit"
             class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-colors cursor-pointer">
@@ -1224,11 +1207,29 @@
           </button>
         </form>
 
+        <div class="relative flex items-center justify-center">
+          <div class="border-t border-slate-200 w-full"></div>
+          <span class="bg-white px-3 text-xs font-medium text-slate-400">atau OAuth</span>
+          <div class="border-t border-slate-200 w-full"></div>
+        </div>
+
+        <!-- Google Sign In Button (Opsional jika Google Provider diaktifkan di Supabase) -->
+        <button type="button" onclick="handleGoogleLogin()" id="btn-google-login"
+          class="w-full py-2.5 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.99] text-slate-800 text-xs sm:text-sm font-semibold shadow-2xs flex items-center justify-center gap-2.5 transition-all cursor-pointer">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+            <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+          </svg>
+          <span>Lanjutkan dengan Google (OAuth)</span>
+        </button>
+
         <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          <span>Ingin mengatur project Firebase?</span>
-          <button type="button" onclick="closeModal('modal-auth'); openFirebaseConfigModal();"
+          <span>Ingin mengatur kunci Supabase?</span>
+          <button type="button" onclick="closeModal('modal-auth'); openSupabaseConfigModal();"
             class="font-semibold text-emerald-600 hover:text-emerald-700 underline cursor-pointer">
-            Pengaturan Database
+            Pengaturan Supabase
           </button>
         </div>
       </div>
@@ -1236,9 +1237,9 @@
   </div>
 
   <!-- =====================================================================
-       MODAL 6: PENGATURAN DATABASE CLOUD (FIREBASE CONFIG & RULES)
+       MODAL 6: PENGATURAN DATABASE SUPABASE (URL, ANON KEY & SQL SETUP)
   ====================================================================== -->
-  <div id="modal-firebase-config" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+  <div id="modal-supabase-config" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
     <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in max-h-[92vh] flex flex-col">
       <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
@@ -1246,83 +1247,117 @@
             <i data-lucide="database" class="w-4 h-4"></i>
           </div>
           <div>
-            <h3 class="text-base sm:text-lg font-bold text-slate-900">Pengaturan Database Firebase</h3>
-            <p class="text-[11px] text-slate-500">Hubungkan ke Firebase Firestore untuk hosting di GitHub Pages</p>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900">Pengaturan Database Supabase</h3>
+            <p class="text-[11px] text-slate-500">Hubungkan ke proyek Supabase Anda untuk hosting di GitHub Pages</p>
           </div>
         </div>
-        <button onclick="closeModal('modal-firebase-config')" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
+        <button onclick="closeModal('modal-supabase-config')" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <div class="p-6 space-y-5 overflow-y-auto">
-        <!-- Step 1: Paste Config -->
-        <form onsubmit="saveCustomFirebaseConfig(event)" class="space-y-3">
+        <!-- Step 1: Supabase URL & Anon Key -->
+        <form onsubmit="saveCustomSupabaseConfig(event)" class="space-y-3.5">
           <div class="flex items-center justify-between">
-            <label for="firebase-config-textarea" class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
-              1. Tempel Kode <code class="text-emerald-700">firebaseConfig</code> Anda
-            </label>
+            <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">
+              1. Kredensial API Proyek Supabase
+            </span>
             <span id="config-source-badge" class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-600">
               Belum Terkonfigurasi
             </span>
           </div>
           <p class="text-xs text-slate-500 leading-relaxed">
-            Salin objek <code>firebaseConfig</code> dari <strong>Firebase Console &rarr; Project Settings &rarr; Your apps (Web)</strong>, lalu tempel di bawah ini (mendukung format JSON maupun kode JavaScript langsung):
+            Salin <strong>Project URL</strong> dan <strong>Anon Public Key</strong> dari <strong>Supabase Dashboard &rarr; Project Settings &rarr; Data API / API Keys</strong>:
           </p>
-          <textarea id="firebase-config-textarea" rows="6" required
-            placeholder='{
-  "apiKey": "AIzaSy...",
-  "authDomain": "proyek-anda.firebaseapp.com",
-  "projectId": "proyek-anda",
-  "storageBucket": "proyek-anda.firebasestorage.app",
-  "messagingSenderId": "123456789",
-  "appId": "1:123456789:web:abcdef"
-}'
-            class="w-full p-3.5 rounded-xl border border-slate-300 font-mono text-xs text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+
+          <div>
+            <label for="supabase-url-input" class="block text-xs font-semibold text-slate-600 mb-1">Supabase Project URL</label>
+            <input type="url" id="supabase-url-input" required placeholder="https://xxxxxxxxxxxx.supabase.co"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-mono text-xs text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+
+          <div>
+            <label for="supabase-key-input" class="block text-xs font-semibold text-slate-600 mb-1">Supabase Anon Public Key</label>
+            <textarea id="supabase-key-input" rows="3" required placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              class="w-full p-3 rounded-xl border border-slate-300 font-mono text-xs text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+          </div>
 
           <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-            <button type="button" id="btn-remove-firebase-config" onclick="removeCustomFirebaseConfig()"
+            <button type="button" id="btn-remove-supabase-config" onclick="removeCustomSupabaseConfig()"
               class="hidden px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold cursor-pointer">
-              Putuskan &amp; Hapus Konfigurasi
+              Putuskan &amp; Hapus Kunci
             </button>
             <div class="flex items-center gap-2 ml-auto">
-              <button type="button" onclick="closeModal('modal-firebase-config')"
+              <button type="button" onclick="closeModal('modal-supabase-config')"
                 class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
                 Tutup
               </button>
               <button type="submit"
                 class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs cursor-pointer">
-                Simpan &amp; Hubungkan Cloud
+                Simpan &amp; Hubungkan Supabase
               </button>
             </div>
           </div>
         </form>
 
-        <!-- Step 2: Firestore Security Rules & GitHub Pages Checklist -->
+        <!-- Step 2: SQL Setup Script -->
         <div class="pt-4 border-t border-slate-200 space-y-3">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">
-              2. Aturan Keamanan Firestore (Firestore Rules)
+              2. Skrip SQL Tabel &amp; Keamanan (RLS)
             </span>
-            <button type="button" onclick="copyFirestoreRules()"
+            <button type="button" onclick="copySupabaseSQL()"
               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer">
               <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-              <span>Salin Rules</span>
+              <span>Salin SQL Setup</span>
             </button>
           </div>
           <p class="text-xs text-slate-500 leading-relaxed">
-            Pastikan <strong>Authentication</strong> (Google &amp; Email/Password) dan <strong>Cloud Firestore</strong> aktif di Firebase Console. Tempel aturan berikut pada tab <strong>Firestore Database &rarr; Rules</strong> agar setiap pengguna hanya dapat mengakses datanya sendiri:
+            Jalankan skrip berikut sekali saja di <strong>Supabase &rarr; SQL Editor &rarr; New Query</strong> untuk membuat tabel <code>transactions</code>, <code>recurring_bills</code>, kebijakan keamanan <strong>Row Level Security (RLS)</strong>, dan sinkronisasi real-time:
           </p>
-          <pre id="firestore-rules-code" class="p-3 rounded-xl bg-slate-900 text-emerald-300 font-mono text-[11px] overflow-x-auto leading-relaxed">rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}</pre>
+          <pre id="supabase-sql-code" class="p-3 rounded-xl bg-slate-900 text-emerald-300 font-mono text-[11px] overflow-x-auto leading-relaxed max-h-48">create table if not exists public.transactions (
+  id text primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  type text not null check (type in ('income', 'expense')),
+  amount numeric not null default 0,
+  category text not null,
+  date text not null,
+  note text not null default '',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.recurring_bills (
+  id text primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  category text not null,
+  amount numeric not null default 0,
+  cycle text not null default 'Bulanan',
+  due_day integer not null default 1,
+  status text not null default 'unpaid' check (status in ('paid', 'unpaid')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.transactions enable row level security;
+alter table public.recurring_bills enable row level security;
+
+drop policy if exists "Users manage own transactions" on public.transactions;
+create policy "Users manage own transactions"
+  on public.transactions for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Users manage own recurring_bills" on public.recurring_bills;
+create policy "Users manage own recurring_bills"
+  on public.recurring_bills for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+alter publication supabase_realtime add table public.transactions;
+alter publication supabase_realtime add table public.recurring_bills;</pre>
           <p class="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-            <strong>Tips GitHub Pages:</strong> Tambahkan domain <code>username.github.io</code> Anda di <em>Firebase Console &rarr; Authentication &rarr; Settings &rarr; Authorized domains</em> agar Login Google berjalan lancar.
+            <strong>Tips GitHub Pages:</strong> Anda juga dapat menempelkan <code>CUSTOM_SUPABASE_URL</code> dan <code>CUSTOM_SUPABASE_ANON_KEY</code> langsung di bagian atas kode <code>index.html</code> sebelum di-push ke GitHub agar otomatis terhubung di semua perangkat.
           </p>
         </div>
       </div>
@@ -1335,47 +1370,22 @@ service cloud.firestore {
   <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-50 flex flex-col gap-2 max-w-xs sm:max-w-sm pointer-events-none"></div>
 
   <!-- =====================================================================
-       APPLICATION JAVASCRIPT LOGIC (FIREBASE MODULAR SDK + LOCAL FALLBACK)
+       APPLICATION JAVASCRIPT LOGIC (SUPABASE SDK v2 + LOCAL FALLBACK)
   ====================================================================== -->
   <script type="module">
-    import { initializeApp, getApps, deleteApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import {
-      getAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      signInWithCustomToken,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import {
-      getFirestore,
-      collection,
-      doc,
-      setDoc,
-      deleteDoc,
-      onSnapshot,
-      writeBatch
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
     /**
      * =========================================================================
-     * 0. KONFIGURASI FIREBASE UNTUK GITHUB PAGES (OPSIONAL HARDCODE)
-     *    Anda bisa mengisi objek di bawah ini sebelum meng-upload ke GitHub,
-     *    ATAU langsung menempelkannya melalui menu "Pengaturan Database Cloud" di web.
+     * 0. KONFIGURASI SUPABASE UNTUK GITHUB PAGES (OPSIONAL HARDCODE)
+     *    Isi dua konstanta di bawah ini sebelum meng-upload index.html ke GitHub,
+     *    ATAU masukkan langsung lewat tombol gerigi "Pengaturan Supabase" di web.
      * =========================================================================
      */
-    const CUSTOM_FIREBASE_CONFIG = {
-      apiKey: "",
-      authDomain: "",
-      projectId: "",
-      storageBucket: "",
-      messagingSenderId: "",
-      appId: ""
-    };
+    const CUSTOM_SUPABASE_URL = "";
+    const CUSTOM_SUPABASE_ANON_KEY = "";
 
-    const CUSTOM_CONFIG_STORAGE_KEY = 'dompetku_custom_firebase_config_v1';
+    const CUSTOM_SUPABASE_STORAGE_KEY = 'dompetku_supabase_config_v1';
 
     /**
      * =========================================================================
@@ -1433,16 +1443,14 @@ service cloud.firestore {
 
     /**
      * =========================================================================
-     * 2. STATE APLIKASI GLOBAL & STATE FIREBASE CLOUD
+     * 2. STATE APLIKASI GLOBAL & STATE SUPABASE CLOUD
      * =========================================================================
      */
-    let firebaseApp = null;
-    let auth = null;
-    let db = null;
+    let supabase = null;
     let currentUser = null;
-    let configSourceType = 'none'; // 'preview' | 'hardcoded' | 'local_ui' | 'none'
-    let unsubscribeTransactions = null;
-    let unsubscribeRecurring = null;
+    let configSourceType = 'none'; // 'hardcoded' | 'local_ui' | 'none'
+    let realtimeChannel = null;
+    let authSubscription = null;
     let migrationBannerDismissed = false;
 
     let appState = {
@@ -1466,41 +1474,34 @@ service cloud.firestore {
 
     /**
      * =========================================================================
-     * 2B. INISIALISASI FIREBASE DUAL-MODE, AUTENTIKASI & REAL-TIME SYNC
+     * 2B. INISIALISASI SUPABASE, AUTENTIKASI & REAL-TIME SYNC
      * =========================================================================
      */
-    function resolveFirebaseConfig() {
-      // 1. Cek environment preview sandbox (__firebase_config)
-      if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-        try {
-          const parsed = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
-          if (parsed && parsed.apiKey && parsed.projectId) {
-            configSourceType = 'preview';
-            return parsed;
-          }
-        } catch (e) {
-          console.warn('Gagal mem-parsing __firebase_config:', e);
-        }
-      }
-
-      // 2. Cek CUSTOM_FIREBASE_CONFIG yang diisi langsung di kode (untuk GitHub Pages)
-      if (CUSTOM_FIREBASE_CONFIG && CUSTOM_FIREBASE_CONFIG.apiKey && CUSTOM_FIREBASE_CONFIG.projectId) {
+    function resolveSupabaseConfig() {
+      // 1. Cek CUSTOM_SUPABASE_URL & CUSTOM_SUPABASE_ANON_KEY di kode (untuk GitHub Pages)
+      if (CUSTOM_SUPABASE_URL && CUSTOM_SUPABASE_URL.trim() && CUSTOM_SUPABASE_ANON_KEY && CUSTOM_SUPABASE_ANON_KEY.trim()) {
         configSourceType = 'hardcoded';
-        return CUSTOM_FIREBASE_CONFIG;
+        return {
+          url: CUSTOM_SUPABASE_URL.trim(),
+          anonKey: CUSTOM_SUPABASE_ANON_KEY.trim()
+        };
       }
 
-      // 3. Cek konfigurasi yang disimpan user via UI Modal 'Pengaturan Database Cloud'
+      // 2. Cek konfigurasi yang disimpan user via UI Modal 'Pengaturan Supabase'
       try {
-        const savedRaw = localStorage.getItem(CUSTOM_CONFIG_STORAGE_KEY);
+        const savedRaw = localStorage.getItem(CUSTOM_SUPABASE_STORAGE_KEY);
         if (savedRaw) {
           const parsed = JSON.parse(savedRaw);
-          if (parsed && parsed.apiKey && parsed.projectId) {
+          if (parsed && parsed.url && parsed.anonKey) {
             configSourceType = 'local_ui';
-            return parsed;
+            return {
+              url: parsed.url.trim(),
+              anonKey: parsed.anonKey.trim()
+            };
           }
         }
       } catch (e) {
-        console.warn('Gagal membaca konfigurasi Firebase lokal:', e);
+        console.warn('Gagal membaca konfigurasi Supabase lokal:', e);
       }
 
       configSourceType = 'none';
@@ -1508,102 +1509,102 @@ service cloud.firestore {
     }
 
     function isCloudConfigured() {
-      return Boolean(firebaseApp && auth && db);
+      return Boolean(supabase);
     }
 
     function isCloudAuthenticated() {
       return Boolean(isCloudConfigured() && currentUser);
     }
 
-    function getUserTransactionsCollection(uid) {
-      // Gunakan path /artifacts/{appId}/users/{uid}/transactions di mode sandbox preview,
-      // dan users/{uid}/transactions saat di-host di GitHub Pages dengan Firebase pribadi
-      if (configSourceType === 'preview' && typeof __app_id !== 'undefined' && __app_id) {
-        return collection(db, 'artifacts', __app_id, 'users', uid, 'transactions');
-      }
-      return collection(db, 'users', uid, 'transactions');
+    function mapTxFromDB(row) {
+      return {
+        id: row.id,
+        type: row.type,
+        amount: Number(row.amount) || 0,
+        category: row.category,
+        date: row.date,
+        note: row.note || ''
+      };
     }
 
-    function getUserRecurringCollection(uid) {
-      if (configSourceType === 'preview' && typeof __app_id !== 'undefined' && __app_id) {
-        return collection(db, 'artifacts', __app_id, 'users', uid, 'recurring_bills');
-      }
-      return collection(db, 'users', uid, 'recurring_bills');
+    function mapRecFromDB(row) {
+      return {
+        id: row.id,
+        name: row.name,
+        category: row.category,
+        amount: Number(row.amount) || 0,
+        cycle: row.cycle || 'Bulanan',
+        dueDay: Number(row.due_day) || 1,
+        status: row.status || 'unpaid'
+      };
     }
 
-    function stopRealtimeListeners() {
-      if (typeof unsubscribeTransactions === 'function') {
-        unsubscribeTransactions();
-        unsubscribeTransactions = null;
-      }
-      if (typeof unsubscribeRecurring === 'function') {
-        unsubscribeRecurring();
-        unsubscribeRecurring = null;
-      }
-    }
-
-    function startRealtimeListeners(uid) {
-      if (!db || !uid) return;
-      stopRealtimeListeners();
-
-      const txCol = getUserTransactionsCollection(uid);
-      const recCol = getUserRecurringCollection(uid);
-
-      // Listener real-time Transaksi (tanpa orderBy/where kompleks agar bebas error indeks)
-      unsubscribeTransactions = onSnapshot(
-        txCol,
-        (snapshot) => {
-          const items = [];
-          snapshot.forEach((docSnap) => {
-            items.push({ id: docSnap.id, ...docSnap.data() });
-          });
-          appState.transactions = items;
-          appState.isSampleData = false;
-          refreshAllViews();
-        },
-        (error) => {
-          console.error('Firestore transactions listener error:', error);
-          showToast('Gagal menyinkronkan transaksi cloud. Periksa Firestore Rules Anda.', 'error');
-        }
-      );
-
-      // Listener real-time Pembayaran Rutin
-      unsubscribeRecurring = onSnapshot(
-        recCol,
-        (snapshot) => {
-          const items = [];
-          snapshot.forEach((docSnap) => {
-            items.push({ id: docSnap.id, ...docSnap.data() });
-          });
-          appState.recurringBills = items;
-          refreshAllViews();
-        },
-        (error) => {
-          console.error('Firestore recurring_bills listener error:', error);
-          showToast('Gagal menyinkronkan tagihan rutin cloud.', 'error');
-        }
-      );
-    }
-
-    async function initFirebaseService() {
-      stopRealtimeListeners();
-      currentUser = null;
-
-      // Bersihkan instance lama jika user baru saja memperbarui konfigurasi
-      const existingApps = getApps();
-      for (const appInstance of existingApps) {
+    async function stopRealtimeListeners() {
+      if (supabase && realtimeChannel) {
         try {
-          await deleteApp(appInstance);
+          await supabase.removeChannel(realtimeChannel);
         } catch (e) {
-          console.warn('Info deleteApp:', e);
+          console.warn('Info removeChannel:', e);
         }
+        realtimeChannel = null;
+      }
+    }
+
+    async function fetchCloudData() {
+      if (!supabase || !currentUser) return;
+      try {
+        const [txRes, recRes] = await Promise.all([
+          supabase.from('transactions').select('*').eq('user_id', currentUser.id),
+          supabase.from('recurring_bills').select('*').eq('user_id', currentUser.id)
+        ]);
+
+        if (txRes.error) throw txRes.error;
+        if (recRes.error) throw recRes.error;
+
+        appState.transactions = (txRes.data || []).map(mapTxFromDB);
+        appState.recurringBills = (recRes.data || []).map(mapRecFromDB);
+        appState.isSampleData = false;
+        refreshAllViews();
+      } catch (err) {
+        console.error('Supabase fetchCloudData error:', err);
+        showToast('Gagal memuat data Supabase. Pastikan SQL Setup sudah dijalankan.', 'error');
+      }
+    }
+
+    async function startRealtimeListeners(uid) {
+      if (!supabase || !uid) return;
+      await stopRealtimeListeners();
+
+      realtimeChannel = supabase
+        .channel(`dompetku-sync-${uid}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${uid}` },
+          () => {
+            fetchCloudData();
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'recurring_bills', filter: `user_id=eq.${uid}` },
+          () => {
+            fetchCloudData();
+          }
+        )
+        .subscribe();
+    }
+
+    async function initSupabaseService() {
+      await stopRealtimeListeners();
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+        authSubscription = null;
       }
 
-      firebaseApp = null;
-      auth = null;
-      db = null;
+      currentUser = null;
+      supabase = null;
 
-      const config = resolveFirebaseConfig();
+      const config = resolveSupabaseConfig();
       if (!config) {
         loadLocalState();
         refreshAllViews();
@@ -1611,39 +1612,50 @@ service cloud.firestore {
       }
 
       try {
-        firebaseApp = initializeApp(config);
-        auth = getAuth(firebaseApp);
-        db = getFirestore(firebaseApp);
+        supabase = createClient(config.url, config.anonKey);
 
-        // Jika di lingkungan preview dan tersedia __initial_auth_token, login otomatis
-        if (configSourceType === 'preview' && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          try {
-            await signInWithCustomToken(auth, __initial_auth_token);
-          } catch (tokenErr) {
-            console.warn('Custom token sign-in skipped:', tokenErr);
-          }
+        // Periksa sesi login aktif saat halaman dibuka
+        const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
+        if (sessionErr) throw sessionErr;
+
+        if (sessionData && sessionData.session && sessionData.session.user) {
+          currentUser = sessionData.session.user;
+          checkLocalDataForMigration();
+          await fetchCloudData();
+          await startRealtimeListeners(currentUser.id);
+        } else {
+          loadLocalState();
+          refreshAllViews();
         }
 
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            currentUser = user;
-            checkLocalDataForMigration();
-            startRealtimeListeners(user.uid);
+        // Dengarkan perubahan status autentikasi (Login / Logout / OAuth Redirect)
+        const { data: listenerData } = supabase.auth.onAuthStateChange(async (_event, session) => {
+          if (session && session.user) {
+            const isNewUserLogin = !currentUser || currentUser.id !== session.user.id;
+            currentUser = session.user;
+            if (isNewUserLogin) {
+              checkLocalDataForMigration();
+              await fetchCloudData();
+              await startRealtimeListeners(currentUser.id);
+            }
             refreshAllViews();
           } else {
             currentUser = null;
-            stopRealtimeListeners();
+            await stopRealtimeListeners();
             document.getElementById('cloud-migration-banner').classList.add('hidden');
             loadLocalState();
             refreshAllViews();
           }
         });
+
+        if (listenerData && listenerData.subscription) {
+          authSubscription = listenerData.subscription;
+        }
       } catch (err) {
-        console.error('Gagal menginisialisasi Firebase:', err);
-        firebaseApp = null;
-        auth = null;
-        db = null;
-        showToast('Konfigurasi Firebase tidak valid. Beralih ke Mode Lokal.', 'error');
+        console.error('Gagal menginisialisasi Supabase:', err);
+        supabase = null;
+        currentUser = null;
+        showToast('Kredensial Supabase tidak valid. Beralih ke Mode Lokal.', 'error');
         loadLocalState();
         refreshAllViews();
       }
@@ -1660,7 +1672,7 @@ service cloud.firestore {
           const recCount = Array.isArray(localParsed.recurringBills) ? localParsed.recurringBills.length : 0;
           if (txCount > 0 || recCount > 0) {
             document.getElementById('cloud-migration-desc').textContent =
-              `Ditemukan ${txCount} transaksi dan ${recCount} jadwal tagihan rutin di penyimpanan browser ini. Unggah ke akun Cloud Anda?`;
+              `Ditemukan ${txCount} transaksi dan ${recCount} jadwal tagihan rutin di penyimpanan browser ini. Unggah ke database Supabase Anda?`;
             document.getElementById('cloud-migration-banner').classList.remove('hidden');
           }
         }
@@ -1675,7 +1687,7 @@ service cloud.firestore {
     }
 
     async function migrateLocalDataToCloud() {
-      if (!isCloudAuthenticated() || !db) return;
+      if (!isCloudAuthenticated() || !supabase) return;
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) {
@@ -1686,29 +1698,42 @@ service cloud.firestore {
         const localTxs = Array.isArray(localParsed.transactions) ? localParsed.transactions : [];
         const localRecs = Array.isArray(localParsed.recurringBills) ? localParsed.recurringBills : [];
 
-        const batch = writeBatch(db);
-        const txCol = getUserTransactionsCollection(currentUser.uid);
-        const recCol = getUserRecurringCollection(currentUser.uid);
+        if (localTxs.length > 0) {
+          const txRows = localTxs.map(tx => ({
+            id: tx.id || generateId('tx'),
+            user_id: currentUser.id,
+            type: tx.type,
+            amount: Number(tx.amount) || 0,
+            category: tx.category,
+            date: tx.date,
+            note: tx.note || ''
+          }));
+          const { error: txErr } = await supabase.from('transactions').upsert(txRows);
+          if (txErr) throw txErr;
+        }
 
-        localTxs.forEach((tx) => {
-          const docId = tx.id || generateId('tx');
-          batch.set(doc(txCol, docId), { ...tx, id: docId });
-        });
+        if (localRecs.length > 0) {
+          const recRows = localRecs.map(rec => ({
+            id: rec.id || generateId('rec'),
+            user_id: currentUser.id,
+            name: rec.name,
+            category: rec.category,
+            amount: Number(rec.amount) || 0,
+            cycle: rec.cycle || 'Bulanan',
+            due_day: Number(rec.dueDay) || 1,
+            status: rec.status || 'unpaid'
+          }));
+          const { error: recErr } = await supabase.from('recurring_bills').upsert(recRows);
+          if (recErr) throw recErr;
+        }
 
-        localRecs.forEach((rec) => {
-          const docId = rec.id || generateId('rec');
-          batch.set(doc(recCol, docId), { ...rec, id: docId });
-        });
-
-        await batch.commit();
-
-        // Bersihkan draft lokal setelah sukses diunggah ke cloud agar tidak ditanyakan berulang kali
         localStorage.removeItem(STORAGE_KEY);
         dismissMigrationBanner();
-        showToast(`${localTxs.length} transaksi & ${localRecs.length} tagihan berhasil diunggah ke Cloud!`, 'success');
+        await fetchCloudData();
+        showToast(`${localTxs.length} transaksi & ${localRecs.length} tagihan berhasil diunggah ke Supabase!`, 'success');
       } catch (err) {
-        console.error('Gagal migrasi data ke Firestore:', err);
-        showToast('Gagal mengunggah data lokal ke Cloud. Periksa aturan Firestore.', 'error');
+        console.error('Gagal migrasi data ke Supabase:', err);
+        showToast('Gagal mengunggah data lokal ke Supabase. Periksa SQL Setup & RLS.', 'error');
       }
     }
 
@@ -1834,7 +1859,6 @@ service cloud.firestore {
       const todayObj = parseLocalDate(today);
       const currentDay = todayObj.getDate();
 
-      // Hitung jatuh tempo dinamis relatif terhadap tanggal hari ini agar badge status langsung informatif
       const dueSoonDay = Math.min(28, currentDay + 3);
       const dueLaterDay = Math.min(28, currentDay + 8);
       const overdueDay = currentDay > 3 ? currentDay - 2 : 1;
@@ -1988,7 +2012,7 @@ service cloud.firestore {
     }
 
     function saveLocalState() {
-      if (isCloudAuthenticated()) return; // Saat login cloud, Firestore menjadi sumber utama
+      if (isCloudAuthenticated()) return;
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
       } catch (err) {
@@ -2068,7 +2092,6 @@ service cloud.firestore {
     }
 
     function updatePeriodUIControls() {
-      // Update active button styling
       document.querySelectorAll('.period-btn').forEach(btn => {
         const isSelected = btn.dataset.period === uiState.periodMode;
         if (isSelected) {
@@ -2078,7 +2101,6 @@ service cloud.firestore {
         }
       });
 
-      // Toggle picker visibility
       document.getElementById('picker-daily').classList.toggle('hidden', uiState.periodMode !== 'daily');
       document.getElementById('picker-weekly').classList.toggle('hidden', uiState.periodMode !== 'weekly');
       document.getElementById('picker-monthly').classList.toggle('hidden', uiState.periodMode !== 'monthly');
@@ -2175,16 +2197,13 @@ service cloud.firestore {
     function switchTab(tabName) {
       uiState.activeTab = tabName;
 
-      // Sembunyikan semua section
       ['dashboard', 'transactions', 'recurring', 'reports'].forEach(view => {
         document.getElementById(`view-${view}`).classList.toggle('hidden', view !== tabName);
       });
 
-      // Tampilkan global period bar hanya di Ringkasan & Transaksi
       const showPeriodBar = tabName === 'dashboard' || tabName === 'transactions';
       document.getElementById('period-filter-bar').classList.toggle('hidden', !showPeriodBar);
 
-      // Update Desktop Sidebar Active State (konsisten menjaga perataan ikon & teks)
       document.querySelectorAll('.nav-item').forEach(btn => {
         const active = btn.dataset.nav === tabName;
         const isRecurring = btn.dataset.nav === 'recurring';
@@ -2196,7 +2215,6 @@ service cloud.firestore {
         }
       });
 
-      // Update Mobile Bottom Nav Active State
       document.querySelectorAll('.mobile-nav-item').forEach(btn => {
         const active = btn.dataset.mobileNav === tabName;
         if (active) {
@@ -2229,7 +2247,6 @@ service cloud.firestore {
     }
 
     function updateHeaderAndBadges() {
-      // Total Saldo Keseluruhan (Seluruh Pemasukan - Seluruh Pengeluaran)
       let totalIn = 0;
       let totalOut = 0;
       appState.transactions.forEach(tx => {
@@ -2241,10 +2258,8 @@ service cloud.firestore {
       balanceEl.textContent = formatRupiah(totalBalance);
       balanceEl.className = `text-xs sm:text-lg font-extrabold tracking-tight ${totalBalance < 0 ? 'text-rose-600' : 'text-slate-900'}`;
 
-      // Banner Data Contoh (hanya tampil di mode lokal saat sample data aktif)
       document.getElementById('sample-data-banner').classList.toggle('hidden', !appState.isSampleData || isCloudAuthenticated());
 
-      // Update Indikator Status Cloud & Profil Pengguna
       const cloudSynced = isCloudAuthenticated();
       const cloudReady = isCloudConfigured();
 
@@ -2258,32 +2273,32 @@ service cloud.firestore {
       if (cloudSynced) {
         headerBtn.className = 'inline-flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-xs font-semibold text-emerald-800 transition-colors cursor-pointer';
         headerDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0';
-        headerLabel.textContent = 'Tersinkronisasi Cloud';
+        headerLabel.textContent = 'Supabase Terhubung';
 
         sidebarStatus.className = 'inline-flex items-center gap-1.5 text-emerald-400 font-semibold truncate';
-        sidebarStatus.title = 'Database: Tersinkronisasi Cloud';
-        sidebarStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span><span class="sidebar-hide-collapsed truncate">Tersinkronisasi Cloud</span>`;
+        sidebarStatus.title = 'Supabase: Tersinkronisasi Cloud';
+        sidebarStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span><span class="sidebar-hide-collapsed truncate">Tersinkronisasi</span>`;
 
         reportCloudBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800';
-        reportCloudBadge.textContent = 'Tersinkronisasi Cloud';
+        reportCloudBadge.textContent = 'Supabase Terhubung';
 
         reportAuthBtn.innerHTML = `<i data-lucide="log-out" class="w-4 h-4"></i><span>Keluar Akun</span>`;
         reportAuthBtn.onclick = handleLogout;
 
-        // Tampilkan Profil Pengguna di Sidebar
         document.getElementById('sidebar-auth-logged-out').classList.add('hidden');
         document.getElementById('sidebar-auth-logged-in').classList.remove('hidden');
 
-        const displayName = currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Pengguna Cloud');
-        const emailText = currentUser.email || `ID: ${currentUser.uid.slice(0, 10)}...`;
+        const userMeta = currentUser.user_metadata || {};
+        const displayName = userMeta.full_name || userMeta.name || (currentUser.email ? currentUser.email.split('@')[0] : 'Pengguna Cloud');
+        const emailText = currentUser.email || `ID: ${currentUser.id.slice(0, 10)}...`;
         document.getElementById('sidebar-user-name').textContent = displayName;
         document.getElementById('sidebar-user-email').textContent = emailText;
 
         const avatarImg = document.getElementById('sidebar-user-avatar');
         const initialsBox = document.getElementById('sidebar-user-initials');
         initialsBox.title = `${displayName} (${emailText})`;
-        if (currentUser.photoURL) {
-          avatarImg.src = currentUser.photoURL;
+        if (userMeta.avatar_url) {
+          avatarImg.src = userMeta.avatar_url;
           avatarImg.title = `${displayName} (${emailText})`;
           avatarImg.classList.remove('hidden');
           initialsBox.classList.add('hidden');
@@ -2298,7 +2313,7 @@ service cloud.firestore {
         headerLabel.textContent = cloudReady ? 'Mode Lokal (Masuk)' : 'Mode Lokal';
 
         sidebarStatus.className = 'inline-flex items-center gap-1.5 text-amber-300 font-semibold truncate';
-        sidebarStatus.title = 'Database: Mode Lokal';
+        sidebarStatus.title = 'Supabase: Mode Lokal';
         sidebarStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span><span class="sidebar-hide-collapsed truncate">Mode Lokal</span>`;
 
         reportCloudBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800';
@@ -2311,7 +2326,6 @@ service cloud.firestore {
         document.getElementById('sidebar-auth-logged-in').classList.add('hidden');
       }
 
-      // Badge Tagihan Belum Dibayar di Sidebar (Expanded & Mini) & Mobile Nav
       const unpaidBills = appState.recurringBills.filter(b => b.status === 'unpaid');
       const sideBadge = document.getElementById('sidebar-unpaid-badge');
       const sideMiniDot = document.getElementById('sidebar-unpaid-mini-dot');
@@ -2354,7 +2368,6 @@ service cloud.firestore {
       });
       const netCashflow = periodIncome - periodExpense;
 
-      // Update KPI Cards
       document.getElementById('kpi-income').textContent = formatRupiah(periodIncome);
       document.getElementById('kpi-expense').textContent = formatRupiah(periodExpense);
       document.getElementById('kpi-period-subtitle-1').textContent = periodLabel;
@@ -2374,20 +2387,14 @@ service cloud.firestore {
         netStatusEl.textContent = 'Arus kas seimbang';
       }
 
-      // Unpaid Routine Bills KPI
       const unpaidBills = appState.recurringBills.filter(b => b.status === 'unpaid');
       const unpaidSum = unpaidBills.reduce((acc, b) => acc + (Number(b.amount) || 0), 0);
       document.getElementById('kpi-unpaid-routine').textContent = formatRupiah(unpaidSum);
       document.getElementById('kpi-unpaid-count').textContent = `${unpaidBills.length} tagihan belum dibayar`;
       document.getElementById('dashboard-unpaid-pill').textContent = unpaidBills.length;
 
-      // Render Routine Reminders on Dashboard
       renderDashboardRoutineReminders(unpaidBills);
-
-      // Render Recent Transactions on Dashboard
       renderDashboardRecentTransactions(periodTxs, periodLabel);
-
-      // Render Charts
       renderCashflowChart();
       renderCategoryDoughnutChart(periodTxs, periodLabel);
     }
@@ -2407,7 +2414,6 @@ service cloud.firestore {
         return;
       }
 
-      // Urutkan berdasarkan urgensi (terlambat / jatuh tempo terdekat)
       const sorted = [...unpaidBills].sort((a, b) => getDueDayMeta(a).daysDiff - getDueDayMeta(b).daysDiff);
 
       container.innerHTML = sorted.slice(0, 4).map(bill => {
@@ -2493,7 +2499,6 @@ service cloud.firestore {
       let subtitle = '';
 
       if (mode === 'daily') {
-        // Menampilkan tren 7 hari terakhir hingga tanggal terpilih agar grafik batang informatif
         subtitle = `Tren 7 hari hingga ${formatDateIndo(uiState.dailyDate)}`;
         for (let i = 6; i >= 0; i--) {
           const dStr = addDaysToStr(uiState.dailyDate, -i);
@@ -2513,7 +2518,6 @@ service cloud.firestore {
           expenseData.push(exp);
         }
       } else if (mode === 'weekly') {
-        // Menampilkan 7 hari (Senin - Minggu) dalam minggu terpilih
         const { startStr, label } = getWeekRange(uiState.weeklyAnchorDate);
         subtitle = `Rincian harian minggu (${label})`;
         const dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
@@ -2533,7 +2537,6 @@ service cloud.firestore {
           expenseData.push(exp);
         }
       } else if (mode === 'monthly') {
-        // Menampilkan breakdown Minggu 1 s/d Minggu 5 pada bulan terpilih
         subtitle = `Rincian mingguan bulan ${formatMonthIndo(uiState.monthlyValue)}`;
         labels = ['Minggu 1 (1-7)', 'Minggu 2 (8-14)', 'Minggu 3 (15-21)', 'Minggu 4 (22-28)', 'Minggu 5 (29-31)'];
         incomeData = [0, 0, 0, 0, 0];
@@ -2548,7 +2551,6 @@ service cloud.firestore {
           }
         });
       } else {
-        // Semua Waktu: Kelompokkan per Bulan (maksimal 6 bulan terakhir yang memiliki data atau 6 bulan kalender terakhir)
         subtitle = 'Perbandingan bulanan (Semua Waktu)';
         const monthMap = {};
         appState.transactions.forEach(tx => {
@@ -2720,7 +2722,6 @@ service cloud.firestore {
         }
       });
 
-      // Render Breakdown Percentage List
       legendList.innerHTML = entries.map(([cat, val], idx) => {
         const pct = ((val / totalExpense) * 100).toFixed(1);
         return `
@@ -2782,7 +2783,6 @@ service cloud.firestore {
         return true;
       });
 
-      // Hitung ringkasan filter aktif
       let sumIn = 0;
       let sumOut = 0;
       filtered.forEach(tx => {
@@ -2917,13 +2917,22 @@ service cloud.firestore {
 
       if (isCloudAuthenticated()) {
         try {
-          const txCol = getUserTransactionsCollection(currentUser.uid);
-          await setDoc(doc(txCol, txId), txPayload);
+          const { error } = await supabase.from('transactions').upsert({
+            id: txId,
+            user_id: currentUser.id,
+            type,
+            amount,
+            category,
+            date,
+            note
+          });
+          if (error) throw error;
           closeModal('modal-transaction');
-          showToast(id ? 'Transaksi cloud diperbarui.' : 'Transaksi tersimpan ke Cloud!', 'success');
+          await fetchCloudData();
+          showToast(id ? 'Transaksi Supabase diperbarui.' : 'Transaksi tersimpan ke Supabase!', 'success');
         } catch (err) {
-          console.error('Firestore saveTransaction error:', err);
-          showToast('Gagal menyimpan transaksi ke Cloud.', 'error');
+          console.error('Supabase saveTransaction error:', err);
+          showToast('Gagal menyimpan transaksi ke Supabase.', 'error');
         }
         return;
       }
@@ -2956,12 +2965,17 @@ service cloud.firestore {
         onConfirm: async () => {
           if (isCloudAuthenticated()) {
             try {
-              const txCol = getUserTransactionsCollection(currentUser.uid);
-              await deleteDoc(doc(txCol, txId));
-              showToast('Transaksi dihapus dari Cloud.', 'info');
+              const { error } = await supabase
+                .from('transactions')
+                .delete()
+                .eq('id', txId)
+                .eq('user_id', currentUser.id);
+              if (error) throw error;
+              await fetchCloudData();
+              showToast('Transaksi dihapus dari Supabase.', 'info');
             } catch (err) {
-              console.error('Firestore deleteTransaction error:', err);
-              showToast('Gagal menghapus transaksi di Cloud.', 'error');
+              console.error('Supabase deleteTransaction error:', err);
+              showToast('Gagal menghapus transaksi di Supabase.', 'error');
             }
             return;
           }
@@ -3055,7 +3069,6 @@ service cloud.firestore {
       if (uiState.recurringFilter === 'unpaid') filtered = unpaidBills;
       if (uiState.recurringFilter === 'paid') filtered = paidBills;
 
-      // Urutkan: yang belum dibayar & paling mendesak di atas
       filtered.sort((a, b) => {
         if (a.status !== b.status) return a.status === 'unpaid' ? -1 : 1;
         return Number(a.dueDay) - Number(b.dueDay);
@@ -3198,18 +3211,27 @@ service cloud.firestore {
 
       if (isCloudAuthenticated()) {
         try {
-          const recCol = getUserRecurringCollection(currentUser.uid);
-          await setDoc(doc(recCol, recId), recPayload);
+          const { error } = await supabase.from('recurring_bills').upsert({
+            id: recId,
+            user_id: currentUser.id,
+            name,
+            category,
+            amount,
+            cycle,
+            due_day: dueDay,
+            status
+          });
+          if (error) throw error;
           closeModal('modal-recurring');
-          showToast(id ? 'Jadwal tagihan cloud diperbarui.' : 'Tagihan rutin tersimpan ke Cloud!', 'success');
+          await fetchCloudData();
+          showToast(id ? 'Jadwal tagihan Supabase diperbarui.' : 'Tagihan rutin tersimpan ke Supabase!', 'success');
         } catch (err) {
-          console.error('Firestore saveRecurringBill error:', err);
-          showToast('Gagal menyimpan tagihan rutin ke Cloud.', 'error');
+          console.error('Supabase saveRecurringBill error:', err);
+          showToast('Gagal menyimpan tagihan rutin ke Supabase.', 'error');
         }
         return;
       }
 
-      // Mode Lokal
       if (id) {
         const idx = appState.recurringBills.findIndex(b => b.id === id);
         if (idx !== -1) {
@@ -3267,24 +3289,36 @@ service cloud.firestore {
 
       if (isCloudAuthenticated()) {
         try {
-          const batch = writeBatch(db);
-          const recCol = getUserRecurringCollection(currentUser.uid);
-          const txCol = getUserTransactionsCollection(currentUser.uid);
+          const [billRes, txRes] = await Promise.all([
+            supabase
+              .from('recurring_bills')
+              .update({ status: 'paid' })
+              .eq('id', bill.id)
+              .eq('user_id', currentUser.id),
+            supabase.from('transactions').insert({
+              id: newTxId,
+              user_id: currentUser.id,
+              type: 'expense',
+              amount: actualAmount,
+              category: 'Tagihan Rutin',
+              date: payDate,
+              note: payNote
+            })
+          ]);
 
-          batch.set(doc(recCol, bill.id), { ...bill, status: 'paid' });
-          batch.set(doc(txCol, newTxId), newTxPayload);
+          if (billRes.error) throw billRes.error;
+          if (txRes.error) throw txRes.error;
 
-          await batch.commit();
           closeModal('modal-pay-bill');
-          showToast(`Tagihan "${bill.name}" lunas & tersimpan di Cloud!`, 'success');
+          await fetchCloudData();
+          showToast(`Tagihan "${bill.name}" lunas & tersimpan di Supabase!`, 'success');
         } catch (err) {
-          console.error('Firestore submitBillPayment error:', err);
-          showToast('Gagal memproses pembayaran ke Cloud.', 'error');
+          console.error('Supabase submitBillPayment error:', err);
+          showToast('Gagal memproses pembayaran ke Supabase.', 'error');
         }
         return;
       }
 
-      // Mode Lokal
       bill.status = 'paid';
       appState.transactions.unshift(newTxPayload);
 
@@ -3300,11 +3334,16 @@ service cloud.firestore {
 
       if (isCloudAuthenticated()) {
         try {
-          const recCol = getUserRecurringCollection(currentUser.uid);
-          await setDoc(doc(recCol, bill.id), { ...bill, status: 'unpaid' });
+          const { error } = await supabase
+            .from('recurring_bills')
+            .update({ status: 'unpaid' })
+            .eq('id', bill.id)
+            .eq('user_id', currentUser.id);
+          if (error) throw error;
+          await fetchCloudData();
           showToast(`Status "${bill.name}" dikembalikan ke Belum Dibayar.`, 'info');
         } catch (err) {
-          showToast('Gagal mengubah status tagihan di Cloud.', 'error');
+          showToast('Gagal mengubah status tagihan di Supabase.', 'error');
         }
         return;
       }
@@ -3327,15 +3366,15 @@ service cloud.firestore {
         onConfirm: async () => {
           if (isCloudAuthenticated()) {
             try {
-              const batch = writeBatch(db);
-              const recCol = getUserRecurringCollection(currentUser.uid);
-              appState.recurringBills.forEach(bill => {
-                batch.set(doc(recCol, bill.id), { ...bill, status: 'unpaid' });
-              });
-              await batch.commit();
-              showToast('Status seluruh tagihan rutin direset di Cloud.', 'success');
+              const { error } = await supabase
+                .from('recurring_bills')
+                .update({ status: 'unpaid' })
+                .eq('user_id', currentUser.id);
+              if (error) throw error;
+              await fetchCloudData();
+              showToast('Status seluruh tagihan rutin direset di Supabase.', 'success');
             } catch (err) {
-              showToast('Gagal mereset tagihan di Cloud.', 'error');
+              showToast('Gagal mereset tagihan di Supabase.', 'error');
             }
             return;
           }
@@ -3361,11 +3400,16 @@ service cloud.firestore {
         onConfirm: async () => {
           if (isCloudAuthenticated()) {
             try {
-              const recCol = getUserRecurringCollection(currentUser.uid);
-              await deleteDoc(doc(recCol, billId));
-              showToast('Jadwal tagihan rutin dihapus dari Cloud.', 'info');
+              const { error } = await supabase
+                .from('recurring_bills')
+                .delete()
+                .eq('id', billId)
+                .eq('user_id', currentUser.id);
+              if (error) throw error;
+              await fetchCloudData();
+              showToast('Jadwal tagihan rutin dihapus dari Supabase.', 'info');
             } catch (err) {
-              showToast('Gagal menghapus jadwal di Cloud.', 'error');
+              showToast('Gagal menghapus jadwal di Supabase.', 'error');
             }
             return;
           }
@@ -3431,7 +3475,6 @@ service cloud.firestore {
           tx.amount
         ]);
 
-      // Tambahkan UTF-8 BOM (\uFEFF) agar Excel membaca format teks Indonesia dengan sempurna
       const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -3489,26 +3532,42 @@ service cloud.firestore {
             onConfirm: async () => {
               if (isCloudAuthenticated()) {
                 try {
-                  const batch = writeBatch(db);
-                  const txCol = getUserTransactionsCollection(currentUser.uid);
-                  const recCol = getUserRecurringCollection(currentUser.uid);
+                  await supabase.from('transactions').delete().eq('user_id', currentUser.id);
+                  await supabase.from('recurring_bills').delete().eq('user_id', currentUser.id);
 
-                  appState.transactions.forEach(t => batch.delete(doc(txCol, t.id)));
-                  appState.recurringBills.forEach(r => batch.delete(doc(recCol, r.id)));
+                  if (importedData.transactions.length > 0) {
+                    const txRows = importedData.transactions.map(t => ({
+                      id: t.id || generateId('tx'),
+                      user_id: currentUser.id,
+                      type: t.type,
+                      amount: Number(t.amount) || 0,
+                      category: t.category,
+                      date: t.date,
+                      note: t.note || ''
+                    }));
+                    const { error: txErr } = await supabase.from('transactions').upsert(txRows);
+                    if (txErr) throw txErr;
+                  }
 
-                  importedData.transactions.forEach(t => {
-                    const id = t.id || generateId('tx');
-                    batch.set(doc(txCol, id), { ...t, id });
-                  });
-                  importedData.recurringBills.forEach(r => {
-                    const id = r.id || generateId('rec');
-                    batch.set(doc(recCol, id), { ...r, id });
-                  });
+                  if (importedData.recurringBills.length > 0) {
+                    const recRows = importedData.recurringBills.map(r => ({
+                      id: r.id || generateId('rec'),
+                      user_id: currentUser.id,
+                      name: r.name,
+                      category: r.category,
+                      amount: Number(r.amount) || 0,
+                      cycle: r.cycle || 'Bulanan',
+                      due_day: Number(r.dueDay) || 1,
+                      status: r.status || 'unpaid'
+                    }));
+                    const { error: recErr } = await supabase.from('recurring_bills').upsert(recRows);
+                    if (recErr) throw recErr;
+                  }
 
-                  await batch.commit();
-                  showToast('Data berhasil dipulihkan ke Cloud!', 'success');
+                  await fetchCloudData();
+                  showToast('Data berhasil dipulihkan ke Supabase!', 'success');
                 } catch (err) {
-                  showToast('Gagal memulihkan data ke Cloud.', 'error');
+                  showToast('Gagal memulihkan data ke Supabase.', 'error');
                 }
                 return;
               }
@@ -3541,17 +3600,37 @@ service cloud.firestore {
           const sample = createSampleData();
           if (isCloudAuthenticated()) {
             try {
-              const batch = writeBatch(db);
-              const txCol = getUserTransactionsCollection(currentUser.uid);
-              const recCol = getUserRecurringCollection(currentUser.uid);
+              const txRows = sample.transactions.map(t => ({
+                id: t.id,
+                user_id: currentUser.id,
+                type: t.type,
+                amount: t.amount,
+                category: t.category,
+                date: t.date,
+                note: t.note
+              }));
+              const recRows = sample.recurringBills.map(r => ({
+                id: r.id,
+                user_id: currentUser.id,
+                name: r.name,
+                category: r.category,
+                amount: r.amount,
+                cycle: r.cycle,
+                due_day: r.dueDay,
+                status: r.status
+              }));
 
-              sample.transactions.forEach(t => batch.set(doc(txCol, t.id), t));
-              sample.recurringBills.forEach(r => batch.set(doc(recCol, r.id), r));
+              const [txRes, recRes] = await Promise.all([
+                supabase.from('transactions').upsert(txRows),
+                supabase.from('recurring_bills').upsert(recRows)
+              ]);
+              if (txRes.error) throw txRes.error;
+              if (recRes.error) throw recRes.error;
 
-              await batch.commit();
-              showToast('Data contoh berhasil ditambahkan ke Cloud!', 'success');
+              await fetchCloudData();
+              showToast('Data contoh berhasil ditambahkan ke Supabase!', 'success');
             } catch (err) {
-              showToast('Gagal menambahkan data contoh ke Cloud.', 'error');
+              showToast('Gagal menambahkan data contoh ke Supabase.', 'error');
             }
             return;
           }
@@ -3590,17 +3669,12 @@ service cloud.firestore {
         onConfirm: async () => {
           if (isCloudAuthenticated()) {
             try {
-              const batch = writeBatch(db);
-              const txCol = getUserTransactionsCollection(currentUser.uid);
-              const recCol = getUserRecurringCollection(currentUser.uid);
-
-              appState.transactions.forEach(t => batch.delete(doc(txCol, t.id)));
-              appState.recurringBills.forEach(r => batch.delete(doc(recCol, r.id)));
-
-              await batch.commit();
-              showToast('Seluruh data di Cloud berhasil dihapus.', 'info');
+              await supabase.from('transactions').delete().eq('user_id', currentUser.id);
+              await supabase.from('recurring_bills').delete().eq('user_id', currentUser.id);
+              await fetchCloudData();
+              showToast('Seluruh data di Supabase berhasil dihapus.', 'info');
             } catch (err) {
-              showToast('Gagal menghapus data di Cloud.', 'error');
+              showToast('Gagal menghapus data di Supabase.', 'error');
             }
             return;
           }
@@ -3619,7 +3693,7 @@ service cloud.firestore {
 
     /**
      * =========================================================================
-     * 12B. HANDLER UI MODAL AUTENTIKASI & PENGATURAN FIREBASE CONFIG
+     * 12B. HANDLER UI MODAL AUTENTIKASI & PENGATURAN SUPABASE CONFIG
      * =========================================================================
      */
     function openAuthModal() {
@@ -3631,6 +3705,7 @@ service cloud.firestore {
       document.getElementById('btn-email-auth-submit').classList.toggle('opacity-50', !configured);
 
       document.getElementById('auth-error-msg').classList.add('hidden');
+      document.getElementById('auth-info-msg').classList.add('hidden');
       document.getElementById('form-email-auth').reset();
       switchAuthMode('login');
       openModal('modal-auth');
@@ -3652,169 +3727,155 @@ service cloud.firestore {
         submitBtn.textContent = 'Daftar Akun Baru';
       }
       document.getElementById('auth-error-msg').classList.add('hidden');
+      document.getElementById('auth-info-msg').classList.add('hidden');
     }
 
-    function translateFirebaseAuthError(code) {
-      const map = {
-        'auth/invalid-email': 'Format alamat email tidak valid.',
-        'auth/user-not-found': 'Akun dengan email tersebut belum terdaftar.',
-        'auth/wrong-password': 'Kata sandi yang Anda masukkan salah.',
-        'auth/invalid-credential': 'Email atau kata sandi tidak cocok.',
-        'auth/email-already-in-use': 'Alamat email ini sudah terdaftar. Silakan masuk (Login).',
-        'auth/weak-password': 'Kata sandi terlalu lemah (minimal 6 karakter).',
-        'auth/popup-closed-by-user': 'Jendela login Google ditutup sebelum selesai.',
-        'auth/unauthorized-domain': 'Domain website ini belum diizinkan di Firebase Console (Authentication -> Settings -> Authorized domains).'
-      };
-      return map[code] || `Terjadi kendala autentikasi (${code || 'unknown'}).`;
+    function translateSupabaseAuthError(message) {
+      const msg = (message || '').toLowerCase();
+      if (msg.includes('invalid login credentials')) return 'Email atau kata sandi tidak cocok.';
+      if (msg.includes('user already registered')) return 'Alamat email ini sudah terdaftar. Silakan pindah ke tab Masuk (Login).';
+      if (msg.includes('email not confirmed')) return 'Email belum dikonfirmasi. Cek inbox Anda atau nonaktifkan "Confirm email" di Supabase Authentication.';
+      if (msg.includes('password should be at least')) return 'Kata sandi terlalu pendek (minimal 6 karakter).';
+      if (msg.includes('provider is not enabled')) return 'Login Google belum diaktifkan di Supabase Dashboard (Authentication -> Providers -> Google).';
+      return message || 'Terjadi kendala autentikasi Supabase.';
     }
 
     async function handleGoogleLogin() {
-      if (!auth) return;
+      if (!supabase) return;
       const errBox = document.getElementById('auth-error-msg');
       errBox.classList.add('hidden');
       try {
-        const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
-        closeModal('modal-auth');
-        showToast('Berhasil masuk dengan Akun Google!', 'success');
+        const redirectTarget = window.location.origin + window.location.pathname;
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: redirectTarget }
+        });
+        if (error) throw error;
       } catch (err) {
-        console.error('Google sign-in error:', err);
-        errBox.textContent = translateFirebaseAuthError(err.code);
+        console.error('Supabase Google OAuth error:', err);
+        errBox.textContent = translateSupabaseAuthError(err.message);
         errBox.classList.remove('hidden');
       }
     }
 
     async function handleEmailAuthSubmit(event) {
       event.preventDefault();
-      if (!auth) return;
+      if (!supabase) return;
 
       const mode = document.getElementById('auth-mode').value;
       const email = document.getElementById('auth-email').value.trim();
       const password = document.getElementById('auth-password').value;
       const errBox = document.getElementById('auth-error-msg');
+      const infoBox = document.getElementById('auth-info-msg');
       errBox.classList.add('hidden');
+      infoBox.classList.add('hidden');
 
       try {
         if (mode === 'login') {
-          await signInWithEmailAndPassword(auth, email, password);
-          showToast('Berhasil masuk ke akun Cloud!', 'success');
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          closeModal('modal-auth');
+          showToast('Berhasil masuk ke akun Supabase!', 'success');
         } else {
-          await createUserWithEmailAndPassword(auth, email, password);
-          showToast('Pendaftaran berhasil! Akun Cloud aktif.', 'success');
+          const { data, error } = await supabase.auth.signUp({ email, password });
+          if (error) throw error;
+
+          if (data && data.session) {
+            closeModal('modal-auth');
+            showToast('Pendaftaran berhasil! Akun Supabase aktif.', 'success');
+          } else {
+            infoBox.textContent = 'Pendaftaran berhasil! Silakan cek kotak masuk email Anda untuk verifikasi, atau nonaktifkan "Confirm email" di Supabase Auth agar bisa langsung masuk.';
+            infoBox.classList.remove('hidden');
+          }
         }
-        closeModal('modal-auth');
       } catch (err) {
-        console.error('Email auth error:', err);
-        errBox.textContent = translateFirebaseAuthError(err.code);
+        console.error('Supabase Email auth error:', err);
+        errBox.textContent = translateSupabaseAuthError(err.message);
         errBox.classList.remove('hidden');
       }
     }
 
     async function handleLogout() {
-      if (!auth) return;
+      if (!supabase) return;
       try {
-        await signOut(auth);
-        showToast('Anda telah keluar dari akun Cloud (beralih ke Mode Lokal).', 'info');
+        await supabase.auth.signOut();
+        showToast('Anda telah keluar dari Supabase (beralih ke Mode Lokal).', 'info');
       } catch (err) {
         showToast('Gagal keluar dari akun.', 'error');
       }
     }
 
-    function openFirebaseConfigModal() {
-      const textarea = document.getElementById('firebase-config-textarea');
+    function openSupabaseConfigModal() {
+      const urlInput = document.getElementById('supabase-url-input');
+      const keyInput = document.getElementById('supabase-key-input');
       const badge = document.getElementById('config-source-badge');
-      const removeBtn = document.getElementById('btn-remove-firebase-config');
+      const removeBtn = document.getElementById('btn-remove-supabase-config');
 
-      const savedRaw = localStorage.getItem(CUSTOM_CONFIG_STORAGE_KEY);
+      const savedRaw = localStorage.getItem(CUSTOM_SUPABASE_STORAGE_KEY);
       if (savedRaw) {
         try {
-          textarea.value = JSON.stringify(JSON.parse(savedRaw), null, 2);
+          const parsed = JSON.parse(savedRaw);
+          urlInput.value = parsed.url || '';
+          keyInput.value = parsed.anonKey || '';
         } catch (e) {
-          textarea.value = savedRaw;
+          urlInput.value = '';
+          keyInput.value = '';
         }
         badge.textContent = 'Tersimpan di Browser';
         badge.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-100 text-emerald-800';
         removeBtn.classList.remove('hidden');
       } else if (configSourceType === 'hardcoded') {
-        textarea.value = JSON.stringify(CUSTOM_FIREBASE_CONFIG, null, 2);
+        urlInput.value = CUSTOM_SUPABASE_URL;
+        keyInput.value = CUSTOM_SUPABASE_ANON_KEY;
         badge.textContent = 'Dari Kode Sumber';
         badge.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-sky-100 text-sky-800';
         removeBtn.classList.add('hidden');
-      } else if (configSourceType === 'preview') {
-        textarea.value = '';
-        badge.textContent = 'Mode Preview Aktif';
-        badge.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-100 text-emerald-800';
-        removeBtn.classList.add('hidden');
       } else {
-        textarea.value = '';
+        urlInput.value = '';
+        keyInput.value = '';
         badge.textContent = 'Belum Terkonfigurasi';
         badge.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-600';
         removeBtn.classList.add('hidden');
       }
 
-      openModal('modal-firebase-config');
+      openModal('modal-supabase-config');
     }
 
-    function parseFirebaseConfigInput(rawText) {
-      // Mendukung tempelan JSON murni ATAU potongan JS "const firebaseConfig = { apiKey: '...' };"
-      const firstBrace = rawText.indexOf('{');
-      const lastBrace = rawText.lastIndexOf('}');
-      if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
-        throw new Error('Objek konfigurasi tidak ditemukan.');
-      }
-      const objectSlice = rawText.slice(firstBrace, lastBrace + 1);
-
-      try {
-        return JSON.parse(objectSlice);
-      } catch (jsonErr) {
-        // Konversi key JS tanpa tanda kutip & single quote menjadi JSON valid
-        const normalized = objectSlice
-          .replace(/\/\/.*$/gm, '')
-          .replace(/\/\*[\s\S]*?\*\//g, '')
-          .replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":')
-          .replace(/'/g, '"')
-          .replace(/,\s*}/g, '}');
-        return JSON.parse(normalized);
-      }
-    }
-
-    async function saveCustomFirebaseConfig(event) {
+    async function saveCustomSupabaseConfig(event) {
       event.preventDefault();
-      const rawText = document.getElementById('firebase-config-textarea').value.trim();
-      try {
-        const parsed = parseFirebaseConfigInput(rawText);
-        if (!parsed.apiKey || !parsed.projectId) {
-          showToast('Konfigurasi wajib memiliki minimal "apiKey" dan "projectId".', 'error');
-          return;
-        }
-        localStorage.setItem(CUSTOM_CONFIG_STORAGE_KEY, JSON.stringify(parsed));
-        closeModal('modal-firebase-config');
-        showToast('Konfigurasi Firebase disimpan! Menghubungkan...', 'success');
-        await initFirebaseService();
-        if (isCloudConfigured() && !isCloudAuthenticated()) {
-          openAuthModal();
-        }
-      } catch (err) {
-        showToast('Format firebaseConfig tidak dikenali. Pastikan menyalin objek { ... } dengan benar.', 'error');
+      const url = document.getElementById('supabase-url-input').value.trim();
+      const anonKey = document.getElementById('supabase-key-input').value.trim();
+
+      if (!url.startsWith('https://') || !anonKey) {
+        showToast('Masukkan Project URL (https://...) dan Anon Key Supabase yang valid.', 'error');
+        return;
+      }
+
+      localStorage.setItem(CUSTOM_SUPABASE_STORAGE_KEY, JSON.stringify({ url, anonKey }));
+      closeModal('modal-supabase-config');
+      showToast('Kredensial Supabase disimpan! Menghubungkan...', 'success');
+      await initSupabaseService();
+      if (isCloudConfigured() && !isCloudAuthenticated()) {
+        openAuthModal();
       }
     }
 
-    async function removeCustomFirebaseConfig() {
-      localStorage.removeItem(CUSTOM_CONFIG_STORAGE_KEY);
-      closeModal('modal-firebase-config');
-      showToast('Konfigurasi Firebase dihapus. Kembali ke Mode Lokal.', 'info');
-      await initFirebaseService();
+    async function removeCustomSupabaseConfig() {
+      localStorage.removeItem(CUSTOM_SUPABASE_STORAGE_KEY);
+      closeModal('modal-supabase-config');
+      showToast('Kredensial Supabase dihapus. Kembali ke Mode Lokal.', 'info');
+      await initSupabaseService();
     }
 
-    function copyFirestoreRules() {
-      const rulesText = document.getElementById('firestore-rules-code').textContent;
+    function copySupabaseSQL() {
+      const sqlText = document.getElementById('supabase-sql-code').textContent;
       const tempArea = document.createElement('textarea');
-      tempArea.value = rulesText;
+      tempArea.value = sqlText;
       document.body.appendChild(tempArea);
       tempArea.select();
       try {
         document.execCommand('copy');
-        showToast('Firestore Rules berhasil disalin ke clipboard!', 'success');
+        showToast('Skrip SQL Setup Supabase berhasil disalin!', 'success');
       } catch (err) {
         showToast('Gagal menyalin teks.', 'error');
       }
@@ -3885,7 +3946,7 @@ service cloud.firestore {
 
     // Tutup modal saat mengklik area luar backdrop
     window.addEventListener('click', (e) => {
-      ['modal-transaction', 'modal-recurring', 'modal-pay-bill', 'modal-confirm', 'modal-auth', 'modal-firebase-config'].forEach(id => {
+      ['modal-transaction', 'modal-recurring', 'modal-pay-bill', 'modal-confirm', 'modal-auth', 'modal-supabase-config'].forEach(id => {
         const modal = document.getElementById(id);
         if (e.target === modal) {
           closeModal(id);
@@ -3930,10 +3991,10 @@ service cloud.firestore {
       handleGoogleLogin,
       handleEmailAuthSubmit,
       handleLogout,
-      openFirebaseConfigModal,
-      saveCustomFirebaseConfig,
-      removeCustomFirebaseConfig,
-      copyFirestoreRules,
+      openSupabaseConfigModal,
+      saveCustomSupabaseConfig,
+      removeCustomSupabaseConfig,
+      copySupabaseSQL,
       migrateLocalDataToCloud,
       dismissMigrationBanner
     });
@@ -3947,7 +4008,7 @@ service cloud.firestore {
       initSidebarState();
       initPeriodControls();
       updateCategoryFilterOptions();
-      await initFirebaseService();
+      await initSupabaseService();
     });
   </script>
 </body>
