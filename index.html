@@ -196,6 +196,18 @@
         <span id="sidebar-unpaid-badge" class="sidebar-hide-collapsed hidden px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">0</span>
       </button>
 
+      <button onclick="switchTab('vehicles')" data-nav="vehicles" title="Garasi & Servis"
+        class="nav-item relative w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition-all duration-150 cursor-pointer">
+        <div class="nav-item-content flex items-center gap-3.5 min-w-0">
+          <div class="relative shrink-0">
+            <i data-lucide="wrench" class="w-5 h-5"></i>
+            <span id="sidebar-vehicles-mini-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-400 ring-2 ring-slate-900"></span>
+          </div>
+          <span class="sidebar-hide-collapsed truncate">Garasi &amp; Servis</span>
+        </div>
+        <span id="sidebar-vehicles-badge" class="sidebar-hide-collapsed hidden px-2 py-0.5 text-xs font-semibold rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 shrink-0">0</span>
+      </button>
+
       <button onclick="switchTab('reports')" data-nav="reports" title="Laporan & Data"
         class="nav-item w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition-all duration-150 cursor-pointer">
         <div class="nav-item-content flex items-center gap-3.5 min-w-0">
@@ -227,10 +239,6 @@
             <i data-lucide="log-in" class="w-3.5 h-3.5 shrink-0"></i>
             <span class="sidebar-hide-collapsed">Masuk Cloud</span>
           </button>
-          <button onclick="openSupabaseConfigModal()" title="Pengaturan Database Supabase"
-            class="p-2 rounded-xl bg-slate-700/80 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer shrink-0">
-            <i data-lucide="settings" class="w-4 h-4"></i>
-          </button>
         </div>
       </div>
 
@@ -249,10 +257,6 @@
             class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-700/80 hover:bg-rose-600/90 text-slate-200 hover:text-white text-xs font-semibold transition-colors cursor-pointer">
             <i data-lucide="log-out" class="w-3.5 h-3.5 shrink-0"></i>
             <span class="sidebar-hide-collapsed">Keluar</span>
-          </button>
-          <button onclick="openSupabaseConfigModal()" title="Pengaturan Database Supabase"
-            class="p-2 rounded-xl bg-slate-700/80 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer shrink-0">
-            <i data-lucide="settings" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
@@ -347,7 +351,7 @@
           </div>
           <div>
             <p class="text-sm font-semibold text-amber-900">Mode Data Contoh Aktif</p>
-            <p class="text-xs text-amber-700">Aplikasi menampilkan simulasi transaksi &amp; tagihan rutin agar Anda bisa langsung mencoba fitur yang ada.</p>
+            <p class="text-xs text-amber-700">Aplikasi menampilkan simulasi transaksi, tagihan rutin, utang/piutang &amp; servis kendaraan.</p>
           </div>
         </div>
         <button onclick="confirmClearSampleData()"
@@ -617,6 +621,32 @@
             <!-- Populated by JS -->
           </div>
         </div>
+
+        <!-- Ringkasan Status Servis Kendaraan Card -->
+        <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                <span>Garasi &amp; Jadwal Servis Kendaraan</span>
+                <span id="dashboard-vehicles-pill" class="px-2 py-0.5 text-xs font-bold rounded-full bg-slate-100 text-slate-700">0 Unit</span>
+              </h2>
+              <p class="text-xs text-slate-500">Pantauan kilometer (odometer) dan jadwal ganti oli / servis berkala</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="openServiceModal()" class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold cursor-pointer">
+                + Catat Servis
+              </button>
+              <button onclick="switchTab('vehicles')" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1 cursor-pointer">
+                <span>Buka Garasi</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="dashboard-vehicles-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <!-- Populated by JS -->
+          </div>
+        </div>
       </section>
 
       <!-- =================================================================
@@ -845,6 +875,121 @@
       </section>
 
       <!-- =================================================================
+           VIEW 3B: GARASI & SERVIS KENDARAAN (VEHICLES & MAINTENANCE)
+      ================================================================== -->
+      <section id="view-vehicles" class="hidden space-y-6 animate-fade-in">
+        <!-- Header & Actions -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Garasi &amp; Riwayat Servis Kendaraan</h2>
+            <p class="text-xs sm:text-sm text-slate-500">Kelola daftar kendaraan, pantau odometer &amp; jadwal ganti oli, serta catat biaya servis langsung ke Buku Kas</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button onclick="openVehicleModal()"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold shadow-2xs transition-colors cursor-pointer">
+              <i data-lucide="car" class="w-4 h-4 text-slate-600"></i>
+              <span>+ Tambah Kendaraan</span>
+            </button>
+            <button onclick="openServiceModal()"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-colors cursor-pointer">
+              <i data-lucide="wrench" class="w-4 h-4"></i>
+              <span>+ Catat Servis</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 Vehicle Maintenance Summary KPIs -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <div class="flex items-center justify-between">
+              <p class="text-xs font-semibold text-slate-500 uppercase">Total Biaya Servis</p>
+              <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <i data-lucide="receipt" class="w-4 h-4"></i>
+              </span>
+            </div>
+            <p id="veh-kpi-total-cost" class="text-lg sm:text-2xl font-extrabold text-slate-900 mt-1.5">Rp 0</p>
+            <p id="veh-kpi-cost-breakdown" class="text-xs text-slate-400 mt-0.5">Sparepart Rp 0 • Jasa Rp 0</p>
+          </div>
+
+          <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <div class="flex items-center justify-between">
+              <p class="text-xs font-semibold text-slate-500 uppercase">Kendaraan Terdaftar</p>
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <i data-lucide="gauge" class="w-4 h-4"></i>
+              </span>
+            </div>
+            <p id="veh-kpi-unit-count" class="text-lg sm:text-2xl font-extrabold text-emerald-600 mt-1.5">0 Unit</p>
+            <p id="veh-kpi-due-summary" class="text-xs text-slate-400 mt-0.5">Semua jadwal terpantau aman</p>
+          </div>
+
+          <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <div class="flex items-center justify-between">
+              <p class="text-xs font-semibold text-slate-500 uppercase">Total Riwayat Servis</p>
+              <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <i data-lucide="history" class="w-4 h-4"></i>
+              </span>
+            </div>
+            <p id="veh-kpi-service-count" class="text-lg sm:text-2xl font-extrabold text-slate-900 mt-1.5">0 Kali</p>
+            <p id="veh-kpi-last-service" class="text-xs text-slate-400 mt-0.5">Belum ada riwayat servis</p>
+          </div>
+        </div>
+
+        <!-- Daftar Kendaraan (Garasi Saya) -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="warehouse" class="w-4 h-4 text-emerald-600"></i>
+              <span>Daftar Kendaraan di Garasi</span>
+            </h3>
+            <span class="text-xs text-slate-400">Klik "Update KM" untuk memperbarui odometer harian</span>
+          </div>
+
+          <div id="vehicles-garage-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Riwayat Servis Kendaraan -->
+        <div class="space-y-4 pt-2">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">Riwayat Servis &amp; Penggantian Suku Cadang</h3>
+              <p class="text-xs text-slate-500">Catatan lengkap komponen diganti, bengkel, odometer, dan rekomendasi mekanik</p>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              <select id="svc-filter-vehicle" onchange="renderVehiclesView(); if(window.lucide) lucide.createIcons();"
+                class="px-3.5 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="all">Semua Kendaraan</option>
+              </select>
+
+              <select id="svc-filter-type" onchange="renderVehiclesView(); if(window.lucide) lucide.createIcons();"
+                class="px-3.5 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="all">Semua Jenis Servis</option>
+                <option value="Ganti Oli Rutin">Ganti Oli Rutin</option>
+                <option value="Servis Berkala / Tune Up">Servis Berkala / Tune Up</option>
+                <option value="Ganti Suku Cadang">Ganti Suku Cadang</option>
+                <option value="Perbaikan Darurat">Perbaikan Darurat</option>
+                <option value="Pajak & Administrasi">Pajak &amp; Administrasi (STNK/KIR)</option>
+              </select>
+
+              <div class="relative">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input type="text" id="svc-search-input" oninput="renderVehiclesView(); if(window.lucide) lucide.createIcons();"
+                  placeholder="Cari sparepart / bengkel..."
+                  class="w-full sm:w-52 pl-9 pr-3.5 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+            </div>
+          </div>
+
+          <div id="vehicle-services-list" class="space-y-3">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
            VIEW 4: LAPORAN & DATA (ANALYTICS & BACKUP)
       ================================================================== -->
       <section id="view-reports" class="hidden space-y-6 animate-fade-in">
@@ -885,7 +1030,7 @@
               <span class="text-xs font-semibold text-slate-500 uppercase">Total Catatan Tersimpan</span>
             </div>
             <p id="report-record-count" class="text-2xl font-extrabold text-slate-900">0 Catatan</p>
-            <p id="report-routine-count" class="text-xs text-slate-500 mt-1">0 tagihan rutin &amp; 0 utang/piutang</p>
+            <p id="report-routine-count" class="text-xs text-slate-500 mt-1">0 tagihan rutin, 0 utang/piutang &amp; 0 servis</p>
           </div>
         </div>
 
@@ -959,16 +1104,11 @@
                 <span id="report-cloud-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Mode Lokal</span>
               </div>
               <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                Hubungkan aplikasi ini dengan proyek Supabase Anda agar seluruh transaksi dan jadwal tagihan tersimpan aman di PostgreSQL Cloud dan otomatis sinkron saat diakses melalui GitHub Pages di HP maupun Laptop.
+                Masuk dengan akun Anda agar seluruh transaksi, tagihan rutin, utang/piutang, dan riwayat servis kendaraan tersinkronisasi aman di PostgreSQL Cloud.
               </p>
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-            <button onclick="openSupabaseConfigModal()"
-              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold cursor-pointer">
-              <i data-lucide="settings" class="w-4 h-4"></i>
-              <span>Pengaturan Supabase</span>
-            </button>
             <button onclick="openAuthModal()" id="report-auth-btn"
               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer">
               <i data-lucide="log-in" class="w-4 h-4"></i>
@@ -982,39 +1122,46 @@
   </div>
 
   <!-- =====================================================================
-       MOBILE BOTTOM NAVIGATION BAR
+       MOBILE BOTTOM NAVIGATION BAR (6-COLUMN RESPONSIVE GRID)
   ====================================================================== -->
-  <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 px-1 py-1.5 flex items-center justify-around shadow-lg" aria-label="Navigasi Bawah">
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 px-1 py-1.5 grid grid-cols-6 items-center shadow-lg" aria-label="Navigasi Bawah">
     <button onclick="switchTab('dashboard')" data-mobile-nav="dashboard"
-      class="mobile-nav-item flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-emerald-600 font-semibold transition-colors">
-      <i data-lucide="layout-dashboard" class="w-5 h-5 mb-0.5"></i>
-      <span class="text-[10px]">Ringkasan</span>
+      class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-emerald-600 font-semibold transition-colors">
+      <i data-lucide="layout-dashboard" class="w-4 h-4 mb-0.5"></i>
+      <span class="text-[9px] leading-tight">Ringkasan</span>
     </button>
 
     <button onclick="switchTab('transactions')" data-mobile-nav="transactions"
-      class="mobile-nav-item flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-slate-500 font-medium transition-colors">
-      <i data-lucide="arrow-left-right" class="w-5 h-5 mb-0.5"></i>
-      <span class="text-[10px]">Transaksi</span>
+      class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
+      <i data-lucide="arrow-left-right" class="w-4 h-4 mb-0.5"></i>
+      <span class="text-[9px] leading-tight">Transaksi</span>
     </button>
 
     <button onclick="switchTab('debts')" data-mobile-nav="debts"
-      class="mobile-nav-item relative flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-slate-500 font-medium transition-colors">
-      <i data-lucide="hand-coins" class="w-5 h-5 mb-0.5"></i>
-      <span class="text-[10px]">Utang/Piutang</span>
+      class="mobile-nav-item relative flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
+      <i data-lucide="hand-coins" class="w-4 h-4 mb-0.5"></i>
+      <span class="text-[9px] leading-tight">Utang</span>
       <span id="mobile-debts-dot" class="hidden absolute top-1 right-2.5 w-2 h-2 rounded-full bg-indigo-500"></span>
     </button>
 
     <button onclick="switchTab('recurring')" data-mobile-nav="recurring"
-      class="mobile-nav-item relative flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-slate-500 font-medium transition-colors">
-      <i data-lucide="calendar-clock" class="w-5 h-5 mb-0.5"></i>
-      <span class="text-[10px]">Tagihan</span>
+      class="mobile-nav-item relative flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
+      <i data-lucide="calendar-clock" class="w-4 h-4 mb-0.5"></i>
+      <span class="text-[9px] leading-tight">Tagihan</span>
       <span id="mobile-unpaid-dot" class="hidden absolute top-1 right-2.5 w-2 h-2 rounded-full bg-amber-500"></span>
     </button>
 
+    <button onclick="switchTab('vehicles')" data-mobile-nav="vehicles"
+      class="mobile-nav-item relative flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
+      <i data-lucide="wrench" class="w-4 h-4 mb-0.5"></i>
+      <span class="text-[9px] leading-tight">Servis</span>
+      <span id="mobile-vehicles-dot" class="hidden absolute top-1 right-2.5 w-2 h-2 rounded-full bg-rose-500"></span>
+    </button>
+
     <button onclick="switchTab('reports')" data-mobile-nav="reports"
-      class="mobile-nav-item flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-slate-500 font-medium transition-colors">
-      <i data-lucide="pie-chart" class="w-5 h-5 mb-0.5"></i>
-      <span class="text-[10px]">Laporan</span>
+      class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
+      <i data-lucide="pie-chart" class="w-4 h-4 mb-0.5"></i>
+      <span class="text-[9px] leading-tight">Laporan</span>
     </button>
   </nav>
 
@@ -1393,6 +1540,270 @@
   </div>
 
   <!-- =====================================================================
+       MODAL 2B: TAMBAH / EDIT KENDARAAN (GARASI)
+  ====================================================================== -->
+  <div id="modal-vehicle" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in max-h-[92vh] flex flex-col">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h3 id="modal-veh-title" class="text-base sm:text-lg font-bold text-slate-900">Tambah Kendaraan ke Garasi</h3>
+        <button onclick="closeModal('modal-vehicle')" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-vehicle" onsubmit="saveVehicle(event)" class="p-6 space-y-4 overflow-y-auto">
+        <input type="hidden" id="veh-id" />
+
+        <div class="grid grid-cols-3 gap-3">
+          <div class="col-span-2">
+            <label for="veh-name" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Nama / Tipe Kendaraan</label>
+            <input type="text" id="veh-name" required placeholder="Contoh: Honda Vario 160"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label for="veh-type" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Jenis</label>
+            <select id="veh-type" required
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="Motor">Motor</option>
+              <option value="Mobil">Mobil</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="veh-plate" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Nomor Polisi <span class="text-slate-400 font-normal">(Opsional)</span></label>
+            <input type="text" id="veh-plate" placeholder="B 1234 XYZ"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm uppercase text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label for="veh-odo" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Odometer Saat Ini (km)</label>
+            <input type="text" id="veh-odo" inputmode="numeric" required placeholder="16.200"
+              oninput="formatRupiahInput(this)"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
+          <p class="text-xs font-bold text-slate-700">Target Pengingat Servis Berikutnya (Opsional)</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="veh-next-odo" class="block text-[11px] font-semibold text-slate-500 mb-1">Target Kilometer (km)</label>
+              <input type="text" id="veh-next-odo" inputmode="numeric" placeholder="18.200"
+                oninput="formatRupiahInput(this)"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label for="veh-next-date" class="block text-[11px] font-semibold text-slate-500 mb-1">Target Tanggal</label>
+              <input type="date" id="veh-next-date"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-vehicle')"
+            class="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+            Batal
+          </button>
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm cursor-pointer">
+            Simpan Kendaraan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 2C: CATAT / EDIT SERVIS KENDARAAN (AUTO POTONG SALDO BUKU KAS)
+  ====================================================================== -->
+  <div id="modal-service" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in max-h-[92vh] flex flex-col">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <i data-lucide="wrench" class="w-4 h-4"></i>
+          </div>
+          <h3 id="modal-svc-title" class="text-base sm:text-lg font-bold text-slate-900">Catat Servis Kendaraan</h3>
+        </div>
+        <button onclick="closeModal('modal-service')" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-service" onsubmit="saveServiceRecord(event)" class="p-6 space-y-4 overflow-y-auto">
+        <input type="hidden" id="svc-id" />
+
+        <!-- Pilih Kendaraan & Tanggal Servis -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="svc-vehicle-id" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Pilih Kendaraan</label>
+            <select id="svc-vehicle-id" required onchange="handleServiceVehicleChange()"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div>
+            <label for="svc-date" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Tanggal Servis</label>
+            <input type="date" id="svc-date" required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+        </div>
+
+        <!-- Odometer Saat Ini & Jenis Servis -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="svc-odometer" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Odometer Saat Servis (km)</label>
+            <input type="text" id="svc-odometer" inputmode="numeric" required placeholder="16.200"
+              oninput="formatRupiahInput(this); autoSuggestNextServiceOdo();"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label for="svc-type" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Kategori / Jenis Servis</label>
+            <select id="svc-type" required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="Ganti Oli Rutin">Ganti Oli Rutin</option>
+              <option value="Servis Berkala / Tune Up">Servis Berkala / Tune Up</option>
+              <option value="Ganti Suku Cadang">Ganti Suku Cadang</option>
+              <option value="Perbaikan Darurat">Perbaikan Darurat</option>
+              <option value="Pajak & Administrasi">Pajak &amp; Administrasi (STNK/KIR)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Daftar Suku Cadang / Pekerjaan -->
+        <div>
+          <label for="svc-items" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Suku Cadang Diganti / Detail Pekerjaan</label>
+          <input type="text" id="svc-items" required placeholder="Contoh: Oli mesin MPX2, oli gardan, kampas rem depan"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <!-- Rincian Biaya: Sparepart + Jasa = Total Aktual -->
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/90 space-y-3">
+          <p class="text-xs font-bold text-slate-700 uppercase tracking-wide">Rincian Biaya Servis</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="svc-parts-cost" class="block text-[11px] font-semibold text-slate-500 mb-1">Biaya Sparepart (Rp)</label>
+              <input type="text" id="svc-parts-cost" inputmode="numeric" placeholder="0"
+                oninput="formatRupiahInput(this); recalcServiceTotal();"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label for="svc-labor-cost" class="block text-[11px] font-semibold text-slate-500 mb-1">Biaya Jasa Mekanik (Rp)</label>
+              <input type="text" id="svc-labor-cost" inputmode="numeric" placeholder="0"
+                oninput="formatRupiahInput(this); recalcServiceTotal();"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+          </div>
+
+          <div>
+            <label for="svc-total-cost" class="block text-xs font-semibold text-slate-700 mb-1">Total Biaya Aktual Dibayar (Rp)</label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
+              <input type="text" id="svc-total-cost" inputmode="numeric" required placeholder="0"
+                oninput="formatRupiahInput(this)"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-base font-extrabold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Nama Bengkel & Catatan Mekanik -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="svc-workshop" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Nama Bengkel <span class="text-slate-400 font-normal">(Opsional)</span></label>
+            <input type="text" id="svc-workshop" placeholder="Contoh: AHASS Mandiri Motor"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label for="svc-notes" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Catatan Mekanik <span class="text-slate-400 font-normal">(Opsional)</span></label>
+            <input type="text" id="svc-notes" placeholder="Contoh: Cek kampas belakang bulan depan"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+        </div>
+
+        <!-- Target Servis Berikutnya -->
+        <div class="p-3.5 rounded-xl bg-indigo-50/60 border border-indigo-200/70 space-y-2.5">
+          <p class="text-xs font-bold text-indigo-950">Jadwal Servis Berikutnya (Otomatis Memperbarui Kartu Kendaraan)</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="svc-next-odo" class="block text-[11px] font-semibold text-indigo-800 mb-1">Target KM Berikutnya</label>
+              <input type="text" id="svc-next-odo" inputmode="numeric" placeholder="18.200"
+                oninput="formatRupiahInput(this)"
+                class="w-full px-3 py-2 rounded-xl border border-indigo-200 text-sm font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+            <div>
+              <label for="svc-next-date" class="block text-[11px] font-semibold text-indigo-800 mb-1">Target Tanggal Berikutnya</label>
+              <input type="date" id="svc-next-date"
+                class="w-full px-3 py-2 rounded-xl border border-indigo-200 text-sm font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Checkbox Integrasi ke Saldo & Buku Kas -->
+        <div id="svc-sync-cash-box" class="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 space-y-1">
+          <label class="flex items-start gap-2.5 cursor-pointer select-none">
+            <input type="checkbox" id="svc-sync-cash" checked
+              class="mt-0.5 w-4 h-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer" />
+            <span class="text-xs font-bold text-emerald-950">Catat otomatis ke Pengeluaran Buku Kas (Potong Saldo)</span>
+          </label>
+          <p class="text-[11px] text-emerald-800 pl-6 leading-relaxed">
+            Otomatis menambahkan pengeluaran kategori <strong>Servis &amp; Kendaraan</strong> sesuai Total Biaya Aktual.
+          </p>
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-service')"
+            class="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+            Batal
+          </button>
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm cursor-pointer">
+            Simpan Riwayat Servis
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 2D: UPDATE ODOMETER (KM) CEPAT
+  ====================================================================== -->
+  <div id="modal-update-odo" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">Perbarui Kilometer (Odometer)</h3>
+        <button onclick="closeModal('modal-update-odo')" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="submitQuickOdometer(event)" class="p-6 space-y-4">
+        <input type="hidden" id="quick-odo-veh-id" />
+        <div>
+          <p id="quick-odo-veh-name" class="text-sm font-bold text-slate-900">-</p>
+          <p id="quick-odo-current-label" class="text-xs text-slate-500 mt-0.5">Odometer tercatat: 0 km</p>
+        </div>
+        <div>
+          <label for="quick-odo-input" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Angka Odometer Terbaru (km)</label>
+          <input type="text" id="quick-odo-input" inputmode="numeric" required oninput="formatRupiahInput(this)"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-lg font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modal-update-odo')"
+            class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+            Batal
+          </button>
+          <button type="submit"
+            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs cursor-pointer">
+            Simpan KM
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
        MODAL 3: KONFIRMASI BAYAR TAGIHAN RUTIN (SMART WORKFLOW)
   ====================================================================== -->
   <div id="modal-pay-bill" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
@@ -1506,20 +1917,16 @@
 
       <div class="p-6 space-y-5 overflow-y-auto">
         <!-- Warning if Supabase Config is not set yet -->
-        <div id="auth-no-config-alert" class="hidden p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-2.5">
+        <div id="auth-no-config-alert" class="hidden p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
           <div class="flex items-start gap-2.5">
             <i data-lucide="alert-circle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
             <div>
-              <p class="text-xs sm:text-sm font-bold text-amber-900">Database Supabase Belum Dikonfigurasi</p>
+              <p class="text-xs sm:text-sm font-bold text-amber-900">Layanan Cloud Belum Aktif</p>
               <p class="text-xs text-amber-800 mt-0.5 leading-relaxed">
-                Untuk mengaktifkan fitur Login &amp; Sinkronisasi Cloud, masukkan <strong>Project URL</strong> dan <strong>Anon Key</strong> Supabase Anda terlebih dahulu.
+                Koneksi database Supabase belum dikonfigurasi pada kode aplikasi. Silakan gunakan mode lokal browser atau lengkapi kredensial Supabase di dalam kode.
               </p>
             </div>
           </div>
-          <button type="button" onclick="closeModal('modal-auth'); openSupabaseConfigModal();"
-            class="w-full py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold cursor-pointer">
-            Buka Pengaturan Database Supabase
-          </button>
         </div>
 
         <!-- Mode Switcher (Login vs Register) -->
@@ -1576,165 +1983,6 @@
           </svg>
           <span>Lanjutkan dengan Google (OAuth)</span>
         </button>
-
-        <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          <span>Ingin mengatur kunci Supabase?</span>
-          <button type="button" onclick="closeModal('modal-auth'); openSupabaseConfigModal();"
-            class="font-semibold text-emerald-600 hover:text-emerald-700 underline cursor-pointer">
-            Pengaturan Supabase
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- =====================================================================
-       MODAL 6: PENGATURAN DATABASE SUPABASE (URL, ANON KEY & SQL SETUP)
-  ====================================================================== -->
-  <div id="modal-supabase-config" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-    <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in max-h-[92vh] flex flex-col">
-      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center">
-            <i data-lucide="database" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 class="text-base sm:text-lg font-bold text-slate-900">Pengaturan Database Supabase</h3>
-            <p class="text-[11px] text-slate-500">Hubungkan ke proyek Supabase Anda untuk hosting di GitHub Pages</p>
-          </div>
-        </div>
-        <button onclick="closeModal('modal-supabase-config')" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="p-6 space-y-5 overflow-y-auto">
-        <!-- Step 1: Supabase URL & Anon Key -->
-        <form onsubmit="saveCustomSupabaseConfig(event)" class="space-y-3.5">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">
-              1. Kredensial API Proyek Supabase
-            </span>
-            <span id="config-source-badge" class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-600">
-              Belum Terkonfigurasi
-            </span>
-          </div>
-          <p class="text-xs text-slate-500 leading-relaxed">
-            Salin <strong>Project URL</strong> dan <strong>Anon Public Key</strong> dari <strong>Supabase Dashboard &rarr; Project Settings &rarr; Data API / API Keys</strong>:
-          </p>
-
-          <div>
-            <label for="supabase-url-input" class="block text-xs font-semibold text-slate-600 mb-1">Supabase Project URL</label>
-            <input type="url" id="supabase-url-input" required placeholder="https://xxxxxxxxxxxx.supabase.co"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-mono text-xs text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-          </div>
-
-          <div>
-            <label for="supabase-key-input" class="block text-xs font-semibold text-slate-600 mb-1">Supabase Anon Public Key</label>
-            <textarea id="supabase-key-input" rows="3" required placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-              class="w-full p-3 rounded-xl border border-slate-300 font-mono text-xs text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
-          </div>
-
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-            <button type="button" id="btn-remove-supabase-config" onclick="removeCustomSupabaseConfig()"
-              class="hidden px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold cursor-pointer">
-              Putuskan &amp; Hapus Kunci
-            </button>
-            <div class="flex items-center gap-2 ml-auto">
-              <button type="button" onclick="closeModal('modal-supabase-config')"
-                class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
-                Tutup
-              </button>
-              <button type="submit"
-                class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs cursor-pointer">
-                Simpan &amp; Hubungkan Supabase
-              </button>
-            </div>
-          </div>
-        </form>
-
-        <!-- Step 2: SQL Setup Script -->
-        <div class="pt-4 border-t border-slate-200 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">
-              2. Skrip SQL Tabel &amp; Keamanan (RLS)
-            </span>
-            <button type="button" onclick="copySupabaseSQL()"
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer">
-              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-              <span>Salin SQL Setup</span>
-            </button>
-          </div>
-          <p class="text-xs text-slate-500 leading-relaxed">
-            Jalankan skrip berikut sekali saja di <strong>Supabase &rarr; SQL Editor &rarr; New Query</strong> untuk membuat tabel <code>transactions</code>, <code>recurring_bills</code>, <code>debts</code>, kebijakan keamanan <strong>Row Level Security (RLS)</strong>, dan sinkronisasi real-time:
-          </p>
-          <pre id="supabase-sql-code" class="p-3 rounded-xl bg-slate-900 text-emerald-300 font-mono text-[11px] overflow-x-auto leading-relaxed max-h-48">create table if not exists public.transactions (
-  id text primary key,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  type text not null check (type in ('income', 'expense')),
-  amount numeric not null default 0,
-  category text not null,
-  date text not null,
-  note text not null default '',
-  created_at timestamptz not null default now()
-);
-
-create table if not exists public.recurring_bills (
-  id text primary key,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  name text not null,
-  category text not null,
-  amount numeric not null default 0,
-  cycle text not null default 'Bulanan',
-  due_day integer not null default 1,
-  status text not null default 'unpaid' check (status in ('paid', 'unpaid')),
-  created_at timestamptz not null default now()
-);
-
-create table if not exists public.debts (
-  id text primary key,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  type text not null check (type in ('debt', 'receivable')),
-  person_name text not null,
-  amount numeric not null default 0,
-  paid_amount numeric not null default 0,
-  description text not null default '',
-  date text not null,
-  due_date text,
-  status text not null default 'unpaid' check (status in ('unpaid', 'paid')),
-  created_at timestamptz not null default now()
-);
-
-alter table public.transactions enable row level security;
-alter table public.recurring_bills enable row level security;
-alter table public.debts enable row level security;
-
-drop policy if exists "Users manage own transactions" on public.transactions;
-create policy "Users manage own transactions"
-  on public.transactions for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
-drop policy if exists "Users manage own recurring_bills" on public.recurring_bills;
-create policy "Users manage own recurring_bills"
-  on public.recurring_bills for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
-drop policy if exists "Users manage own debts" on public.debts;
-create policy "Users manage own debts"
-  on public.debts for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
-alter publication supabase_realtime add table public.transactions;
-alter publication supabase_realtime add table public.recurring_bills;
-alter publication supabase_realtime add table public.debts;
-notify pgrst, 'reload schema';</pre>
-          <p class="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-            <strong>Tips GitHub Pages:</strong> Anda juga dapat menempelkan <code>CUSTOM_SUPABASE_URL</code> dan <code>CUSTOM_SUPABASE_ANON_KEY</code> langsung di bagian atas kode <code>index.html</code> sebelum di-push ke GitHub agar otomatis terhubung di semua perangkat.
-          </p>
-        </div>
       </div>
     </div>
   </div>
@@ -1769,6 +2017,7 @@ notify pgrst, 'reload schema';</pre>
      */
     const STORAGE_KEY = 'dompetku_finance_data_v1';
     const DEBT_FALLBACK_STORAGE_KEY = 'dompetku_debts_fallback_v1';
+    const VEHICLES_FALLBACK_STORAGE_KEY = 'dompetku_vehicles_fallback_v1';
 
     const CATEGORIES = {
       income: [
@@ -1783,6 +2032,7 @@ notify pgrst, 'reload schema';</pre>
       expense: [
         'Makanan & Minuman',
         'Transportasi & BBM',
+        'Servis & Kendaraan',
         'Belanja Harian',
         'Tagihan Rutin',
         'Kesehatan',
@@ -1812,11 +2062,12 @@ notify pgrst, 'reload schema';</pre>
       // Expense categories
       'Makanan & Minuman': { icon: 'utensils', bg: 'bg-orange-50', text: 'text-orange-600', hex: '#f97316' },
       'Transportasi & BBM': { icon: 'fuel', bg: 'bg-blue-50', text: 'text-blue-600', hex: '#3b82f6' },
+      'Servis & Kendaraan': { icon: 'wrench', bg: 'bg-indigo-50', text: 'text-indigo-600', hex: '#4f46e5' },
       'Belanja Harian': { icon: 'shopping-bag', bg: 'bg-purple-50', text: 'text-purple-600', hex: '#a855f7' },
       'Tagihan Rutin': { icon: 'receipt', bg: 'bg-amber-50', text: 'text-amber-600', hex: '#f59e0b' },
       'Kesehatan': { icon: 'heart-pulse', bg: 'bg-rose-50', text: 'text-rose-600', hex: '#f43f5e' },
       'Hiburan': { icon: 'film', bg: 'bg-pink-50', text: 'text-pink-600', hex: '#ec4899' },
-      'Piutang (Pinjaman Keluar)': { icon: 'send', bg: 'bg-indigo-50', text: 'text-indigo-600', hex: '#4f46e5' },
+      'Piutang (Pinjaman Keluar)': { icon: 'send', bg: 'bg-violet-50', text: 'text-violet-600', hex: '#7c3aed' },
       'Pelunasan Utang': { icon: 'check-circle-2', bg: 'bg-amber-50', text: 'text-amber-700', hex: '#b45309' },
       'Lainnya': { icon: 'layers', bg: 'bg-slate-100', text: 'text-slate-600', hex: '#64748b' }
     };
@@ -1845,11 +2096,15 @@ notify pgrst, 'reload schema';</pre>
     let migrationBannerDismissed = false;
     let debtsTableAvailable = true;
     let warnedMissingDebtsTable = false;
+    let vehiclesTablesAvailable = true;
+    let warnedMissingVehiclesTables = false;
 
     let appState = {
       transactions: [],
       recurringBills: [],
       debts: [],
+      vehicles: [],
+      vehicleServices: [],
       isSampleData: false
     };
 
@@ -1946,6 +2201,36 @@ notify pgrst, 'reload schema';</pre>
       };
     }
 
+    function mapVehicleFromDB(row) {
+      return {
+        id: row.id,
+        name: row.name || 'Kendaraan',
+        type: row.type || 'Motor',
+        plateNumber: row.plate_number || '',
+        currentOdometer: Number(row.current_odometer) || 0,
+        nextServiceOdometer: row.next_service_odometer != null ? Number(row.next_service_odometer) : null,
+        nextServiceDate: row.next_service_date || ''
+      };
+    }
+
+    function mapVehicleServiceFromDB(row) {
+      return {
+        id: row.id,
+        vehicleId: row.vehicle_id,
+        serviceDate: row.service_date || getTodayStr(),
+        odometer: Number(row.odometer) || 0,
+        serviceType: row.service_type || 'Servis Berkala / Tune Up',
+        itemsReplaced: row.items_replaced || '',
+        partsCost: Number(row.parts_cost) || 0,
+        laborCost: Number(row.labor_cost) || 0,
+        totalCost: Number(row.total_cost) || 0,
+        workshopName: row.workshop_name || '',
+        nextOdometer: row.next_odometer != null ? Number(row.next_odometer) : null,
+        nextDate: row.next_date || '',
+        mechanicNotes: row.mechanic_notes || ''
+      };
+    }
+
     function isMissingTableError(err, tableName) {
       if (!err) return false;
       const code = String(err.code || '');
@@ -1974,6 +2259,31 @@ notify pgrst, 'reload schema';</pre>
       }
     }
 
+    function saveVehiclesFallback(vehiclesList, servicesList) {
+      try {
+        localStorage.setItem(VEHICLES_FALLBACK_STORAGE_KEY, JSON.stringify({
+          vehicles: vehiclesList || [],
+          vehicleServices: servicesList || []
+        }));
+      } catch (e) {
+        console.warn('Gagal menyimpan fallback kendaraan:', e);
+      }
+    }
+
+    function loadVehiclesFallback() {
+      try {
+        const raw = localStorage.getItem(VEHICLES_FALLBACK_STORAGE_KEY);
+        if (!raw) return { vehicles: [], vehicleServices: [] };
+        const parsed = JSON.parse(raw);
+        return {
+          vehicles: Array.isArray(parsed.vehicles) ? parsed.vehicles : [],
+          vehicleServices: Array.isArray(parsed.vehicleServices) ? parsed.vehicleServices : []
+        };
+      } catch (e) {
+        return { vehicles: [], vehicleServices: [] };
+      }
+    }
+
     async function stopRealtimeListeners() {
       if (supabase && realtimeChannel) {
         try {
@@ -1988,10 +2298,12 @@ notify pgrst, 'reload schema';</pre>
     async function fetchCloudData() {
       if (!supabase || !currentUser) return;
       try {
-        const [txRes, recRes, debtRes] = await Promise.all([
+        const [txRes, recRes, debtRes, vehRes, svcRes] = await Promise.all([
           supabase.from('transactions').select('*').eq('user_id', currentUser.id),
           supabase.from('recurring_bills').select('*').eq('user_id', currentUser.id),
-          supabase.from('debts').select('*').eq('user_id', currentUser.id)
+          supabase.from('debts').select('*').eq('user_id', currentUser.id),
+          supabase.from('vehicles').select('*').eq('user_id', currentUser.id),
+          supabase.from('vehicle_services').select('*').eq('user_id', currentUser.id)
         ]);
 
         if (txRes.error) throw txRes.error;
@@ -2006,7 +2318,7 @@ notify pgrst, 'reload schema';</pre>
             appState.debts = loadDebtsFallback();
             if (!warnedMissingDebtsTable) {
               warnedMissingDebtsTable = true;
-              showToast('Tabel "debts" belum ada di Supabase. Jalankan SQL Setup terbaru (Utang/Piutang disimpan lokal sementara).', 'info');
+              showToast('Tabel "debts" belum ada di Supabase. Jalankan SQL Setup terbaru.', 'info');
             }
           } else {
             throw debtRes.error;
@@ -2014,6 +2326,26 @@ notify pgrst, 'reload schema';</pre>
         } else {
           debtsTableAvailable = true;
           appState.debts = (debtRes.data || []).map(mapDebtFromDB);
+        }
+
+        if (vehRes.error || svcRes.error) {
+          const errObj = vehRes.error || svcRes.error;
+          if (isMissingTableError(errObj, 'vehicles') || isMissingTableError(errObj, 'vehicle_services')) {
+            vehiclesTablesAvailable = false;
+            const fb = loadVehiclesFallback();
+            appState.vehicles = fb.vehicles;
+            appState.vehicleServices = fb.vehicleServices;
+            if (!warnedMissingVehiclesTables) {
+              warnedMissingVehiclesTables = true;
+              showToast('Tabel "vehicles" belum ada di Supabase. Jalankan SQL Setup terbaru (data servis disimpan lokal sementara).', 'info');
+            }
+          } else {
+            throw errObj;
+          }
+        } else {
+          vehiclesTablesAvailable = true;
+          appState.vehicles = (vehRes.data || []).map(mapVehicleFromDB);
+          appState.vehicleServices = (svcRes.data || []).map(mapVehicleServiceFromDB);
         }
 
         appState.isSampleData = false;
@@ -2033,23 +2365,27 @@ notify pgrst, 'reload schema';</pre>
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${uid}` },
-          () => {
-            fetchCloudData();
-          }
+          () => fetchCloudData()
         )
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'recurring_bills', filter: `user_id=eq.${uid}` },
-          () => {
-            fetchCloudData();
-          }
+          () => fetchCloudData()
         )
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'debts', filter: `user_id=eq.${uid}` },
-          () => {
-            fetchCloudData();
-          }
+          () => fetchCloudData()
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'vehicles', filter: `user_id=eq.${uid}` },
+          () => fetchCloudData()
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'vehicle_services', filter: `user_id=eq.${uid}` },
+          () => fetchCloudData()
         )
         .subscribe();
     }
@@ -2129,9 +2465,11 @@ notify pgrst, 'reload schema';</pre>
           const txCount = Array.isArray(localParsed.transactions) ? localParsed.transactions.length : 0;
           const recCount = Array.isArray(localParsed.recurringBills) ? localParsed.recurringBills.length : 0;
           const debtCount = Array.isArray(localParsed.debts) ? localParsed.debts.length : 0;
-          if (txCount > 0 || recCount > 0 || debtCount > 0) {
+          const vehCount = Array.isArray(localParsed.vehicles) ? localParsed.vehicles.length : 0;
+          const svcCount = Array.isArray(localParsed.vehicleServices) ? localParsed.vehicleServices.length : 0;
+          if (txCount > 0 || recCount > 0 || debtCount > 0 || vehCount > 0 || svcCount > 0) {
             document.getElementById('cloud-migration-desc').textContent =
-              `Ditemukan ${txCount} transaksi, ${recCount} tagihan rutin, dan ${debtCount} catatan utang/piutang di browser ini. Unggah ke database Supabase Anda?`;
+              `Ditemukan ${txCount} transaksi, ${recCount} tagihan, ${debtCount} utang/piutang, dan ${vehCount} kendaraan (${svcCount} servis) di browser ini. Unggah ke Supabase?`;
             document.getElementById('cloud-migration-banner').classList.remove('hidden');
           }
         }
@@ -2157,6 +2495,8 @@ notify pgrst, 'reload schema';</pre>
         const localTxs = Array.isArray(localParsed.transactions) ? localParsed.transactions : [];
         const localRecs = Array.isArray(localParsed.recurringBills) ? localParsed.recurringBills : [];
         const localDebts = Array.isArray(localParsed.debts) ? localParsed.debts : [];
+        const localVehicles = Array.isArray(localParsed.vehicles) ? localParsed.vehicles : [];
+        const localServices = Array.isArray(localParsed.vehicleServices) ? localParsed.vehicleServices : [];
 
         if (localTxs.length > 0) {
           const txRows = localTxs.map(tx => ({
@@ -2210,10 +2550,50 @@ notify pgrst, 'reload schema';</pre>
           }
         }
 
+        if (localVehicles.length > 0) {
+          const vehRows = localVehicles.map(v => ({
+            id: v.id || generateId('veh'),
+            user_id: currentUser.id,
+            name: v.name || 'Kendaraan',
+            type: v.type || 'Motor',
+            plate_number: v.plateNumber || '',
+            current_odometer: Number(v.currentOdometer) || 0,
+            next_service_odometer: v.nextServiceOdometer != null ? Number(v.nextServiceOdometer) : null,
+            next_service_date: v.nextServiceDate || null
+          }));
+          const { error: vehErr } = await supabase.from('vehicles').upsert(vehRows);
+          if (vehErr) {
+            if (isMissingTableError(vehErr, 'vehicles')) {
+              saveVehiclesFallback(localVehicles, localServices);
+            } else {
+              throw vehErr;
+            }
+          } else if (localServices.length > 0) {
+            const svcRows = localServices.map(s => ({
+              id: s.id || generateId('svc'),
+              user_id: currentUser.id,
+              vehicle_id: s.vehicleId,
+              service_date: s.serviceDate || getTodayStr(),
+              odometer: Number(s.odometer) || 0,
+              service_type: s.serviceType || 'Servis Berkala / Tune Up',
+              items_replaced: s.itemsReplaced || '',
+              parts_cost: Number(s.partsCost) || 0,
+              labor_cost: Number(s.laborCost) || 0,
+              total_cost: Number(s.totalCost) || 0,
+              workshop_name: s.workshopName || '',
+              next_odometer: s.nextOdometer != null ? Number(s.nextOdometer) : null,
+              next_date: s.nextDate || null,
+              mechanic_notes: s.mechanicNotes || ''
+            }));
+            const { error: svcErr } = await supabase.from('vehicle_services').upsert(svcRows);
+            if (svcErr) throw svcErr;
+          }
+        }
+
         localStorage.removeItem(STORAGE_KEY);
         dismissMigrationBanner();
         await fetchCloudData();
-        showToast(`${localTxs.length} transaksi, ${localRecs.length} tagihan, & ${localDebts.length} utang/piutang berhasil diunggah!`, 'success');
+        showToast('Seluruh catatan lokal berhasil diunggah ke Supabase!', 'success');
       } catch (err) {
         console.error('Gagal migrasi data ke Supabase:', err);
         showToast('Gagal mengunggah data lokal ke Supabase. Periksa SQL Setup & RLS.', 'error');
@@ -2296,6 +2676,11 @@ notify pgrst, 'reload schema';</pre>
       return { start, end, startStr, endStr, label };
     }
 
+    function formatNumberID(numVal) {
+      const num = Math.round(Number(numVal) || 0);
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
     function formatRupiah(amount) {
       const num = Math.round(Number(amount) || 0);
       const isNegative = num < 0;
@@ -2345,6 +2730,9 @@ notify pgrst, 'reload schema';</pre>
       const dueLaterDay = Math.min(28, currentDay + 8);
       const overdueDay = currentDay > 3 ? currentDay - 2 : 1;
 
+      const vehMotorId = generateId('veh');
+      const vehMobilId = generateId('veh');
+
       const sampleTransactions = [
         {
           id: generateId('tx'),
@@ -2389,10 +2777,10 @@ notify pgrst, 'reload schema';</pre>
         {
           id: generateId('tx'),
           type: 'expense',
-          amount: 215000,
-          category: 'Transportasi & BBM',
+          amount: 190000,
+          category: 'Servis & Kendaraan',
           date: addDaysToStr(today, -6),
-          note: 'Servis rutin & ganti oli kendaraan'
+          note: 'Servis Honda Vario 160: Ganti Oli Rutin (AHASS Mandiri Motor)'
         },
         {
           id: generateId('tx'),
@@ -2441,7 +2829,7 @@ notify pgrst, 'reload schema';</pre>
         },
         {
           id: generateId('rec'),
-          name: 'Cicilan & Perawatan Kendaraan',
+          name: 'Cicilan Kendaraan Bulanan',
           category: 'Kendaraan',
           amount: 1350000,
           cycle: 'Bulanan',
@@ -2465,6 +2853,60 @@ notify pgrst, 'reload schema';</pre>
           cycle: 'Bulanan',
           dueDay: 15,
           status: 'paid'
+        }
+      ];
+
+      const sampleVehicles = [
+        {
+          id: vehMotorId,
+          name: 'Honda Vario 160',
+          type: 'Motor',
+          plateNumber: 'B 1234 XYZ',
+          currentOdometer: 16450,
+          nextServiceOdometer: 18200,
+          nextServiceDate: addDaysToStr(today, 45)
+        },
+        {
+          id: vehMobilId,
+          name: 'Toyota Avanza Veloz',
+          type: 'Mobil',
+          plateNumber: 'AB 5678 CD',
+          currentOdometer: 49750,
+          nextServiceOdometer: 50000,
+          nextServiceDate: addDaysToStr(today, 5)
+        }
+      ];
+
+      const sampleVehicleServices = [
+        {
+          id: generateId('svc'),
+          vehicleId: vehMotorId,
+          serviceDate: addDaysToStr(today, -6),
+          odometer: 16200,
+          serviceType: 'Ganti Oli Rutin',
+          itemsReplaced: 'Oli mesin MPX2, oli gardan, kampas rem depan',
+          partsCost: 145000,
+          laborCost: 45000,
+          totalCost: 190000,
+          workshopName: 'AHASS Mandiri Motor',
+          nextOdometer: 18200,
+          nextDate: addDaysToStr(today, 45),
+          mechanicNotes: 'Roller CVT mulai aus, disarankan cek pada servis berikutnya'
+        },
+        {
+          id: generateId('svc'),
+          vehicleId: vehMobilId,
+          serviceDate: addDaysToStr(today, -35),
+          odometer: 45000,
+          serviceType: 'Servis Berkala / Tune Up',
+          itemsReplaced: 'Oli mesin 4L, filter oli, balancing & spooring ban',
+          partsCost: 620000,
+          laborCost: 230000,
+          totalCost: 850000,
+          workshopName: 'Bengkel Resmi Auto2000',
+          nextOdometer: 50000,
+          nextDate: addDaysToStr(today, 5),
+          mechanicNotes: 'Kondisi aki masih 80% normal, siap perjalanan jauh'
         }
       ];
 
@@ -2495,6 +2937,8 @@ notify pgrst, 'reload schema';</pre>
             status: 'unpaid'
           }
         ],
+        vehicles: sampleVehicles,
+        vehicleServices: sampleVehicleServices,
         isSampleData: true
       };
     }
@@ -2507,6 +2951,8 @@ notify pgrst, 'reload schema';</pre>
           appState.transactions = Array.isArray(parsed.transactions) ? parsed.transactions : [];
           appState.recurringBills = Array.isArray(parsed.recurringBills) ? parsed.recurringBills : [];
           appState.debts = Array.isArray(parsed.debts) ? parsed.debts : [];
+          appState.vehicles = Array.isArray(parsed.vehicles) ? parsed.vehicles : [];
+          appState.vehicleServices = Array.isArray(parsed.vehicleServices) ? parsed.vehicleServices : [];
           appState.isSampleData = Boolean(parsed.isSampleData);
         } else {
           appState = createSampleData();
@@ -2704,7 +3150,7 @@ notify pgrst, 'reload schema';</pre>
     function switchTab(tabName) {
       uiState.activeTab = tabName;
 
-      ['dashboard', 'transactions', 'debts', 'recurring', 'reports'].forEach(view => {
+      ['dashboard', 'transactions', 'debts', 'recurring', 'vehicles', 'reports'].forEach(view => {
         document.getElementById(`view-${view}`).classList.toggle('hidden', view !== tabName);
       });
 
@@ -2713,7 +3159,7 @@ notify pgrst, 'reload schema';</pre>
 
       document.querySelectorAll('.nav-item').forEach(btn => {
         const active = btn.dataset.nav === tabName;
-        const hasBadge = btn.dataset.nav === 'recurring' || btn.dataset.nav === 'debts';
+        const hasBadge = btn.dataset.nav === 'recurring' || btn.dataset.nav === 'debts' || btn.dataset.nav === 'vehicles';
         const baseClasses = `nav-item ${hasBadge ? 'relative ' : ''}w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm transition-all duration-150 cursor-pointer`;
         if (active) {
           btn.className = `${baseClasses} font-semibold bg-emerald-600 text-white shadow-md shadow-emerald-950/50`;
@@ -2739,7 +3185,7 @@ notify pgrst, 'reload schema';</pre>
 
     /**
      * =========================================================================
-     * 7. RENDER UTAMA: HEADER, DASHBOARD, CHARTS, TRANSAKSI, TAGIHAN & LAPORAN
+     * 7. RENDER UTAMA: HEADER, DASHBOARD, CHARTS, TRANSAKSI, TAGIHAN & SERVIS
      * =========================================================================
      */
     function refreshAllViews() {
@@ -2748,6 +3194,7 @@ notify pgrst, 'reload schema';</pre>
       renderTransactionsView();
       renderDebtsView();
       renderRecurringView();
+      renderVehiclesView();
       renderReportsView();
       if (window.lucide) {
         lucide.createIcons();
@@ -2865,6 +3312,26 @@ notify pgrst, 'reload schema';</pre>
         sideDebtsMiniDot.classList.add('hidden');
         mobileDebtsDot.classList.add('hidden');
       }
+
+      // Badge Kendaraan Mendekati / Lewat Jadwal Servis
+      const dueVehicles = (appState.vehicles || []).filter(v => {
+        const st = getVehicleServiceStatus(v);
+        return st.level === 'urgent' || st.level === 'warning';
+      });
+      const sideVehBadge = document.getElementById('sidebar-vehicles-badge');
+      const sideVehMiniDot = document.getElementById('sidebar-vehicles-mini-dot');
+      const mobileVehDot = document.getElementById('mobile-vehicles-dot');
+
+      if (dueVehicles.length > 0) {
+        sideVehBadge.textContent = dueVehicles.length;
+        sideVehBadge.classList.remove('hidden');
+        sideVehMiniDot.classList.remove('hidden');
+        mobileVehDot.classList.remove('hidden');
+      } else {
+        sideVehBadge.classList.add('hidden');
+        sideVehMiniDot.classList.add('hidden');
+        mobileVehDot.classList.add('hidden');
+      }
     }
 
     function handleHeaderCloudClick() {
@@ -2920,8 +3387,63 @@ notify pgrst, 'reload schema';</pre>
       renderDashboardRoutineReminders(unpaidBills);
       renderDashboardRecentTransactions(periodTxs, periodLabel);
       renderDashboardDebtsWidget();
+      renderDashboardVehiclesWidget();
       renderCashflowChart();
       renderCategoryDoughnutChart(periodTxs, periodLabel);
+    }
+
+    function renderDashboardVehiclesWidget() {
+      const vehicles = appState.vehicles || [];
+      document.getElementById('dashboard-vehicles-pill').textContent = `${vehicles.length} Unit`;
+
+      const container = document.getElementById('dashboard-vehicles-list');
+      if (vehicles.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full p-4 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                <i data-lucide="car" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <p class="text-xs sm:text-sm font-bold text-slate-800">Belum Ada Kendaraan di Garasi</p>
+                <p class="text-xs text-slate-500">Tambahkan motor atau mobil Anda untuk memantau odometer &amp; jadwal ganti oli.</p>
+              </div>
+            </div>
+            <button onclick="openVehicleModal()" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-xs font-semibold text-slate-700 shrink-0 cursor-pointer">
+              + Tambah Unit
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = vehicles.slice(0, 3).map(v => {
+        const statusMeta = getVehicleServiceStatus(v);
+        const iconName = v.type === 'Mobil' ? 'car' : 'bike';
+        return `
+          <div class="p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/60 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                <i data-lucide="${iconName}" class="w-5 h-5"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-bold text-slate-900 truncate">${escapeHTML(v.name)}</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">
+                  Odo: <strong class="text-slate-700">${formatNumberID(v.currentOdometer)} km</strong>
+                  ${v.nextServiceOdometer ? ` &rarr; Target ${formatNumberID(v.nextServiceOdometer)} km` : ''}
+                </p>
+                <span class="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-semibold ${statusMeta.badgeClass}">
+                  ${statusMeta.label}
+                </span>
+              </div>
+            </div>
+            <button onclick="openServiceModal('${v.id}')"
+              class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shrink-0 cursor-pointer transition-colors">
+              Servis
+            </button>
+          </div>
+        `;
+      }).join('');
     }
 
     function renderDashboardDebtsWidget() {
@@ -3564,7 +4086,6 @@ notify pgrst, 'reload schema';</pre>
         return;
       }
 
-      // Cabang Khusus Utang atau Piutang Baru
       if (!id && (type === 'debt' || type === 'receivable')) {
         const personName = document.getElementById('tx-debt-person').value.trim();
         const dueDate = document.getElementById('tx-debt-due-date').value || '';
@@ -3897,7 +4418,6 @@ notify pgrst, 'reload schema';</pre>
         return `
           <div class="bg-white rounded-2xl border ${isPaid ? 'border-slate-200/80 opacity-90' : 'border-slate-200 shadow-2xs'} p-5 flex flex-col justify-between gap-4 transition-all hover:shadow-md">
             <div>
-              <!-- Header Row -->
               <div class="flex items-start justify-between gap-2">
                 <div class="space-y-1 min-w-0">
                   <div class="flex flex-wrap items-center gap-1.5">
@@ -3926,7 +4446,6 @@ notify pgrst, 'reload schema';</pre>
                 </div>
               </div>
 
-              <!-- Amounts & Progress Bar -->
               <div class="mt-4 pt-3.5 border-t border-slate-100 space-y-2.5">
                 <div class="flex items-end justify-between gap-2">
                   <div>
@@ -3941,7 +4460,6 @@ notify pgrst, 'reload schema';</pre>
                   </div>
                 </div>
 
-                <!-- Progress Bar -->
                 <div>
                   <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1">
                     <span>Progres Pelunasan</span>
@@ -3961,7 +4479,6 @@ notify pgrst, 'reload schema';</pre>
               </div>
             </div>
 
-            <!-- Action Footer -->
             <div class="pt-1">
               ${isPaid ? `
                 <div class="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200/70 flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-700">
@@ -4333,7 +4850,6 @@ notify pgrst, 'reload schema';</pre>
         return `
           <div class="bg-white rounded-2xl border ${isPaid ? 'border-slate-200/80 opacity-90' : 'border-slate-200 shadow-2xs'} p-5 flex flex-col justify-between gap-4 transition-all hover:shadow-md">
             <div>
-              <!-- Top Row: Icon + Status Badge -->
               <div class="flex items-start justify-between gap-3">
                 <div class="flex items-center gap-3 min-w-0">
                   <div class="w-11 h-11 rounded-2xl ${style.bg} ${style.text} border ${style.border} flex items-center justify-center shrink-0">
@@ -4357,7 +4873,6 @@ notify pgrst, 'reload schema';</pre>
                 </div>
               </div>
 
-              <!-- Amount & Due Date -->
               <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-end justify-between gap-2">
                 <div>
                   <p class="text-[11px] font-medium text-slate-400">Estimasi Tagihan</p>
@@ -4372,7 +4887,6 @@ notify pgrst, 'reload schema';</pre>
               </div>
             </div>
 
-            <!-- Action Footer -->
             <div class="pt-2">
               ${isPaid ? `
                 <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200/70">
@@ -4656,6 +5170,754 @@ notify pgrst, 'reload schema';</pre>
 
     /**
      * =========================================================================
+     * 11B. RENDER VIEW 3B: GARASI & RIWAYAT SERVIS KENDARAAN
+     * =========================================================================
+     */
+    function getVehicleServiceStatus(vehicle) {
+      const curOdo = Number(vehicle.currentOdometer) || 0;
+      const targetOdo = vehicle.nextServiceOdometer != null ? Number(vehicle.nextServiceOdometer) : null;
+      const targetDate = vehicle.nextServiceDate || '';
+
+      let kmDiff = null;
+      if (targetOdo && targetOdo > 0) {
+        kmDiff = targetOdo - curOdo;
+      }
+
+      let dayDiff = null;
+      if (targetDate) {
+        const today = parseLocalDate(getTodayStr());
+        const due = parseLocalDate(targetDate);
+        dayDiff = Math.round((due - today) / (1000 * 60 * 60 * 24));
+      }
+
+      if ((kmDiff !== null && kmDiff <= 0) || (dayDiff !== null && dayDiff < 0)) {
+        const reason = kmDiff !== null && kmDiff <= 0
+          ? `Lewat ${formatNumberID(Math.abs(kmDiff))} km dari target`
+          : `Lewat ${Math.abs(dayDiff)} hari dari jadwal`;
+        return {
+          level: 'urgent',
+          label: `Waktunya Servis! (${reason})`,
+          badgeClass: 'bg-rose-100 text-rose-800 border border-rose-200'
+        };
+      }
+
+      if ((kmDiff !== null && kmDiff <= 500) || (dayDiff !== null && dayDiff <= 7)) {
+        const reason = kmDiff !== null && kmDiff <= 500
+          ? `Sisa ${formatNumberID(kmDiff)} km lagi`
+          : (dayDiff === 0 ? 'Jadwal servis hari ini' : `Sisa ${dayDiff} hari lagi`);
+        return {
+          level: 'warning',
+          label: `Mendekati Servis (${reason})`,
+          badgeClass: 'bg-amber-100 text-amber-800 border border-amber-200'
+        };
+      }
+
+      if (kmDiff !== null) {
+        return {
+          level: 'ok',
+          label: `Aman • Sisa ${formatNumberID(kmDiff)} km`,
+          badgeClass: 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+        };
+      }
+
+      if (dayDiff !== null) {
+        return {
+          level: 'ok',
+          label: `Aman • ${dayDiff} hari lagi`,
+          badgeClass: 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+        };
+      }
+
+      return {
+        level: 'none',
+        label: 'Belum ada target servis',
+        badgeClass: 'bg-slate-100 text-slate-600 border border-slate-200'
+      };
+    }
+
+    function renderVehiclesView() {
+      const vehicles = appState.vehicles || [];
+      const services = appState.vehicleServices || [];
+
+      let totalParts = 0;
+      let totalLabor = 0;
+      let totalCost = 0;
+
+      services.forEach(s => {
+        totalParts += Number(s.partsCost) || 0;
+        totalLabor += Number(s.laborCost) || 0;
+        totalCost += Number(s.totalCost) || 0;
+      });
+
+      const dueCount = vehicles.filter(v => {
+        const st = getVehicleServiceStatus(v);
+        return st.level === 'urgent' || st.level === 'warning';
+      }).length;
+
+      document.getElementById('veh-kpi-total-cost').textContent = formatRupiah(totalCost);
+      document.getElementById('veh-kpi-cost-breakdown').textContent = `Sparepart ${formatRupiah(totalParts)} • Jasa ${formatRupiah(totalLabor)}`;
+      document.getElementById('veh-kpi-unit-count').textContent = `${vehicles.length} Unit`;
+      document.getElementById('veh-kpi-due-summary').textContent = dueCount > 0
+        ? `${dueCount} kendaraan mendekati / lewat jadwal`
+        : 'Semua jadwal perawatan terpantau aman';
+      document.getElementById('veh-kpi-service-count').textContent = `${services.length} Kali`;
+
+      const sortedAllServices = [...services].sort((a, b) => (b.serviceDate > a.serviceDate ? 1 : -1));
+      if (sortedAllServices.length > 0) {
+        const latest = sortedAllServices[0];
+        const vObj = vehicles.find(v => v.id === latest.vehicleId);
+        document.getElementById('veh-kpi-last-service').textContent = `Terakhir: ${formatDateIndo(latest.serviceDate)} (${vObj ? vObj.name : latest.serviceType})`;
+      } else {
+        document.getElementById('veh-kpi-last-service').textContent = 'Belum ada riwayat servis';
+      }
+
+      // Render Daftar Kendaraan (Garasi)
+      const garageGrid = document.getElementById('vehicles-garage-grid');
+      if (vehicles.length === 0) {
+        garageGrid.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl border border-slate-200/80 p-10 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="car" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800">Garasi Masih Kosong</h3>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">
+              Tambahkan kendaraan Anda (motor atau mobil) untuk mencatat riwayat ganti oli, suku cadang, dan pengingat kilometer berikutnya.
+            </p>
+            <button onclick="openVehicleModal()"
+              class="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold cursor-pointer">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Tambah Kendaraan Pertama</span>
+            </button>
+          </div>
+        `;
+      } else {
+        garageGrid.innerHTML = vehicles.map(v => {
+          const statusMeta = getVehicleServiceStatus(v);
+          const iconName = v.type === 'Mobil' ? 'car' : 'bike';
+          const vehServices = services.filter(s => s.vehicleId === v.id);
+          const vehTotalSpent = vehServices.reduce((acc, s) => acc + (Number(s.totalCost) || 0), 0);
+
+          return `
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs p-5 flex flex-col justify-between gap-4 hover:shadow-md transition-all">
+              <div>
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-200/70 flex items-center justify-center shrink-0">
+                      <i data-lucide="${iconName}" class="w-5 h-5"></i>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-slate-100 text-slate-600">${escapeHTML(v.type)}</span>
+                        ${v.plateNumber ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-slate-900 text-white">${escapeHTML(v.plateNumber)}</span>` : ''}
+                      </div>
+                      <h4 class="text-base font-bold text-slate-900 truncate mt-1">${escapeHTML(v.name)}</h4>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-1 shrink-0">
+                    <button onclick="openVehicleModal('${v.id}')" title="Edit Kendaraan"
+                      class="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 cursor-pointer">
+                      <i data-lucide="pencil" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="confirmDeleteVehicle('${v.id}')" title="Hapus Kendaraan"
+                      class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer">
+                      <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Odometer Box -->
+                <div class="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
+                  <div>
+                    <p class="text-[11px] font-medium text-slate-400">Odometer Saat Ini</p>
+                    <p class="text-base sm:text-lg font-extrabold text-slate-900">${formatNumberID(v.currentOdometer)} <span class="text-xs font-semibold text-slate-500">km</span></p>
+                  </div>
+                  <button onclick="openQuickOdoModal('${v.id}')"
+                    class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-xs font-semibold text-slate-700 cursor-pointer">
+                    Update KM
+                  </button>
+                </div>
+
+                <!-- Target Servis Berikutnya -->
+                <div class="mt-3 space-y-1.5">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold ${statusMeta.badgeClass}">
+                    ${statusMeta.label}
+                  </span>
+                  <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                    <span>Target KM: <strong class="text-slate-700">${v.nextServiceOdometer ? formatNumberID(v.nextServiceOdometer) + ' km' : '-'}</strong></span>
+                    <span>Target Tgl: <strong class="text-slate-700">${v.nextServiceDate ? formatDateIndo(v.nextServiceDate) : '-'}</strong></span>
+                  </div>
+                  <p class="text-[11px] text-slate-400">Total biaya servis unit ini: <strong class="text-slate-600">${formatRupiah(vehTotalSpent)}</strong> (${vehServices.length}x)</p>
+                </div>
+              </div>
+
+              <button onclick="openServiceModal('${v.id}')"
+                class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-xs sm:text-sm font-semibold shadow-2xs flex items-center justify-center gap-2 transition-all cursor-pointer">
+                <i data-lucide="wrench" class="w-4 h-4"></i>
+                <span>Catat Servis Unit Ini</span>
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Sinkronkan dropdown filter kendaraan di riwayat servis
+      const vehFilterSelect = document.getElementById('svc-filter-vehicle');
+      const prevVehFilter = vehFilterSelect.value;
+      vehFilterSelect.innerHTML = `<option value="all">Semua Kendaraan</option>` +
+        vehicles.map(v => `<option value="${v.id}">${escapeHTML(v.name)}${v.plateNumber ? ` (${escapeHTML(v.plateNumber)})` : ''}</option>`).join('');
+      if (vehicles.some(v => v.id === prevVehFilter)) {
+        vehFilterSelect.value = prevVehFilter;
+      }
+
+      // Render Riwayat Servis Kendaraan
+      const selectedVeh = vehFilterSelect.value;
+      const selectedType = document.getElementById('svc-filter-type').value;
+      const searchQ = (document.getElementById('svc-search-input').value || '').toLowerCase().trim();
+
+      const filteredServices = sortedAllServices.filter(s => {
+        if (selectedVeh !== 'all' && s.vehicleId !== selectedVeh) return false;
+        if (selectedType !== 'all' && s.serviceType !== selectedType) return false;
+        if (searchQ) {
+          const vObj = vehicles.find(v => v.id === s.vehicleId);
+          const haystack = `${s.itemsReplaced} ${s.workshopName} ${s.mechanicNotes} ${s.serviceType} ${vObj ? vObj.name : ''}`.toLowerCase();
+          if (!haystack.includes(searchQ)) return false;
+        }
+        return true;
+      });
+
+      const listContainer = document.getElementById('vehicle-services-list');
+      if (filteredServices.length === 0) {
+        listContainer.innerHTML = `
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-10 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2.5">
+              <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+            </div>
+            <p class="text-sm font-bold text-slate-800">Belum Ada Riwayat Servis Ditemukan</p>
+            <p class="text-xs text-slate-500 mt-1">Klik "+ Catat Servis" untuk mencatat penggantian oli, suku cadang, atau perbaikan kendaraan.</p>
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = filteredServices.map(s => {
+        const vObj = vehicles.find(v => v.id === s.vehicleId);
+        const vehName = vObj ? vObj.name : 'Kendaraan Terhapus';
+        const vehPlate = vObj && vObj.plateNumber ? vObj.plateNumber : '';
+
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs hover:border-slate-300 transition-all">
+            <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+              <!-- Left Info -->
+              <div class="space-y-2 min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                    ${escapeHTML(s.serviceType)}
+                  </span>
+                  <span class="text-xs font-bold text-slate-800">
+                    ${escapeHTML(vehName)} ${vehPlate ? `<span class="text-slate-400 font-mono">(${escapeHTML(vehPlate)})</span>` : ''}
+                  </span>
+                  <span class="text-slate-300">&bull;</span>
+                  <span class="text-xs text-slate-500 flex items-center gap-1">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                    ${formatDateIndo(s.serviceDate, true)}
+                  </span>
+                  <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700">
+                    Odo: ${formatNumberID(s.odometer)} km
+                  </span>
+                </div>
+
+                <p class="text-sm sm:text-base font-bold text-slate-900">
+                  Item Diganti: <span class="font-medium text-slate-700">${escapeHTML(s.itemsReplaced)}</span>
+                </p>
+
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+                  ${s.workshopName ? `<span class="inline-flex items-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i> Bengkel: <strong class="text-slate-700">${escapeHTML(s.workshopName)}</strong></span>` : ''}
+                  ${(s.nextOdometer || s.nextDate) ? `<span class="inline-flex items-center gap-1"><i data-lucide="bell" class="w-3.5 h-3.5 text-amber-500"></i> Target Berikutnya: <strong class="text-slate-700">${s.nextOdometer ? formatNumberID(s.nextOdometer) + ' km' : ''}${s.nextOdometer && s.nextDate ? ' / ' : ''}${s.nextDate ? formatDateIndo(s.nextDate) : ''}</strong></span>` : ''}
+                </div>
+
+                ${s.mechanicNotes ? `
+                  <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/70 text-xs text-amber-900 flex items-start gap-2">
+                    <i data-lucide="message-square-warning" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                    <span><strong>Catatan Mekanik:</strong> ${escapeHTML(s.mechanicNotes)}</span>
+                  </div>
+                ` : ''}
+              </div>
+
+              <!-- Right Cost & Actions -->
+              <div class="flex sm:items-center lg:flex-col lg:items-end justify-between gap-3 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 shrink-0">
+                <div class="lg:text-right">
+                  <p class="text-[11px] text-slate-400">Sparepart ${formatRupiah(s.partsCost)} + Jasa ${formatRupiah(s.laborCost)}</p>
+                  <p class="text-base sm:text-lg font-extrabold text-rose-600">${formatRupiah(s.totalCost)}</p>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                  <button onclick="openServiceModal(null, '${s.id}')" title="Edit Riwayat Servis"
+                    class="p-2 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer">
+                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                  </button>
+                  <button onclick="confirmDeleteService('${s.id}')" title="Hapus Riwayat Servis"
+                    class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openVehicleModal(vehicleId = null) {
+      const form = document.getElementById('form-vehicle');
+      form.reset();
+
+      if (vehicleId) {
+        const v = (appState.vehicles || []).find(item => item.id === vehicleId);
+        if (!v) return;
+        document.getElementById('modal-veh-title').textContent = 'Edit Data Kendaraan';
+        document.getElementById('veh-id').value = v.id;
+        document.getElementById('veh-name').value = v.name;
+        document.getElementById('veh-type').value = v.type || 'Motor';
+        document.getElementById('veh-plate').value = v.plateNumber || '';
+        document.getElementById('veh-odo').value = formatNumberID(v.currentOdometer);
+        document.getElementById('veh-next-odo').value = v.nextServiceOdometer ? formatNumberID(v.nextServiceOdometer) : '';
+        document.getElementById('veh-next-date').value = v.nextServiceDate || '';
+      } else {
+        document.getElementById('modal-veh-title').textContent = 'Tambah Kendaraan ke Garasi';
+        document.getElementById('veh-id').value = '';
+        document.getElementById('veh-type').value = 'Motor';
+      }
+
+      openModal('modal-vehicle');
+    }
+
+    async function saveVehicle(event) {
+      event.preventDefault();
+      const id = document.getElementById('veh-id').value;
+      const name = document.getElementById('veh-name').value.trim();
+      const type = document.getElementById('veh-type').value;
+      const plateNumber = document.getElementById('veh-plate').value.trim().toUpperCase();
+      const currentOdometer = parseRupiahInput(document.getElementById('veh-odo').value);
+      const nextOdoRaw = parseRupiahInput(document.getElementById('veh-next-odo').value);
+      const nextServiceOdometer = nextOdoRaw > 0 ? nextOdoRaw : null;
+      const nextServiceDate = document.getElementById('veh-next-date').value || '';
+
+      const vehId = id || generateId('veh');
+      const payload = {
+        id: vehId,
+        name,
+        type,
+        plateNumber,
+        currentOdometer,
+        nextServiceOdometer,
+        nextServiceDate
+      };
+
+      if (isCloudAuthenticated() && vehiclesTablesAvailable) {
+        try {
+          const { error } = await supabase.from('vehicles').upsert({
+            id: vehId,
+            user_id: currentUser.id,
+            name,
+            type,
+            plate_number: plateNumber,
+            current_odometer: currentOdometer,
+            next_service_odometer: nextServiceOdometer,
+            next_service_date: nextServiceDate || null
+          });
+          if (error) throw error;
+          closeModal('modal-vehicle');
+          await fetchCloudData();
+          showToast(id ? 'Data kendaraan diperbarui di Supabase.' : 'Kendaraan ditambahkan ke Supabase!', 'success');
+        } catch (err) {
+          console.error('Supabase saveVehicle error:', err);
+          showToast('Gagal menyimpan kendaraan ke Supabase.', 'error');
+        }
+        return;
+      }
+
+      if (id) {
+        const idx = appState.vehicles.findIndex(v => v.id === id);
+        if (idx !== -1) appState.vehicles[idx] = payload;
+      } else {
+        appState.vehicles.push(payload);
+      }
+
+      if (isCloudAuthenticated()) {
+        saveVehiclesFallback(appState.vehicles, appState.vehicleServices);
+      } else {
+        saveLocalState();
+      }
+      closeModal('modal-vehicle');
+      refreshAllViews();
+      showToast(id ? 'Data kendaraan berhasil diperbarui.' : 'Kendaraan ditambahkan ke garasi!', 'success');
+    }
+
+    function openQuickOdoModal(vehicleId) {
+      const v = (appState.vehicles || []).find(item => item.id === vehicleId);
+      if (!v) return;
+      document.getElementById('quick-odo-veh-id').value = v.id;
+      document.getElementById('quick-odo-veh-name').textContent = `${v.name} ${v.plateNumber ? `(${v.plateNumber})` : ''}`;
+      document.getElementById('quick-odo-current-label').textContent = `Odometer terakhir: ${formatNumberID(v.currentOdometer)} km`;
+      document.getElementById('quick-odo-input').value = formatNumberID(v.currentOdometer);
+      openModal('modal-update-odo');
+    }
+
+    async function submitQuickOdometer(event) {
+      event.preventDefault();
+      const vehId = document.getElementById('quick-odo-veh-id').value;
+      const v = (appState.vehicles || []).find(item => item.id === vehId);
+      if (!v) return;
+
+      const newOdo = parseRupiahInput(document.getElementById('quick-odo-input').value);
+      v.currentOdometer = newOdo;
+
+      if (isCloudAuthenticated() && vehiclesTablesAvailable) {
+        try {
+          const { error } = await supabase
+            .from('vehicles')
+            .update({ current_odometer: newOdo })
+            .eq('id', vehId)
+            .eq('user_id', currentUser.id);
+          if (error) throw error;
+          closeModal('modal-update-odo');
+          await fetchCloudData();
+          showToast(`Odometer ${v.name} diperbarui ke ${formatNumberID(newOdo)} km!`, 'success');
+        } catch (err) {
+          showToast('Gagal memperbarui odometer di Supabase.', 'error');
+        }
+        return;
+      }
+
+      if (isCloudAuthenticated()) {
+        saveVehiclesFallback(appState.vehicles, appState.vehicleServices);
+      } else {
+        saveLocalState();
+      }
+      closeModal('modal-update-odo');
+      refreshAllViews();
+      showToast(`Odometer ${v.name} diperbarui ke ${formatNumberID(newOdo)} km!`, 'success');
+    }
+
+    function confirmDeleteVehicle(vehicleId) {
+      const v = (appState.vehicles || []).find(item => item.id === vehicleId);
+      if (!v) return;
+
+      openConfirmDialog({
+        title: 'Hapus Kendaraan dari Garasi?',
+        message: `Anda akan menghapus "${v.name}" beserta seluruh riwayat servis unit ini. Catatan pengeluaran di Buku Kas tetap tersimpan.`,
+        confirmText: 'Ya, Hapus Unit',
+        onConfirm: async () => {
+          if (isCloudAuthenticated() && vehiclesTablesAvailable) {
+            try {
+              const { error } = await supabase
+                .from('vehicles')
+                .delete()
+                .eq('id', vehicleId)
+                .eq('user_id', currentUser.id);
+              if (error) throw error;
+              await fetchCloudData();
+              showToast('Kendaraan dihapus dari Supabase.', 'info');
+            } catch (err) {
+              showToast('Gagal menghapus kendaraan di Supabase.', 'error');
+            }
+            return;
+          }
+
+          appState.vehicles = appState.vehicles.filter(item => item.id !== vehicleId);
+          appState.vehicleServices = appState.vehicleServices.filter(s => s.vehicleId !== vehicleId);
+          if (isCloudAuthenticated()) {
+            saveVehiclesFallback(appState.vehicles, appState.vehicleServices);
+          } else {
+            saveLocalState();
+          }
+          refreshAllViews();
+          showToast('Kendaraan dan riwayat servisnya telah dihapus.', 'info');
+        }
+      });
+    }
+
+    function openServiceModal(preselectVehicleId = null, serviceId = null) {
+      const vehicles = appState.vehicles || [];
+      if (vehicles.length === 0) {
+        showToast('Tambahkan kendaraan ke garasi terlebih dahulu sebelum mencatat servis.', 'info');
+        openVehicleModal();
+        return;
+      }
+
+      const form = document.getElementById('form-service');
+      form.reset();
+
+      const vehSelect = document.getElementById('svc-vehicle-id');
+      vehSelect.innerHTML = vehicles.map(v =>
+        `<option value="${v.id}">${escapeHTML(v.name)}${v.plateNumber ? ` (${escapeHTML(v.plateNumber)})` : ''}</option>`
+      ).join('');
+
+      const syncBox = document.getElementById('svc-sync-cash-box');
+
+      if (serviceId) {
+        const svc = (appState.vehicleServices || []).find(s => s.id === serviceId);
+        if (!svc) return;
+        document.getElementById('modal-svc-title').textContent = 'Edit Riwayat Servis Kendaraan';
+        document.getElementById('svc-id').value = svc.id;
+        vehSelect.value = svc.vehicleId;
+        document.getElementById('svc-date').value = svc.serviceDate;
+        document.getElementById('svc-odometer').value = formatNumberID(svc.odometer);
+        document.getElementById('svc-type').value = svc.serviceType;
+        document.getElementById('svc-items').value = svc.itemsReplaced;
+        document.getElementById('svc-parts-cost').value = svc.partsCost ? formatNumberID(svc.partsCost) : '';
+        document.getElementById('svc-labor-cost').value = svc.laborCost ? formatNumberID(svc.laborCost) : '';
+        document.getElementById('svc-total-cost').value = formatNumberID(svc.totalCost);
+        document.getElementById('svc-workshop').value = svc.workshopName || '';
+        document.getElementById('svc-notes').value = svc.mechanicNotes || '';
+        document.getElementById('svc-next-odo').value = svc.nextOdometer ? formatNumberID(svc.nextOdometer) : '';
+        document.getElementById('svc-next-date').value = svc.nextDate || '';
+        syncBox.classList.add('hidden');
+      } else {
+        document.getElementById('modal-svc-title').textContent = 'Catat Servis Kendaraan';
+        document.getElementById('svc-id').value = '';
+        if (preselectVehicleId && vehicles.some(v => v.id === preselectVehicleId)) {
+          vehSelect.value = preselectVehicleId;
+        }
+        document.getElementById('svc-date').value = getTodayStr();
+        document.getElementById('svc-sync-cash').checked = true;
+        syncBox.classList.remove('hidden');
+        handleServiceVehicleChange();
+      }
+
+      openModal('modal-service');
+    }
+
+    function handleServiceVehicleChange() {
+      const svcId = document.getElementById('svc-id').value;
+      if (svcId) return; // Jangan timpa saat mode edit
+
+      const vehId = document.getElementById('svc-vehicle-id').value;
+      const v = (appState.vehicles || []).find(item => item.id === vehId);
+      if (!v) return;
+
+      const curOdo = Number(v.currentOdometer) || 0;
+      document.getElementById('svc-odometer').value = curOdo > 0 ? formatNumberID(curOdo) : '';
+      autoSuggestNextServiceOdo();
+    }
+
+    function autoSuggestNextServiceOdo() {
+      const svcId = document.getElementById('svc-id').value;
+      if (svcId) return;
+
+      const vehId = document.getElementById('svc-vehicle-id').value;
+      const v = (appState.vehicles || []).find(item => item.id === vehId);
+      const odo = parseRupiahInput(document.getElementById('svc-odometer').value);
+
+      if (odo > 0 && v) {
+        const interval = v.type === 'Mobil' ? 5000 : 2000;
+        document.getElementById('svc-next-odo').value = formatNumberID(odo + interval);
+      }
+    }
+
+    function recalcServiceTotal() {
+      const parts = parseRupiahInput(document.getElementById('svc-parts-cost').value);
+      const labor = parseRupiahInput(document.getElementById('svc-labor-cost').value);
+      const sum = parts + labor;
+      document.getElementById('svc-total-cost').value = sum > 0 ? formatNumberID(sum) : '';
+    }
+
+    async function saveServiceRecord(event) {
+      event.preventDefault();
+      const id = document.getElementById('svc-id').value;
+      const vehicleId = document.getElementById('svc-vehicle-id').value;
+      const serviceDate = document.getElementById('svc-date').value;
+      const odometer = parseRupiahInput(document.getElementById('svc-odometer').value);
+      const serviceType = document.getElementById('svc-type').value;
+      const itemsReplaced = document.getElementById('svc-items').value.trim();
+      const partsCost = parseRupiahInput(document.getElementById('svc-parts-cost').value);
+      const laborCost = parseRupiahInput(document.getElementById('svc-labor-cost').value);
+      const totalCost = parseRupiahInput(document.getElementById('svc-total-cost').value);
+      const workshopName = document.getElementById('svc-workshop').value.trim();
+      const mechanicNotes = document.getElementById('svc-notes').value.trim();
+      const nextOdoRaw = parseRupiahInput(document.getElementById('svc-next-odo').value);
+      const nextOdometer = nextOdoRaw > 0 ? nextOdoRaw : null;
+      const nextDate = document.getElementById('svc-next-date').value || '';
+      const syncCash = !id && document.getElementById('svc-sync-cash').checked;
+
+      if (totalCost <= 0) {
+        showToast('Total biaya aktual servis harus lebih dari Rp 0.', 'error');
+        return;
+      }
+
+      const svcId = id || generateId('svc');
+      const svcPayload = {
+        id: svcId,
+        vehicleId,
+        serviceDate,
+        odometer,
+        serviceType,
+        itemsReplaced,
+        partsCost,
+        laborCost,
+        totalCost,
+        workshopName,
+        nextOdometer,
+        nextDate,
+        mechanicNotes
+      };
+
+      const targetVehicle = (appState.vehicles || []).find(v => v.id === vehicleId);
+      const updatedVehicleOdo = targetVehicle
+        ? Math.max(Number(targetVehicle.currentOdometer) || 0, odometer)
+        : odometer;
+      const updatedNextOdo = nextOdometer !== null
+        ? nextOdometer
+        : (targetVehicle ? targetVehicle.nextServiceOdometer : null);
+      const updatedNextDate = nextDate
+        ? nextDate
+        : (targetVehicle ? targetVehicle.nextServiceDate : '');
+
+      const vehName = targetVehicle ? targetVehicle.name : 'Kendaraan';
+      const cashTx = syncCash
+        ? {
+            id: generateId('tx'),
+            type: 'expense',
+            amount: totalCost,
+            category: 'Servis & Kendaraan',
+            date: serviceDate,
+            note: `Servis ${vehName}: ${serviceType}${workshopName ? ` (${workshopName})` : ''}`
+          }
+        : null;
+
+      if (isCloudAuthenticated()) {
+        try {
+          if (cashTx) {
+            const { error: txErr } = await supabase.from('transactions').insert({
+              id: cashTx.id,
+              user_id: currentUser.id,
+              type: cashTx.type,
+              amount: cashTx.amount,
+              category: cashTx.category,
+              date: cashTx.date,
+              note: cashTx.note
+            });
+            if (txErr) throw txErr;
+          }
+
+          if (vehiclesTablesAvailable) {
+            const { error: svcErr } = await supabase.from('vehicle_services').upsert({
+              id: svcId,
+              user_id: currentUser.id,
+              vehicle_id: vehicleId,
+              service_date: serviceDate,
+              odometer,
+              service_type: serviceType,
+              items_replaced: itemsReplaced,
+              parts_cost: partsCost,
+              labor_cost: laborCost,
+              total_cost: totalCost,
+              workshop_name: workshopName,
+              next_odometer: nextOdometer,
+              next_date: nextDate || null,
+              mechanic_notes: mechanicNotes
+            });
+            if (svcErr) throw svcErr;
+
+            if (targetVehicle) {
+              await supabase
+                .from('vehicles')
+                .update({
+                  current_odometer: updatedVehicleOdo,
+                  next_service_odometer: updatedNextOdo,
+                  next_service_date: updatedNextDate || null
+                })
+                .eq('id', targetVehicle.id)
+                .eq('user_id', currentUser.id);
+            }
+          } else {
+            if (id) {
+              const idx = appState.vehicleServices.findIndex(s => s.id === id);
+              if (idx !== -1) appState.vehicleServices[idx] = svcPayload;
+            } else {
+              appState.vehicleServices.unshift(svcPayload);
+            }
+            if (targetVehicle) {
+              targetVehicle.currentOdometer = updatedVehicleOdo;
+              targetVehicle.nextServiceOdometer = updatedNextOdo;
+              targetVehicle.nextServiceDate = updatedNextDate;
+            }
+            saveVehiclesFallback(appState.vehicles, appState.vehicleServices);
+          }
+
+          closeModal('modal-service');
+          await fetchCloudData();
+          showToast(id ? 'Riwayat servis diperbarui di Supabase!' : 'Servis tercatat & saldo disesuaikan!', 'success');
+        } catch (err) {
+          console.error('Supabase saveServiceRecord error:', err);
+          showToast('Gagal menyimpan riwayat servis ke Supabase.', 'error');
+        }
+        return;
+      }
+
+      if (id) {
+        const idx = appState.vehicleServices.findIndex(s => s.id === id);
+        if (idx !== -1) appState.vehicleServices[idx] = svcPayload;
+      } else {
+        appState.vehicleServices.unshift(svcPayload);
+      }
+
+      if (targetVehicle) {
+        targetVehicle.currentOdometer = updatedVehicleOdo;
+        targetVehicle.nextServiceOdometer = updatedNextOdo;
+        targetVehicle.nextServiceDate = updatedNextDate;
+      }
+
+      if (cashTx) {
+        appState.transactions.unshift(cashTx);
+      }
+
+      saveLocalState();
+      closeModal('modal-service');
+      refreshAllViews();
+      showToast(id ? 'Riwayat servis berhasil diperbarui.' : 'Servis kendaraan dicatat & saldo terpotong!', 'success');
+    }
+
+    function confirmDeleteService(serviceId) {
+      const svc = (appState.vehicleServices || []).find(s => s.id === serviceId);
+      if (!svc) return;
+
+      openConfirmDialog({
+        title: 'Hapus Riwayat Servis?',
+        message: `Anda akan menghapus catatan "${svc.serviceType}" senilai ${formatRupiah(svc.totalCost)}. Catatan transaksi di Buku Kas tidak dihapus otomatis.`,
+        confirmText: 'Ya, Hapus',
+        onConfirm: async () => {
+          if (isCloudAuthenticated() && vehiclesTablesAvailable) {
+            try {
+              const { error } = await supabase
+                .from('vehicle_services')
+                .delete()
+                .eq('id', serviceId)
+                .eq('user_id', currentUser.id);
+              if (error) throw error;
+              await fetchCloudData();
+              showToast('Riwayat servis dihapus dari Supabase.', 'info');
+            } catch (err) {
+              showToast('Gagal menghapus riwayat servis di Supabase.', 'error');
+            }
+            return;
+          }
+
+          appState.vehicleServices = appState.vehicleServices.filter(s => s.id !== serviceId);
+          if (isCloudAuthenticated()) {
+            saveVehiclesFallback(appState.vehicles, appState.vehicleServices);
+          } else {
+            saveLocalState();
+          }
+          refreshAllViews();
+          showToast('Riwayat servis telah dihapus.', 'info');
+        }
+      });
+    }
+
+    /**
+     * =========================================================================
      * 12. RENDER VIEW 4: LAPORAN & CADANGAN DATA (CSV & JSON)
      * =========================================================================
      */
@@ -4687,7 +5949,8 @@ notify pgrst, 'reload schema';</pre>
       }
 
       document.getElementById('report-record-count').textContent = `${appState.transactions.length} Transaksi`;
-      document.getElementById('report-routine-count').textContent = `${appState.recurringBills.length} tagihan rutin & ${(appState.debts || []).length} utang/piutang`;
+      document.getElementById('report-routine-count').textContent =
+        `${appState.recurringBills.length} tagihan, ${(appState.debts || []).length} utang/piutang & ${(appState.vehicleServices || []).length} servis`;
     }
 
     function exportToCSV() {
@@ -4769,10 +6032,12 @@ notify pgrst, 'reload schema';</pre>
             throw new Error('Struktur file JSON tidak valid.');
           }
           const importedDebts = Array.isArray(importedData.debts) ? importedData.debts : [];
+          const importedVehicles = Array.isArray(importedData.vehicles) ? importedData.vehicles : [];
+          const importedServices = Array.isArray(importedData.vehicleServices) ? importedData.vehicleServices : [];
 
           openConfirmDialog({
             title: 'Pulihkan Data dari Cadangan?',
-            message: `Ditemukan ${importedData.transactions.length} transaksi, ${importedData.recurringBills.length} tagihan rutin, dan ${importedDebts.length} utang/piutang. Data saat ini akan digantikan oleh file cadangan ini.`,
+            message: `Ditemukan ${importedData.transactions.length} transaksi, ${importedData.recurringBills.length} tagihan, ${importedDebts.length} utang/piutang, dan ${importedVehicles.length} kendaraan. Data saat ini akan digantikan oleh file cadangan ini.`,
             confirmText: 'Ya, Pulihkan Data',
             onConfirm: async () => {
               if (isCloudAuthenticated()) {
@@ -4781,6 +6046,10 @@ notify pgrst, 'reload schema';</pre>
                   await supabase.from('recurring_bills').delete().eq('user_id', currentUser.id);
                   if (debtsTableAvailable) {
                     await supabase.from('debts').delete().eq('user_id', currentUser.id);
+                  }
+                  if (vehiclesTablesAvailable) {
+                    await supabase.from('vehicle_services').delete().eq('user_id', currentUser.id);
+                    await supabase.from('vehicles').delete().eq('user_id', currentUser.id);
                   }
 
                   if (importedData.transactions.length > 0) {
@@ -4829,6 +6098,40 @@ notify pgrst, 'reload schema';</pre>
                     if (debtErr) throw debtErr;
                   }
 
+                  if (importedVehicles.length > 0 && vehiclesTablesAvailable) {
+                    const vehRows = importedVehicles.map(v => ({
+                      id: v.id || generateId('veh'),
+                      user_id: currentUser.id,
+                      name: v.name || 'Kendaraan',
+                      type: v.type || 'Motor',
+                      plate_number: v.plateNumber || '',
+                      current_odometer: Number(v.currentOdometer) || 0,
+                      next_service_odometer: v.nextServiceOdometer != null ? Number(v.nextServiceOdometer) : null,
+                      next_service_date: v.nextServiceDate || null
+                    }));
+                    await supabase.from('vehicles').upsert(vehRows);
+
+                    if (importedServices.length > 0) {
+                      const svcRows = importedServices.map(s => ({
+                        id: s.id || generateId('svc'),
+                        user_id: currentUser.id,
+                        vehicle_id: s.vehicleId,
+                        service_date: s.serviceDate || getTodayStr(),
+                        odometer: Number(s.odometer) || 0,
+                        service_type: s.serviceType || 'Servis Berkala / Tune Up',
+                        items_replaced: s.itemsReplaced || '',
+                        parts_cost: Number(s.partsCost) || 0,
+                        labor_cost: Number(s.laborCost) || 0,
+                        total_cost: Number(s.totalCost) || 0,
+                        workshop_name: s.workshopName || '',
+                        next_odometer: s.nextOdometer != null ? Number(s.nextOdometer) : null,
+                        next_date: s.nextDate || null,
+                        mechanic_notes: s.mechanicNotes || ''
+                      }));
+                      await supabase.from('vehicle_services').upsert(svcRows);
+                    }
+                  }
+
                   await fetchCloudData();
                   showToast('Data berhasil dipulihkan ke Supabase!', 'success');
                 } catch (err) {
@@ -4841,6 +6144,8 @@ notify pgrst, 'reload schema';</pre>
                 transactions: importedData.transactions,
                 recurringBills: importedData.recurringBills,
                 debts: importedDebts,
+                vehicles: importedVehicles,
+                vehicleServices: importedServices,
                 isSampleData: Boolean(importedData.isSampleData)
               };
               saveLocalState();
@@ -4860,7 +6165,7 @@ notify pgrst, 'reload schema';</pre>
     function confirmLoadSampleData() {
       openConfirmDialog({
         title: 'Isi Data Simulasi Contoh?',
-        message: 'Aplikasi akan menambahkan contoh transaksi pemasukan, pengeluaran, dan tagihan rutin agar Anda dapat melihat simulasi grafik dan laporan.',
+        message: 'Aplikasi akan menambahkan contoh transaksi, tagihan rutin, utang/piutang, serta data garasi & servis kendaraan.',
         confirmText: 'Ya, Isi Data Contoh',
         onConfirm: async () => {
           const sample = createSampleData();
@@ -4897,6 +6202,32 @@ notify pgrst, 'reload schema';</pre>
                 due_date: d.dueDate || null,
                 status: d.status
               }));
+              const vehRows = sample.vehicles.map(v => ({
+                id: v.id,
+                user_id: currentUser.id,
+                name: v.name,
+                type: v.type,
+                plate_number: v.plateNumber,
+                current_odometer: v.currentOdometer,
+                next_service_odometer: v.nextServiceOdometer,
+                next_service_date: v.nextServiceDate || null
+              }));
+              const svcRows = sample.vehicleServices.map(s => ({
+                id: s.id,
+                user_id: currentUser.id,
+                vehicle_id: s.vehicleId,
+                service_date: s.serviceDate,
+                odometer: s.odometer,
+                service_type: s.serviceType,
+                items_replaced: s.itemsReplaced,
+                parts_cost: s.partsCost,
+                labor_cost: s.laborCost,
+                total_cost: s.totalCost,
+                workshop_name: s.workshopName,
+                next_odometer: s.nextOdometer,
+                next_date: s.nextDate || null,
+                mechanic_notes: s.mechanicNotes
+              }));
 
               const [txRes, recRes] = await Promise.all([
                 supabase.from('transactions').upsert(txRows),
@@ -4907,6 +6238,10 @@ notify pgrst, 'reload schema';</pre>
 
               if (debtsTableAvailable) {
                 await supabase.from('debts').upsert(debtRows);
+              }
+              if (vehiclesTablesAvailable) {
+                await supabase.from('vehicles').upsert(vehRows);
+                await supabase.from('vehicle_services').upsert(svcRows);
               }
 
               await fetchCloudData();
@@ -4928,13 +6263,15 @@ notify pgrst, 'reload schema';</pre>
     function confirmClearSampleData() {
       openConfirmDialog({
         title: 'Kosongkan Data Contoh?',
-        message: 'Seluruh transaksi simulasi, tagihan rutin, dan utang/piutang contoh akan dihapus sehingga Anda dapat memulai dari Rp 0.',
+        message: 'Seluruh transaksi simulasi, tagihan rutin, utang/piutang, dan data kendaraan contoh akan dihapus sehingga Anda dapat memulai dari Rp 0.',
         confirmText: 'Ya, Kosongkan Sekarang',
         onConfirm: () => {
           appState = {
             transactions: [],
             recurringBills: [],
             debts: [],
+            vehicles: [],
+            vehicleServices: [],
             isSampleData: false
           };
           saveLocalState();
@@ -4947,7 +6284,7 @@ notify pgrst, 'reload schema';</pre>
     function confirmClearAllData() {
       openConfirmDialog({
         title: 'Hapus Seluruh Data?',
-        message: 'Tindakan ini akan menghapus permanen seluruh transaksi, jadwal pembayaran rutin, dan catatan utang/piutang. Pastikan Anda sudah mengunduh cadangan jika diperlukan.',
+        message: 'Tindakan ini akan menghapus permanen seluruh transaksi, jadwal pembayaran rutin, utang/piutang, dan data servis kendaraan.',
         confirmText: 'Hapus Permanen',
         onConfirm: async () => {
           if (isCloudAuthenticated()) {
@@ -4957,7 +6294,12 @@ notify pgrst, 'reload schema';</pre>
               if (debtsTableAvailable) {
                 await supabase.from('debts').delete().eq('user_id', currentUser.id);
               }
+              if (vehiclesTablesAvailable) {
+                await supabase.from('vehicle_services').delete().eq('user_id', currentUser.id);
+                await supabase.from('vehicles').delete().eq('user_id', currentUser.id);
+              }
               saveDebtsFallback([]);
+              saveVehiclesFallback([], []);
               await fetchCloudData();
               showToast('Seluruh data di Supabase berhasil dihapus.', 'info');
             } catch (err) {
@@ -4970,6 +6312,8 @@ notify pgrst, 'reload schema';</pre>
             transactions: [],
             recurringBills: [],
             debts: [],
+            vehicles: [],
+            vehicleServices: [],
             isSampleData: false
           };
           saveLocalState();
@@ -5034,7 +6378,6 @@ notify pgrst, 'reload schema';</pre>
       const btnGoogle = document.getElementById('btn-google-login');
       errBox.classList.add('hidden');
 
-      // Periksa status Google Provider di Supabase Auth Settings agar tidak terpental ke halaman error JSON
       const config = resolveSupabaseConfig();
       if (config && config.url && config.anonKey) {
         try {
@@ -5260,78 +6603,22 @@ notify pgrst, 'reload schema';</pre>
 
     // Tutup modal saat mengklik area luar backdrop
     window.addEventListener('click', (e) => {
-      ['modal-transaction', 'modal-settle-debt', 'modal-edit-debt', 'modal-recurring', 'modal-pay-bill', 'modal-confirm', 'modal-auth', 'modal-supabase-config'].forEach(id => {
+      [
+        'modal-transaction',
+        'modal-settle-debt',
+        'modal-edit-debt',
+        'modal-recurring',
+        'modal-vehicle',
+        'modal-service',
+        'modal-update-odo',
+        'modal-pay-bill',
+        'modal-confirm',
+        'modal-auth'
+      ].forEach(id => {
         const modal = document.getElementById(id);
-        if (e.target === modal) {
+        if (modal && e.target === modal) {
           closeModal(id);
         }
       });
     });
-
-    // Daftarkan semua fungsi handler ke global window agar dapat dipanggil dari atribut HTML onclick/onsubmit
-    Object.assign(window, {
-      toggleSidebarCollapse,
-      switchTab,
-      openTransactionModal,
-      setTxFormType,
-      saveTransaction,
-      confirmDeleteTransaction,
-      formatRupiahInput,
-      setPeriodMode,
-      stepPeriod,
-      handlePeriodValueChange,
-      resetPeriodToToday,
-      updateCategoryFilterOptions,
-      renderTransactionsView,
-      setDebtTypeFilter,
-      renderDebtsView,
-      openSettleDebtModal,
-      fillFullDebtSettlement,
-      submitDebtSettlement,
-      openEditDebtModal,
-      saveEditedDebt,
-      confirmDeleteDebt,
-      setRecurringFilter,
-      openRecurringModal,
-      saveRecurringBill,
-      openPayBillModal,
-      submitBillPayment,
-      toggleBillUnpaid,
-      confirmResetMonthlyBills,
-      confirmDeleteRecurring,
-      exportToCSV,
-      exportToJSON,
-      handleImportJSON,
-      confirmLoadSampleData,
-      confirmClearSampleData,
-      confirmClearAllData,
-      openModal,
-      closeModal,
-      handleHeaderCloudClick,
-      openAuthModal,
-      switchAuthMode,
-      handleGoogleLogin,
-      handleEmailAuthSubmit,
-      handleLogout,
-      openSupabaseConfigModal,
-      saveCustomSupabaseConfig,
-      removeCustomSupabaseConfig,
-      copySupabaseSQL,
-      migrateLocalDataToCloud,
-      dismissMigrationBanner
-    });
-
-    /**
-     * =========================================================================
-     * 14. INISIALISASI APLIKASI SAAT HALAMAN DIMUAT
-     * =========================================================================
-     */
-    window.addEventListener('DOMContentLoaded', async () => {
-      initSidebarState();
-      initPeriodControls();
-      updateCategoryFilterOptions();
-      await initSupabaseService();
-    });
-  </script>
-</body>
-</html>
+// ... existing code ... -->
