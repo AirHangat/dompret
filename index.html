@@ -352,26 +352,26 @@
 
     <!-- Top Sticky Header -->
     <header class="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-3">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-3">
         <!-- Mobile Brand Title -->
-        <div class="flex items-center gap-2.5 md:hidden">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-sm">
+        <div class="flex items-center gap-2 md:hidden shrink-0">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-sm shrink-0">
             <i data-lucide="wallet" class="w-4 h-4 text-white"></i>
           </div>
-          <div>
-            <span class="font-bold text-slate-900 text-base block leading-none">DompetKu</span>
-            <span class="text-[11px] text-slate-500 font-medium">Keuangan Pribadi</span>
+          <div class="hidden min-[390px]:block">
+            <span class="font-bold text-slate-900 text-sm sm:text-base block leading-none">DompetKu</span>
+            <span class="text-[10px] text-slate-500 font-medium">Keuangan Pribadi</span>
           </div>
         </div>
 
         <!-- Total Balance Pill + Privacy Mask Toggle (Desktop & Mobile) -->
-        <div class="flex items-center gap-2.5 sm:gap-3.5 bg-slate-50 border border-slate-200/90 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl">
+        <div class="flex items-center gap-2 sm:gap-3.5 bg-slate-50 border border-slate-200/90 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl min-w-0">
           <div class="hidden sm:flex w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 items-center justify-center shrink-0">
             <i data-lucide="landmark" class="w-4 h-4"></i>
           </div>
-          <div>
-            <p class="text-[10px] sm:text-xs font-medium text-slate-500">Total Saldo Keseluruhan</p>
-            <p id="header-total-balance" class="text-xs sm:text-lg font-extrabold text-slate-900 tracking-tight">Rp 0</p>
+          <div class="min-w-0">
+            <p class="text-[10px] sm:text-xs font-medium text-slate-500 truncate">Total Saldo Keseluruhan</p>
+            <p id="header-total-balance" class="text-xs sm:text-lg font-extrabold text-slate-900 tracking-tight whitespace-nowrap">Rp 0</p>
           </div>
           <button type="button" id="btn-toggle-privacy" onclick="togglePrivacyMode()"
             title="Mode Privasi: Samarkan Nominal (Rp ••••••)"
@@ -488,42 +488,42 @@
         </div>
 
         <!-- Dynamic Date / Week / Month Selector -->
-        <div class="flex flex-wrap items-center gap-2.5">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
           <!-- Daily Date Picker -->
-          <div id="picker-daily" class="flex items-center gap-2">
-            <button onclick="stepPeriod(-1)" title="Hari Sebelumnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+          <div id="picker-daily" class="flex flex-nowrap items-center gap-1.5 sm:gap-2 flex-1 sm:flex-initial min-w-0">
+            <button onclick="stepPeriod(-1)" title="Hari Sebelumnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 shrink-0 cursor-pointer">
               <i data-lucide="chevron-left" class="w-4 h-4"></i>
             </button>
             <input type="date" id="input-period-daily" onchange="handlePeriodValueChange()"
-              class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            <button onclick="stepPeriod(1)" title="Hari Berikutnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+              class="flex-1 sm:flex-initial min-w-0 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            <button onclick="stepPeriod(1)" title="Hari Berikutnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 shrink-0 cursor-pointer">
               <i data-lucide="chevron-right" class="w-4 h-4"></i>
             </button>
           </div>
 
           <!-- Weekly Date Anchor Picker -->
-          <div id="picker-weekly" class="hidden flex items-center gap-2">
-            <button onclick="stepPeriod(-1)" title="Minggu Sebelumnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+          <div id="picker-weekly" class="hidden flex flex-nowrap items-center gap-1.5 sm:gap-2 flex-1 sm:flex-initial min-w-0">
+            <button onclick="stepPeriod(-1)" title="Minggu Sebelumnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 shrink-0 cursor-pointer">
               <i data-lucide="chevron-left" class="w-4 h-4"></i>
             </button>
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50">
-              <span id="weekly-range-label" class="text-xs sm:text-sm font-semibold text-slate-700">Minggu Ini</span>
+            <div class="flex items-center justify-between sm:justify-start gap-2 flex-1 sm:flex-initial min-w-0 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50">
+              <span id="weekly-range-label" class="text-xs sm:text-sm font-semibold text-slate-700 truncate">Minggu Ini</span>
               <input type="date" id="input-period-weekly" onchange="handlePeriodValueChange()"
-                class="w-6 opacity-75 hover:opacity-100 text-xs bg-transparent focus:outline-none cursor-pointer" title="Pilih tanggal dalam minggu" />
+                class="w-6 opacity-75 hover:opacity-100 text-xs bg-transparent focus:outline-none shrink-0 cursor-pointer" title="Pilih tanggal dalam minggu" />
             </div>
-            <button onclick="stepPeriod(1)" title="Minggu Berikutnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+            <button onclick="stepPeriod(1)" title="Minggu Berikutnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 shrink-0 cursor-pointer">
               <i data-lucide="chevron-right" class="w-4 h-4"></i>
             </button>
           </div>
 
           <!-- Monthly Month Picker -->
-          <div id="picker-monthly" class="hidden flex items-center gap-2">
-            <button onclick="stepPeriod(-1)" title="Bulan Sebelumnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+          <div id="picker-monthly" class="hidden flex flex-nowrap items-center gap-1.5 sm:gap-2 flex-1 sm:flex-initial min-w-0">
+            <button onclick="stepPeriod(-1)" title="Bulan Sebelumnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 shrink-0 cursor-pointer">
               <i data-lucide="chevron-left" class="w-4 h-4"></i>
             </button>
             <input type="month" id="input-period-monthly" onchange="handlePeriodValueChange()"
-              class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            <button onclick="stepPeriod(1)" title="Bulan Berikutnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+              class="flex-1 sm:flex-initial min-w-0 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            <button onclick="stepPeriod(1)" title="Bulan Berikutnya" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 shrink-0 cursor-pointer">
               <i data-lucide="chevron-right" class="w-4 h-4"></i>
             </button>
           </div>
@@ -534,7 +534,7 @@
           </div>
 
           <button onclick="resetPeriodToToday()" id="btn-reset-today"
-            class="px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 transition-colors cursor-pointer">
+            class="px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 transition-colors shrink-0 cursor-pointer">
             Hari Ini
           </button>
         </div>
@@ -1283,40 +1283,52 @@
   <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 px-1 py-1.5 grid grid-cols-6 items-center shadow-lg" aria-label="Navigasi Bawah">
     <button onclick="switchTab('dashboard')" data-mobile-nav="dashboard"
       class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-emerald-600 font-semibold transition-colors">
-      <i data-lucide="layout-dashboard" class="w-4 h-4 mb-0.5"></i>
+      <div class="relative inline-flex items-center justify-center mb-0.5">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+      </div>
       <span class="text-[9px] leading-tight">Ringkasan</span>
     </button>
 
     <button onclick="switchTab('transactions')" data-mobile-nav="transactions"
       class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
-      <i data-lucide="arrow-left-right" class="w-4 h-4 mb-0.5"></i>
+      <div class="relative inline-flex items-center justify-center mb-0.5">
+        <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+      </div>
       <span class="text-[9px] leading-tight">Transaksi</span>
     </button>
 
     <button onclick="switchTab('debts')" data-mobile-nav="debts"
-      class="mobile-nav-item relative flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
-      <i data-lucide="hand-coins" class="w-4 h-4 mb-0.5"></i>
+      class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
+      <div class="relative inline-flex items-center justify-center mb-0.5">
+        <i data-lucide="hand-coins" class="w-4 h-4"></i>
+        <span id="mobile-debts-dot" class="hidden absolute -top-0.5 -right-1.5 w-2 h-2 rounded-full bg-indigo-500 ring-1 ring-white"></span>
+      </div>
       <span class="text-[9px] leading-tight">Utang</span>
-      <span id="mobile-debts-dot" class="hidden absolute top-1 right-2.5 w-2 h-2 rounded-full bg-indigo-500"></span>
     </button>
 
     <button onclick="switchTab('recurring')" data-mobile-nav="recurring"
-      class="mobile-nav-item relative flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
-      <i data-lucide="calendar-clock" class="w-4 h-4 mb-0.5"></i>
+      class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
+      <div class="relative inline-flex items-center justify-center mb-0.5">
+        <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+        <span id="mobile-unpaid-dot" class="hidden absolute -top-0.5 -right-1.5 w-2 h-2 rounded-full bg-amber-500 ring-1 ring-white"></span>
+      </div>
       <span class="text-[9px] leading-tight">Tagihan</span>
-      <span id="mobile-unpaid-dot" class="hidden absolute top-1 right-2.5 w-2 h-2 rounded-full bg-amber-500"></span>
     </button>
 
     <button onclick="switchTab('vehicles')" data-mobile-nav="vehicles"
-      class="mobile-nav-item relative flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
-      <i data-lucide="wrench" class="w-4 h-4 mb-0.5"></i>
+      class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
+      <div class="relative inline-flex items-center justify-center mb-0.5">
+        <i data-lucide="wrench" class="w-4 h-4"></i>
+        <span id="mobile-vehicles-dot" class="hidden absolute -top-0.5 -right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-1 ring-white"></span>
+      </div>
       <span class="text-[9px] leading-tight">Servis</span>
-      <span id="mobile-vehicles-dot" class="hidden absolute top-1 right-2.5 w-2 h-2 rounded-full bg-rose-500"></span>
     </button>
 
     <button onclick="switchTab('reports')" data-mobile-nav="reports"
       class="mobile-nav-item flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 font-medium transition-colors">
-      <i data-lucide="pie-chart" class="w-4 h-4 mb-0.5"></i>
+      <div class="relative inline-flex items-center justify-center mb-0.5">
+        <i data-lucide="pie-chart" class="w-4 h-4"></i>
+      </div>
       <span class="text-[9px] leading-tight">Laporan</span>
     </button>
   </nav>
@@ -2765,33 +2777,32 @@
     }
 
     function updateSecurityUI() {
-      // 1. Header Privacy Eye Button
+      // 1. Header Privacy Eye Button (ganti innerHTML agar tidak menyentuh SVGElement.className & ikon langsung berubah)
       const privBtn = document.getElementById('btn-toggle-privacy');
-      const privIcon = document.getElementById('header-privacy-icon');
-      if (privBtn && privIcon) {
+      if (privBtn) {
         privBtn.title = uiState.privacyMode
           ? 'Tampilkan Nominal (Matikan Mode Privasi)'
           : 'Mode Privasi: Samarkan Nominal (Rp ••••••)';
-        privIcon.setAttribute('data-lucide', uiState.privacyMode ? 'eye-off' : 'eye');
+        privBtn.innerHTML = `<i id="header-privacy-icon" data-lucide="${uiState.privacyMode ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>`;
       }
 
       // 2. Header Lock / PIN Button
       const lockBtn = document.getElementById('header-lock-btn');
-      const lockIcon = document.getElementById('header-lock-icon');
-      const lockLabel = document.getElementById('header-lock-label');
-      if (lockBtn && lockIcon && lockLabel) {
+      if (lockBtn) {
         if (securityState.enabled) {
           lockBtn.className = 'inline-flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-2.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-xs font-semibold text-indigo-800 transition-colors cursor-pointer';
           lockBtn.title = 'Kunci Layar Sekarang (PIN Aktif)';
-          lockIcon.setAttribute('data-lucide', 'lock');
-          lockIcon.className = 'w-4 h-4 text-indigo-600';
-          lockLabel.textContent = 'Kunci';
+          lockBtn.innerHTML = `
+            <i id="header-lock-icon" data-lucide="lock" class="w-4 h-4 text-indigo-600"></i>
+            <span id="header-lock-label" class="hidden lg:inline">Kunci</span>
+          `;
         } else {
           lockBtn.className = 'inline-flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors cursor-pointer';
           lockBtn.title = 'Atur Kunci PIN 6-Digit';
-          lockIcon.setAttribute('data-lucide', 'shield');
-          lockIcon.className = 'w-4 h-4 text-slate-500';
-          lockLabel.textContent = 'Atur PIN';
+          lockBtn.innerHTML = `
+            <i id="header-lock-icon" data-lucide="shield" class="w-4 h-4 text-slate-500"></i>
+            <span id="header-lock-label" class="hidden lg:inline">Atur PIN</span>
+          `;
         }
       }
 
@@ -3862,16 +3873,15 @@
       const sidebar = document.getElementById('desktop-sidebar');
       const wrapper = document.getElementById('main-wrapper');
       const btn = document.getElementById('sidebar-collapse-btn');
-      const icon = document.getElementById('sidebar-collapse-icon');
 
       if (!sidebar || !wrapper) return;
 
       sidebar.dataset.collapsed = String(isCollapsed);
       wrapper.dataset.sidebarCollapsed = String(isCollapsed);
 
-      if (btn && icon) {
+      if (btn) {
         btn.title = isCollapsed ? 'Perluas Sidebar' : 'Perkecil Sidebar';
-        icon.setAttribute('data-lucide', isCollapsed ? 'panel-left-open' : 'panel-left-close');
+        btn.innerHTML = `<i id="sidebar-collapse-icon" data-lucide="${isCollapsed ? 'panel-left-open' : 'panel-left-close'}" class="w-4 h-4"></i>`;
       }
       if (window.lucide) {
         lucide.createIcons();
@@ -3942,7 +3952,7 @@
       const totalBalance = totalIn - totalOut;
       const balanceEl = document.getElementById('header-total-balance');
       balanceEl.textContent = formatRupiah(totalBalance);
-      balanceEl.className = `text-xs sm:text-lg font-extrabold tracking-tight ${
+      balanceEl.className = `text-xs sm:text-lg font-extrabold tracking-tight whitespace-nowrap ${
         uiState.privacyMode ? 'text-slate-700' : (totalBalance < 0 ? 'text-rose-600' : 'text-slate-900')
       }`;
 
