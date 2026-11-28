@@ -75,6 +75,16 @@
       animation: fadeSlideUp 0.22s ease-out forwards;
     }
 
+    /* Shake animation for incorrect PIN */
+    @keyframes pinShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .animate-pin-shake {
+      animation: pinShake 0.35s ease-in-out;
+    }
+
     /* Desktop Sidebar Collapse (Mini Mode) Styles */
     @media (min-width: 768px) {
       #desktop-sidebar[data-collapsed="true"] {
@@ -128,6 +138,78 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row bg-slate-50 text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-900">
+
+  <!-- =====================================================================
+       APP LOCK SCREEN OVERLAY (KUNCI PIN 6-DIGIT - PAKET A)
+  ====================================================================== -->
+  <div id="app-lock-overlay" class="hidden fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-4 select-none">
+    <div id="app-lock-card" class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 shadow-2xl text-center space-y-5 animate-fade-in">
+      <!-- Brand & Lock Badge -->
+      <div class="flex flex-col items-center">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-950/70 mb-3">
+          <i data-lucide="lock-keyhole" class="w-7 h-7 text-white"></i>
+        </div>
+        <h2 class="text-lg sm:text-xl font-extrabold text-white tracking-tight">DompetKu Terkunci</h2>
+        <p id="app-lock-subtitle" class="text-xs text-slate-400 mt-1 leading-relaxed">
+          Masukkan 6 digit PIN keamanan Anda untuk mengakses catatan keuangan.
+        </p>
+      </div>
+
+      <!-- 6-Digit PIN Dots Indicator -->
+      <div id="pin-dots-container" class="flex items-center justify-center gap-3 py-2">
+        <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-600 bg-transparent transition-all duration-150"></span>
+        <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-600 bg-transparent transition-all duration-150"></span>
+        <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-600 bg-transparent transition-all duration-150"></span>
+        <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-600 bg-transparent transition-all duration-150"></span>
+        <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-600 bg-transparent transition-all duration-150"></span>
+        <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-600 bg-transparent transition-all duration-150"></span>
+      </div>
+
+      <!-- Error / Cooldown Status -->
+      <p id="app-lock-error" class="min-h-[18px] text-xs font-semibold text-rose-400"></p>
+
+      <!-- Interactive Numeric Keypad -->
+      <div class="grid grid-cols-3 gap-2.5 max-w-[260px] mx-auto">
+        <button type="button" onclick="pressPinDigit('1')" class="pin-key h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white text-lg font-bold border border-slate-700/60 transition-all cursor-pointer">1</button>
+        <button type="button" onclick="pressPinDigit('2')" class="pin-key h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white text-lg font-bold border border-slate-700/60 transition-all cursor-pointer">2</button>
+        <button type="button" onclick="pressPinDigit('3')" class="pin-key h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white text-lg font-bold border border-slate-700/60 transition-all cursor-pointer">3</button>
+        <button type="button" onclick="pressPinDigit('4')" class="pin-key h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white text-lg font-bold border border-slate-700/60 transition-all cursor-pointer">4</button>
+        <button type="button" onclick="pressPinDigit('5')" class="pin-key h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white text-lg font-bold border border-slate-700/60 transition-all cursor-pointer">5</button>
+        <button type="button" onclick="pressPinDigit('6')" class="pin-key h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white text-lg font-bold border border-slate-700/60 transition-all cursor-pointer">6</button>
+        <button type="button" onclick="pressPinDigit('7')" class="pin-key h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white text-lg font-bold border border-slate-700/60 transition-all cursor-pointer">7</button>
+        <button type="button" onclick="pressPinDigit('8')" class="pin-key h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white text-lg font-bold border border-slate-700/60 transition-all cursor-pointer">8</button>
+        <button type="button" onclick="pressPinDigit('9')" class="pin-key h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white text-lg font-bold border border-slate-700/60 transition-all cursor-pointer">9</button>
+        <button type="button" onclick="clearPinEntry()" title="Bersihkan" class="pin-key h-12 rounded-2xl bg-slate-800/50 hover:bg-slate-800 active:scale-95 text-slate-400 hover:text-white text-xs font-semibold border border-slate-800 transition-all cursor-pointer">Reset</button>
+        <button type="button" onclick="pressPinDigit('0')" class="pin-key h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white text-lg font-bold border border-slate-700/60 transition-all cursor-pointer">0</button>
+        <button type="button" onclick="backspacePinDigit()" title="Hapus Digit" aria-label="Hapus Digit" class="pin-key h-12 rounded-2xl bg-slate-800/50 hover:bg-slate-800 active:scale-95 text-slate-300 hover:text-white flex items-center justify-center border border-slate-800 transition-all cursor-pointer">
+          <i data-lucide="delete" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Forgot PIN Footer -->
+      <div class="pt-2 border-t border-slate-800/80">
+        <button type="button" onclick="confirmForgotPinReset()" class="text-[11px] text-slate-400 hover:text-rose-400 underline transition-colors cursor-pointer">
+          Lupa PIN? Atur ulang kunci keamanan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Immediate Synchronous Check to Prevent Content Flash Before First Paint -->
+  <script>
+    (function () {
+      try {
+        var rawPin = localStorage.getItem('dompetku_security_pin_v1');
+        if (rawPin) {
+          var parsedPin = JSON.parse(rawPin);
+          if (parsedPin && parsedPin.enabled && parsedPin.pinHash) {
+            var lockEl = document.getElementById('app-lock-overlay');
+            if (lockEl) lockEl.classList.remove('hidden');
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <!-- =====================================================================
        DESKTOP SIDEBAR NAVIGATION (EXPANDABLE / COLLAPSIBLE)
@@ -282,8 +364,8 @@
           </div>
         </div>
 
-        <!-- Total Balance Pill (Desktop & Mobile) -->
-        <div class="flex items-center gap-3 sm:gap-4 bg-slate-50 border border-slate-200/90 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl">
+        <!-- Total Balance Pill + Privacy Mask Toggle (Desktop & Mobile) -->
+        <div class="flex items-center gap-2.5 sm:gap-3.5 bg-slate-50 border border-slate-200/90 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl">
           <div class="hidden sm:flex w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 items-center justify-center shrink-0">
             <i data-lucide="landmark" class="w-4 h-4"></i>
           </div>
@@ -291,15 +373,30 @@
             <p class="text-[10px] sm:text-xs font-medium text-slate-500">Total Saldo Keseluruhan</p>
             <p id="header-total-balance" class="text-xs sm:text-lg font-extrabold text-slate-900 tracking-tight">Rp 0</p>
           </div>
+          <button type="button" id="btn-toggle-privacy" onclick="togglePrivacyMode()"
+            title="Mode Privasi: Samarkan Nominal (Rp ••••••)"
+            aria-label="Samarkan atau Tampilkan Nominal"
+            class="p-1.5 sm:p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-200/70 transition-colors cursor-pointer shrink-0">
+            <i id="header-privacy-icon" data-lucide="eye" class="w-4 h-4"></i>
+          </button>
         </div>
 
-        <!-- Right Header Controls: Cloud Sync Pill + Quick Transaction Button -->
-        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <!-- Right Header Controls: App Lock + Cloud Sync Pill + Quick Transaction Button -->
+        <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          <!-- App Lock / PIN Quick Action Button -->
+          <button type="button" id="header-lock-btn" onclick="handleHeaderLockClick()"
+            title="Atur Kunci PIN 6-Digit"
+            aria-label="Kunci Layar atau Atur PIN"
+            class="inline-flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors cursor-pointer">
+            <i id="header-lock-icon" data-lucide="shield" class="w-4 h-4 text-slate-500"></i>
+            <span id="header-lock-label" class="hidden lg:inline">Atur PIN</span>
+          </button>
+
           <!-- Cloud Status / Account Button -->
           <button onclick="handleHeaderCloudClick()" id="header-cloud-btn"
             class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors cursor-pointer">
             <span id="header-cloud-dot" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
-            <span id="header-cloud-label" class="inline truncate max-w-[95px] sm:max-w-none">Mode Lokal</span>
+            <span id="header-cloud-label" class="hidden sm:inline truncate max-w-[95px] sm:max-w-none">Mode Lokal</span>
           </button>
 
           <!-- Primary Quick Action Button -->
@@ -989,12 +1086,12 @@
       </section>
 
       <!-- =================================================================
-           VIEW 4: LAPORAN & DATA (ANALYTICS & BACKUP)
+           VIEW 4: LAPORAN & DATA (ANALYTICS, PRIVACY/PIN & BACKUP)
       ================================================================== -->
       <section id="view-reports" class="hidden space-y-6 animate-fade-in">
         <div>
-          <h2 class="text-xl font-bold text-slate-900">Laporan Keuangan &amp; Cadangan Data</h2>
-          <p class="text-xs sm:text-sm text-slate-500">Analisis kesehatan finansial serta ekspor atau pulihkan data lokal Anda</p>
+          <h2 class="text-xl font-bold text-slate-900">Laporan Keuangan, Keamanan &amp; Cadangan Data</h2>
+          <p class="text-xs sm:text-sm text-slate-500">Analisis kesehatan finansial, pengaturan kunci PIN &amp; privasi layar, serta cadangan data</p>
         </div>
 
         <!-- Financial Health Highlights -->
@@ -1030,6 +1127,66 @@
             </div>
             <p id="report-record-count" class="text-2xl font-extrabold text-slate-900">0 Catatan</p>
             <p id="report-routine-count" class="text-xs text-slate-500 mt-1">0 tagihan rutin, 0 utang/piutang &amp; 0 servis</p>
+          </div>
+        </div>
+
+        <!-- Keamanan & Privasi Layar Card (PAKET A) -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-5">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                <i data-lucide="shield-check" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="text-base font-bold text-slate-900">Keamanan &amp; Privasi Layar (Kunci PIN &amp; Sensor Saldo)</h3>
+                  <span id="report-pin-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">PIN Nonaktif</span>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
+                  Lindungi akses aplikasi dengan Kunci PIN 6-Digit terenkripsi SHA-256, penguncian otomatis saat tidak aktif, serta mode penyamaran nominal saat membuka aplikasi di tempat umum.
+                </p>
+              </div>
+            </div>
+
+            <div id="report-pin-actions" class="flex flex-wrap items-center gap-2 shrink-0">
+              <button type="button" onclick="openPinSetupModal('setup')"
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer">
+                <i data-lucide="key-round" class="w-4 h-4"></i>
+                <span>Aktifkan Kunci PIN 6-Digit</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Pengaturan Auto-Lock & Mode Privasi Grid -->
+          <div class="pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Auto Lock Duration -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
+              <div>
+                <p class="text-xs sm:text-sm font-bold text-slate-800">Kunci Otomatis (Auto-Lock)</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Kunci layar otomatis jika tidak disentuh selama:</p>
+              </div>
+              <select id="security-autolock-select" onchange="updateAutoLockMinutes(this.value)"
+                class="px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="1">1 Menit</option>
+                <option value="3" selected>3 Menit</option>
+                <option value="5">5 Menit</option>
+                <option value="10">10 Menit</option>
+                <option value="0">Saat Muat Ulang Saja</option>
+              </select>
+            </div>
+
+            <!-- Privacy Mode Toggle -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
+              <div>
+                <p class="text-xs sm:text-sm font-bold text-slate-800">Mode Privasi Nominal (Rp &bull;&bull;&bull;&bull;&bull;&bull;)</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Samarkan seluruh angka saldo &amp; transaksi di layar</p>
+              </div>
+              <button type="button" id="report-privacy-toggle-btn" onclick="togglePrivacyMode()"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 transition-colors cursor-pointer shrink-0">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+                <span>Nonaktif</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1876,7 +2033,7 @@
   <!-- =====================================================================
        MODAL 4: DIALOG KONFIRMASI UMUM (PENGGANTI CONFIRM/ALERT)
   ====================================================================== -->
-  <div id="modal-confirm" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+  <div id="modal-confirm" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
     <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-6 animate-fade-in">
       <div id="confirm-icon-wrapper" class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
         <i id="confirm-icon" data-lucide="alert-triangle" class="w-5 h-5"></i>
@@ -1971,7 +2128,7 @@
           <div class="border-t border-slate-200 w-full"></div>
         </div>
 
-        <!-- Google Sign In Button (Memeriksa status provider di Supabase sebelum redirect) -->
+        <!-- Google Sign In Button -->
         <button type="button" onclick="handleGoogleLogin()" id="btn-google-login"
           class="w-full py-2.5 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.99] text-slate-800 text-xs sm:text-sm font-semibold shadow-2xs flex items-center justify-center gap-2.5 transition-all cursor-pointer">
           <svg class="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
@@ -1987,12 +2144,90 @@
   </div>
 
   <!-- =====================================================================
-       TOAST NOTIFICATION CONTAINER
+       MODAL 6: PENGATURAN KUNCI PIN 6-DIGIT (PAKET A)
   ====================================================================== -->
-  <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-50 flex flex-col gap-2 max-w-xs sm:max-w-sm pointer-events-none"></div>
+  <div id="modal-pin-setup" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
+            <i data-lucide="lock-keyhole" class="w-4 h-4"></i>
+          </div>
+          <h3 id="modal-pin-title" class="text-base sm:text-lg font-bold text-slate-900">Atur Kunci PIN 6-Digit</h3>
+        </div>
+        <button onclick="closeModal('modal-pin-setup')" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-pin-setup" onsubmit="submitPinSetupForm(event)" class="p-6 space-y-4">
+        <input type="hidden" id="pin-setup-mode" value="setup" />
+
+        <!-- Current PIN (Shown when changing or disabling PIN) -->
+        <div id="pin-current-group" class="hidden">
+          <label for="pin-current-input" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">PIN Saat Ini (6 Digit)</label>
+          <input type="password" id="pin-current-input" inputmode="numeric" pattern="\d{6}" maxlength="6" placeholder="••••••"
+            oninput="this.value = this.value.replace(/\D/g, '').slice(0, 6)"
+            class="w-full px-4 py-3 rounded-xl border border-slate-300 text-center text-lg font-extrabold tracking-[0.5em] text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+
+        <!-- New PIN (Shown when setting up or changing PIN) -->
+        <div id="pin-new-group" class="space-y-4">
+          <div>
+            <label for="pin-new-input" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Buat PIN Baru (6 Angka)</label>
+            <input type="password" id="pin-new-input" inputmode="numeric" pattern="\d{6}" maxlength="6" placeholder="••••••"
+              oninput="this.value = this.value.replace(/\D/g, '').slice(0, 6)"
+              class="w-full px-4 py-3 rounded-xl border border-slate-300 text-center text-lg font-extrabold tracking-[0.5em] text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+
+          <div>
+            <label for="pin-confirm-input" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Konfirmasi PIN Baru</label>
+            <input type="password" id="pin-confirm-input" inputmode="numeric" pattern="\d{6}" maxlength="6" placeholder="••••••"
+              oninput="this.value = this.value.replace(/\D/g, '').slice(0, 6)"
+              class="w-full px-4 py-3 rounded-xl border border-slate-300 text-center text-lg font-extrabold tracking-[0.5em] text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+
+          <div>
+            <label for="pin-autolock-modal-select" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Waktu Kunci Otomatis (Auto-Lock)</label>
+            <select id="pin-autolock-modal-select"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="1">1 Menit tidak aktif</option>
+              <option value="3" selected>3 Menit tidak aktif (Direkomendasikan)</option>
+              <option value="5">5 Menit tidak aktif</option>
+              <option value="10">10 Menit tidak aktif</option>
+              <option value="0">Hanya saat halaman dimuat ulang</option>
+            </select>
+          </div>
+        </div>
+
+        <p id="pin-setup-error" class="hidden text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 p-3 rounded-xl"></p>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px] text-slate-600 flex items-start gap-2">
+          <i data-lucide="lock" class="w-4 h-4 text-indigo-600 shrink-0 mt-0.5"></i>
+          <span>PIN dienkripsi menggunakan <strong>SHA-256</strong> di browser perangkat ini sehingga tidak dapat dibaca sebagai teks biasa.</span>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeModal('modal-pin-setup')"
+            class="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+            Batal
+          </button>
+          <button type="submit" id="btn-pin-setup-submit"
+            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm cursor-pointer">
+            Simpan &amp; Aktifkan PIN
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- =====================================================================
-       APPLICATION JAVASCRIPT LOGIC (SUPABASE SDK v2 + LOCAL FALLBACK)
+       TOAST NOTIFICATION CONTAINER
+  ====================================================================== -->
+  <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-[120] flex flex-col gap-2 max-w-xs sm:max-w-sm pointer-events-none"></div>
+
+  <!-- =====================================================================
+       APPLICATION JAVASCRIPT LOGIC (SUPABASE SDK v2 + LOCAL FALLBACK + PAKET A)
   ====================================================================== -->
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -2000,8 +2235,6 @@
     /**
      * =========================================================================
      * 0. KONFIGURASI SUPABASE UNTUK GITHUB PAGES (OPSIONAL HARDCODE)
-     *    Isi dua konstanta di bawah ini sebelum meng-upload index.html ke GitHub,
-     *    ATAU masukkan langsung lewat tombol gerigi "Pengaturan Supabase" di web.
      * =========================================================================
      */
     const CUSTOM_SUPABASE_URL = "https://zrvgmfcrpljbggqsodmh.supabase.co";
@@ -2017,6 +2250,8 @@
     const STORAGE_KEY = 'dompetku_finance_data_v1';
     const DEBT_FALLBACK_STORAGE_KEY = 'dompetku_debts_fallback_v1';
     const VEHICLES_FALLBACK_STORAGE_KEY = 'dompetku_vehicles_fallback_v1';
+    const SECURITY_PIN_STORAGE_KEY = 'dompetku_security_pin_v1';
+    const PRIVACY_MODE_STORAGE_KEY = 'dompetku_privacy_mode_v1';
 
     const CATEGORIES = {
       income: [
@@ -2084,7 +2319,7 @@
 
     /**
      * =========================================================================
-     * 2. STATE APLIKASI GLOBAL & STATE SUPABASE CLOUD
+     * 2. STATE APLIKASI GLOBAL, KEAMANAN (PAKET A) & SUPABASE CLOUD
      * =========================================================================
      */
     let supabase = null;
@@ -2114,12 +2349,508 @@
       weeklyAnchorDate: '',
       monthlyValue: '',
       recurringFilter: 'all', // 'all' | 'unpaid' | 'paid'
-      debtTypeFilter: 'all' // 'all' | 'debt' | 'receivable'
+      debtTypeFilter: 'all', // 'all' | 'debt' | 'receivable'
+      privacyMode: false
     };
 
+    let securityState = {
+      enabled: false,
+      pinHash: '',
+      autoLockMinutes: 3,
+      isLocked: false,
+      enteredPin: '',
+      failedAttempts: 0,
+      lockoutUntil: 0,
+      lastActivityAt: Date.now()
+    };
+
+    let autoLockIntervalId = null;
+    let lockoutCountdownId = null;
     let cashflowChartInstance = null;
     let categoryChartInstance = null;
     let pendingConfirmCallback = null;
+
+    /**
+     * =========================================================================
+     * 2A. KEAMANAN PAKET A: KUNCI PIN 6-DIGIT, AUTO-LOCK & MODE PRIVASI
+     * =========================================================================
+     */
+    async function hashPinSHA256(pinStr) {
+      const salted = `DompetKu_PIN_v1::${pinStr}`;
+      if (window.crypto && window.crypto.subtle) {
+        try {
+          const msgBuffer = new TextEncoder().encode(salted);
+          const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        } catch (e) {
+          // Fallback jika crypto.subtle dibatasi (misal protokol file:// non-HTTPS)
+        }
+      }
+      let h1 = 0xdeadbeef ^ salted.length;
+      let h2 = 0x41c6ce57 ^ salted.length;
+      for (let i = 0; i < salted.length; i++) {
+        const ch = salted.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(16, '0');
+    }
+
+    function loadSecurityAndPrivacyState() {
+      try {
+        const privRaw = localStorage.getItem(PRIVACY_MODE_STORAGE_KEY);
+        uiState.privacyMode = privRaw === 'true';
+      } catch (e) {
+        uiState.privacyMode = false;
+      }
+
+      try {
+        const raw = localStorage.getItem(SECURITY_PIN_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.enabled && parsed.pinHash) {
+            securityState.enabled = true;
+            securityState.pinHash = parsed.pinHash;
+            securityState.autoLockMinutes = parsed.autoLockMinutes !== undefined ? Number(parsed.autoLockMinutes) : 3;
+            securityState.isLocked = true;
+            showAppLockOverlay('Masukkan 6 digit PIN keamanan Anda untuk membuka aplikasi.');
+          } else if (parsed && parsed.autoLockMinutes !== undefined) {
+            securityState.autoLockMinutes = Number(parsed.autoLockMinutes);
+          }
+        }
+      } catch (e) {
+        console.warn('Gagal memuat pengaturan PIN:', e);
+      }
+
+      initAutoLockWatcher();
+      updateSecurityUI();
+    }
+
+    function saveSecurityConfig() {
+      try {
+        localStorage.setItem(SECURITY_PIN_STORAGE_KEY, JSON.stringify({
+          enabled: securityState.enabled,
+          pinHash: securityState.pinHash,
+          autoLockMinutes: securityState.autoLockMinutes
+        }));
+      } catch (e) {
+        console.warn('Gagal menyimpan pengaturan PIN:', e);
+      }
+    }
+
+    function togglePrivacyMode() {
+      uiState.privacyMode = !uiState.privacyMode;
+      try {
+        localStorage.setItem(PRIVACY_MODE_STORAGE_KEY, String(uiState.privacyMode));
+      } catch (e) {}
+      updateSecurityUI();
+      refreshAllViews();
+      showToast(
+        uiState.privacyMode
+          ? 'Mode Privasi aktif: Nominal disamarkan (Rp ••••••).'
+          : 'Mode Privasi nonaktif: Nominal ditampilkan kembali.',
+        'info'
+      );
+    }
+
+    function showAppLockOverlay(subtitleText = 'Masukkan 6 digit PIN keamanan Anda untuk membuka akses.') {
+      securityState.isLocked = true;
+      securityState.enteredPin = '';
+      updatePinDotsUI();
+
+      const overlay = document.getElementById('app-lock-overlay');
+      const subtitle = document.getElementById('app-lock-subtitle');
+      const errEl = document.getElementById('app-lock-error');
+      if (subtitle && subtitleText) subtitle.textContent = subtitleText;
+      if (errEl && Date.now() >= securityState.lockoutUntil) errEl.textContent = '';
+      if (overlay) overlay.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function hideAppLockOverlay() {
+      securityState.isLocked = false;
+      securityState.enteredPin = '';
+      securityState.failedAttempts = 0;
+      securityState.lastActivityAt = Date.now();
+      updatePinDotsUI();
+      const overlay = document.getElementById('app-lock-overlay');
+      if (overlay) overlay.classList.add('hidden');
+    }
+
+    function lockAppNow() {
+      if (!securityState.enabled) {
+        openPinSetupModal('setup');
+        return;
+      }
+      showAppLockOverlay('Layar dikunci secara manual. Masukkan PIN 6-digit untuk membuka.');
+    }
+
+    function handleHeaderLockClick() {
+      if (securityState.enabled) {
+        lockAppNow();
+      } else {
+        openPinSetupModal('setup');
+      }
+    }
+
+    function updatePinDotsUI() {
+      const dots = document.querySelectorAll('#pin-dots-container .pin-dot');
+      const len = securityState.enteredPin.length;
+      dots.forEach((dot, idx) => {
+        if (idx < len) {
+          dot.className = 'pin-dot w-3.5 h-3.5 rounded-full border-2 border-emerald-400 bg-emerald-400 scale-110 transition-all duration-150';
+        } else {
+          dot.className = 'pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-600 bg-transparent transition-all duration-150';
+        }
+      });
+    }
+
+    async function pressPinDigit(digit) {
+      if (!securityState.isLocked) return;
+      if (Date.now() < securityState.lockoutUntil) return;
+      if (securityState.enteredPin.length >= 6) return;
+
+      securityState.enteredPin += String(digit);
+      updatePinDotsUI();
+
+      if (securityState.enteredPin.length === 6) {
+        await verifyEnteredPin();
+      }
+    }
+
+    function backspacePinDigit() {
+      if (!securityState.isLocked || Date.now() < securityState.lockoutUntil) return;
+      securityState.enteredPin = securityState.enteredPin.slice(0, -1);
+      updatePinDotsUI();
+    }
+
+    function clearPinEntry() {
+      if (!securityState.isLocked || Date.now() < securityState.lockoutUntil) return;
+      securityState.enteredPin = '';
+      document.getElementById('app-lock-error').textContent = '';
+      updatePinDotsUI();
+    }
+
+    async function verifyEnteredPin() {
+      const candidateHash = await hashPinSHA256(securityState.enteredPin);
+      if (candidateHash === securityState.pinHash) {
+        hideAppLockOverlay();
+        showToast('Akses dibuka. Selamat datang kembali!', 'success');
+        return;
+      }
+
+      // Wrong PIN feedback
+      securityState.failedAttempts += 1;
+      securityState.enteredPin = '';
+      updatePinDotsUI();
+
+      const dotsContainer = document.getElementById('pin-dots-container');
+      dotsContainer.classList.remove('animate-pin-shake');
+      void dotsContainer.offsetWidth; // trigger reflow
+      dotsContainer.classList.add('animate-pin-shake');
+
+      const errEl = document.getElementById('app-lock-error');
+      if (securityState.failedAttempts >= 5) {
+        securityState.lockoutUntil = Date.now() + 30000;
+        startLockoutCountdown();
+      } else {
+        const sisa = 5 - securityState.failedAttempts;
+        errEl.textContent = `PIN salah. Sisa percobaan: ${sisa} kali.`;
+      }
+    }
+
+    function startLockoutCountdown() {
+      const errEl = document.getElementById('app-lock-error');
+      if (lockoutCountdownId) clearInterval(lockoutCountdownId);
+
+      const updateTimer = () => {
+        const remSec = Math.ceil((securityState.lockoutUntil - Date.now()) / 1000);
+        if (remSec <= 0) {
+          clearInterval(lockoutCountdownId);
+          lockoutCountdownId = null;
+          securityState.failedAttempts = 0;
+          securityState.lockoutUntil = 0;
+          errEl.textContent = 'Silakan coba masukkan PIN kembali.';
+        } else {
+          errEl.textContent = `Terlalu banyak percobaan. Tunggu ${remSec} detik...`;
+        }
+      };
+
+      updateTimer();
+      lockoutCountdownId = setInterval(updateTimer, 1000);
+    }
+
+    function initAutoLockWatcher() {
+      let lastRecorded = 0;
+      const recordActivity = () => {
+        if (securityState.isLocked) return;
+        const now = Date.now();
+        if (now - lastRecorded > 1000) {
+          lastRecorded = now;
+          securityState.lastActivityAt = now;
+        }
+      };
+
+      ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt => {
+        window.addEventListener(evt, recordActivity, { passive: true });
+      });
+
+      // Physical keyboard input for PIN Lock Screen
+      window.addEventListener('keydown', (e) => {
+        if (!securityState.isLocked) return;
+        if (e.key >= '0' && e.key <= '9') {
+          e.preventDefault();
+          pressPinDigit(e.key);
+        } else if (e.key === 'Backspace' || e.key === 'Delete') {
+          e.preventDefault();
+          backspacePinDigit();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          clearPinEntry();
+        }
+      });
+
+      if (autoLockIntervalId) clearInterval(autoLockIntervalId);
+      autoLockIntervalId = setInterval(() => {
+        if (!securityState.enabled || securityState.isLocked) return;
+        if (!securityState.autoLockMinutes || securityState.autoLockMinutes <= 0) return;
+
+        const idleMs = Date.now() - securityState.lastActivityAt;
+        const limitMs = securityState.autoLockMinutes * 60 * 1000;
+        if (idleMs >= limitMs) {
+          showAppLockOverlay(`Terkunci otomatis setelah ${securityState.autoLockMinutes} menit tidak ada aktivitas.`);
+        }
+      }, 5000);
+    }
+
+    function updateAutoLockMinutes(minutesVal) {
+      securityState.autoLockMinutes = Number(minutesVal);
+      securityState.lastActivityAt = Date.now();
+      saveSecurityConfig();
+      updateSecurityUI();
+      showToast(
+        securityState.autoLockMinutes > 0
+          ? `Auto-Lock diatur ke ${securityState.autoLockMinutes} menit.`
+          : 'Auto-Lock diatur hanya saat halaman dimuat ulang.',
+        'success'
+      );
+    }
+
+    function openPinSetupModal(mode = 'setup') {
+      document.getElementById('pin-setup-mode').value = mode;
+      document.getElementById('form-pin-setup').reset();
+      const errBox = document.getElementById('pin-setup-error');
+      errBox.classList.add('hidden');
+
+      const titleEl = document.getElementById('modal-pin-title');
+      const currentGroup = document.getElementById('pin-current-group');
+      const newGroup = document.getElementById('pin-new-group');
+      const submitBtn = document.getElementById('btn-pin-setup-submit');
+      const autoLockSelect = document.getElementById('pin-autolock-modal-select');
+
+      autoLockSelect.value = String(securityState.autoLockMinutes || 3);
+
+      if (mode === 'setup') {
+        titleEl.textContent = 'Aktifkan Kunci PIN 6-Digit';
+        currentGroup.classList.add('hidden');
+        newGroup.classList.remove('hidden');
+        submitBtn.textContent = 'Simpan & Aktifkan PIN';
+        submitBtn.className = 'px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm cursor-pointer';
+      } else if (mode === 'change') {
+        titleEl.textContent = 'Ubah Kunci PIN 6-Digit';
+        currentGroup.classList.remove('hidden');
+        newGroup.classList.remove('hidden');
+        submitBtn.textContent = 'Perbarui PIN';
+        submitBtn.className = 'px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm cursor-pointer';
+      } else if (mode === 'disable') {
+        titleEl.textContent = 'Nonaktifkan Kunci PIN';
+        currentGroup.classList.remove('hidden');
+        newGroup.classList.add('hidden');
+        submitBtn.textContent = 'Nonaktifkan PIN';
+        submitBtn.className = 'px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold shadow-sm cursor-pointer';
+      }
+
+      openModal('modal-pin-setup');
+    }
+
+    async function submitPinSetupForm(event) {
+      event.preventDefault();
+      const mode = document.getElementById('pin-setup-mode').value;
+      const currentPin = document.getElementById('pin-current-input').value.trim();
+      const newPin = document.getElementById('pin-new-input').value.trim();
+      const confirmPin = document.getElementById('pin-confirm-input').value.trim();
+      const autoLockVal = Number(document.getElementById('pin-autolock-modal-select').value);
+      const errBox = document.getElementById('pin-setup-error');
+      errBox.classList.add('hidden');
+
+      if (mode === 'change' || mode === 'disable') {
+        if (!/^\d{6}$/.test(currentPin)) {
+          errBox.textContent = 'Masukkan 6 digit PIN Anda saat ini.';
+          errBox.classList.remove('hidden');
+          return;
+        }
+        const currentHash = await hashPinSHA256(currentPin);
+        if (currentHash !== securityState.pinHash) {
+          errBox.textContent = 'PIN saat ini tidak sesuai.';
+          errBox.classList.remove('hidden');
+          return;
+        }
+      }
+
+      if (mode === 'disable') {
+        securityState.enabled = false;
+        securityState.pinHash = '';
+        saveSecurityConfig();
+        updateSecurityUI();
+        closeModal('modal-pin-setup');
+        showToast('Kunci PIN 6-Digit telah dinonaktifkan.', 'info');
+        return;
+      }
+
+      if (!/^\d{6}$/.test(newPin)) {
+        errBox.textContent = 'PIN baru wajib terdiri dari tepat 6 angka.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      if (newPin !== confirmPin) {
+        errBox.textContent = 'Konfirmasi PIN baru tidak cocok.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      const hashedNew = await hashPinSHA256(newPin);
+      securityState.enabled = true;
+      securityState.pinHash = hashedNew;
+      securityState.autoLockMinutes = autoLockVal;
+      securityState.lastActivityAt = Date.now();
+      saveSecurityConfig();
+      updateSecurityUI();
+      closeModal('modal-pin-setup');
+      showToast(mode === 'change' ? 'Kunci PIN 6-Digit berhasil diperbarui!' : 'Kunci PIN 6-Digit berhasil diaktifkan!', 'success');
+    }
+
+    function confirmForgotPinReset() {
+      openConfirmDialog({
+        title: 'Lupa PIN Keamanan?',
+        message: 'Karena PIN dienkripsi secara lokal (SHA-256) di perangkat ini, reset PIN akan menghapus pengaturan kunci PIN serta data lokal di browser ini (data cloud Supabase Anda tetap aman di server). Lanjutkan?',
+        confirmText: 'Ya, Reset PIN & Data Lokal',
+        onConfirm: async () => {
+          localStorage.removeItem(SECURITY_PIN_STORAGE_KEY);
+          localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem(DEBT_FALLBACK_STORAGE_KEY);
+          localStorage.removeItem(VEHICLES_FALLBACK_STORAGE_KEY);
+
+          securityState.enabled = false;
+          securityState.pinHash = '';
+          securityState.failedAttempts = 0;
+          securityState.lockoutUntil = 0;
+
+          if (supabase && currentUser) {
+            try {
+              await supabase.auth.signOut();
+            } catch (e) {}
+          }
+
+          hideAppLockOverlay();
+          loadLocalState();
+          updateSecurityUI();
+          refreshAllViews();
+          showToast('Kunci PIN berhasil direset. Anda dapat mengatur PIN baru kapan saja.', 'info');
+        }
+      });
+    }
+
+    function updateSecurityUI() {
+      // 1. Header Privacy Eye Button
+      const privBtn = document.getElementById('btn-toggle-privacy');
+      const privIcon = document.getElementById('header-privacy-icon');
+      if (privBtn && privIcon) {
+        privBtn.title = uiState.privacyMode
+          ? 'Tampilkan Nominal (Matikan Mode Privasi)'
+          : 'Mode Privasi: Samarkan Nominal (Rp ••••••)';
+        privIcon.setAttribute('data-lucide', uiState.privacyMode ? 'eye-off' : 'eye');
+      }
+
+      // 2. Header Lock / PIN Button
+      const lockBtn = document.getElementById('header-lock-btn');
+      const lockIcon = document.getElementById('header-lock-icon');
+      const lockLabel = document.getElementById('header-lock-label');
+      if (lockBtn && lockIcon && lockLabel) {
+        if (securityState.enabled) {
+          lockBtn.className = 'inline-flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-2.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-xs font-semibold text-indigo-800 transition-colors cursor-pointer';
+          lockBtn.title = 'Kunci Layar Sekarang (PIN Aktif)';
+          lockIcon.setAttribute('data-lucide', 'lock');
+          lockIcon.className = 'w-4 h-4 text-indigo-600';
+          lockLabel.textContent = 'Kunci';
+        } else {
+          lockBtn.className = 'inline-flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors cursor-pointer';
+          lockBtn.title = 'Atur Kunci PIN 6-Digit';
+          lockIcon.setAttribute('data-lucide', 'shield');
+          lockIcon.className = 'w-4 h-4 text-slate-500';
+          lockLabel.textContent = 'Atur PIN';
+        }
+      }
+
+      // 3. Reports View Security Card
+      const pinBadge = document.getElementById('report-pin-badge');
+      const pinActions = document.getElementById('report-pin-actions');
+      const autoLockSelect = document.getElementById('security-autolock-select');
+      const reportPrivBtn = document.getElementById('report-privacy-toggle-btn');
+
+      if (autoLockSelect) {
+        autoLockSelect.value = String(securityState.autoLockMinutes ?? 3);
+      }
+
+      if (reportPrivBtn) {
+        if (uiState.privacyMode) {
+          reportPrivBtn.className = 'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-xs font-bold text-emerald-800 transition-colors cursor-pointer shrink-0';
+          reportPrivBtn.innerHTML = `<i data-lucide="eye-off" class="w-4 h-4"></i><span>Aktif (Disamarkan)</span>`;
+        } else {
+          reportPrivBtn.className = 'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 transition-colors cursor-pointer shrink-0';
+          reportPrivBtn.innerHTML = `<i data-lucide="eye" class="w-4 h-4"></i><span>Nonaktif</span>`;
+        }
+      }
+
+      if (pinBadge && pinActions) {
+        if (securityState.enabled) {
+          pinBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800';
+          pinBadge.textContent = 'PIN 6-Digit Aktif';
+          pinActions.innerHTML = `
+            <button type="button" onclick="lockAppNow()"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs cursor-pointer">
+              <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+              <span>Kunci Sekarang</span>
+            </button>
+            <button type="button" onclick="openPinSetupModal('change')"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold cursor-pointer">
+              <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
+              <span>Ubah PIN</span>
+            </button>
+            <button type="button" onclick="openPinSetupModal('disable')"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold cursor-pointer">
+              <i data-lucide="shield-off" class="w-3.5 h-3.5"></i>
+              <span>Nonaktifkan</span>
+            </button>
+          `;
+        } else {
+          pinBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700';
+          pinBadge.textContent = 'PIN Nonaktif';
+          pinActions.innerHTML = `
+            <button type="button" onclick="openPinSetupModal('setup')"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer">
+              <i data-lucide="key-round" class="w-4 h-4"></i>
+              <span>Aktifkan Kunci PIN 6-Digit</span>
+            </button>
+          `;
+        }
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
 
     /**
      * =========================================================================
@@ -2601,7 +3332,7 @@
 
     /**
      * =========================================================================
-     * 3. UTILITAS TANGGAL & FORMAT RUPIAH INDONESIA
+     * 3. UTILITAS TANGGAL & FORMAT RUPIAH INDONESIA (MENDUKUNG MODE PRIVASI)
      * =========================================================================
      */
     function getTodayStr() {
@@ -2681,6 +3412,9 @@
     }
 
     function formatRupiah(amount) {
+      if (uiState.privacyMode) {
+        return 'Rp ••••••';
+      }
       const num = Math.round(Number(amount) || 0);
       const isNegative = num < 0;
       const formatted = Math.abs(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -3121,9 +3855,7 @@
       applySidebarState(nextCollapsed);
       try {
         localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(nextCollapsed));
-      } catch (e) {
-        // Abaikan jika penyimpanan lokal dibatasi
-      }
+      } catch (e) {}
     }
 
     function applySidebarState(isCollapsed) {
@@ -3210,7 +3942,9 @@
       const totalBalance = totalIn - totalOut;
       const balanceEl = document.getElementById('header-total-balance');
       balanceEl.textContent = formatRupiah(totalBalance);
-      balanceEl.className = `text-xs sm:text-lg font-extrabold tracking-tight ${totalBalance < 0 ? 'text-rose-600' : 'text-slate-900'}`;
+      balanceEl.className = `text-xs sm:text-lg font-extrabold tracking-tight ${
+        uiState.privacyMode ? 'text-slate-700' : (totalBalance < 0 ? 'text-rose-600' : 'text-slate-900')
+      }`;
 
       document.getElementById('sample-data-banner').classList.toggle('hidden', !appState.isSampleData || isCloudAuthenticated());
 
@@ -3323,7 +4057,6 @@
         mobileDebtsDot.classList.add('hidden');
       }
 
-      // Badge Kendaraan Mendekati / Lewat Jadwal Servis
       const dueVehicles = (appState.vehicles || []).filter(v => {
         const st = getVehicleServiceStatus(v);
         return st.level === 'urgent' || st.level === 'warning';
@@ -3376,7 +4109,9 @@
 
       const netEl = document.getElementById('kpi-net');
       const netStatusEl = document.getElementById('kpi-net-status');
-      netEl.textContent = `${netCashflow > 0 ? '+' : ''}${formatRupiah(netCashflow)}`;
+      netEl.textContent = uiState.privacyMode
+        ? formatRupiah(netCashflow)
+        : `${netCashflow > 0 ? '+' : ''}${formatRupiah(netCashflow)}`;
       if (netCashflow > 0) {
         netEl.className = 'text-xl sm:text-2xl font-extrabold text-emerald-600 tracking-tight';
         netStatusEl.textContent = 'Surplus arus kas positif';
@@ -3604,7 +4339,7 @@
               </div>
             </div>
             <span class="text-xs sm:text-sm font-bold shrink-0 ${isIncome ? 'text-emerald-600' : 'text-rose-600'}">
-              ${isIncome ? '+' : '-'} ${formatRupiah(tx.amount)}
+              ${uiState.privacyMode ? formatRupiah(tx.amount) : `${isIncome ? '+' : '-'} ${formatRupiah(tx.amount)}`}
             </span>
           </div>
         `;
@@ -3765,6 +4500,7 @@
                 color: '#64748b',
                 font: { size: 11, family: 'Inter' },
                 callback: function (value) {
+                  if (uiState.privacyMode) return 'Rp •••';
                   if (value >= 1000000) return `Rp ${(value / 1000000).toFixed(1)} jt`;
                   if (value >= 1000) return `Rp ${(value / 1000).toFixed(0)} rb`;
                   return `Rp ${value}`;
@@ -3978,7 +4714,7 @@
 
             <div class="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
               <span class="text-sm sm:text-base font-extrabold ${isIncome ? 'text-emerald-600' : 'text-rose-600'}">
-                ${isIncome ? '+' : '-'} ${formatRupiah(tx.amount)}
+                ${uiState.privacyMode ? formatRupiah(tx.amount) : `${isIncome ? '+' : '-'} ${formatRupiah(tx.amount)}`}
               </span>
               <div class="flex items-center gap-1">
                 <button onclick="openTransactionModal('${tx.id}')" title="Edit Transaksi"
@@ -4357,7 +5093,9 @@
 
       const netEl = document.getElementById('debt-net-balance');
       const netDesc = document.getElementById('debt-net-desc');
-      netEl.textContent = `${netDebt > 0 ? '+' : ''}${formatRupiah(netDebt)}`;
+      netEl.textContent = uiState.privacyMode
+        ? formatRupiah(netDebt)
+        : `${netDebt > 0 ? '+' : ''}${formatRupiah(netDebt)}`;
       if (netDebt > 0) {
         netEl.className = 'text-lg sm:text-2xl font-extrabold text-indigo-600 mt-1.5';
         netDesc.textContent = 'Posisi bersih piutang lebih besar';
@@ -5281,7 +6019,6 @@
         document.getElementById('veh-kpi-last-service').textContent = 'Belum ada riwayat servis';
       }
 
-      // Render Daftar Kendaraan (Garasi)
       const garageGrid = document.getElementById('vehicles-garage-grid');
       if (vehicles.length === 0) {
         garageGrid.innerHTML = `
@@ -5371,7 +6108,6 @@
         }).join('');
       }
 
-      // Sinkronkan dropdown filter kendaraan di riwayat servis
       const vehFilterSelect = document.getElementById('svc-filter-vehicle');
       const prevVehFilter = vehFilterSelect.value;
       vehFilterSelect.innerHTML = `<option value="all">Semua Kendaraan</option>` +
@@ -5380,7 +6116,6 @@
         vehFilterSelect.value = prevVehFilter;
       }
 
-      // Render Riwayat Servis Kendaraan
       const selectedVeh = vehFilterSelect.value;
       const selectedType = document.getElementById('svc-filter-type').value;
       const searchQ = (document.getElementById('svc-search-input').value || '').toLowerCase().trim();
@@ -5701,7 +6436,7 @@
 
     function handleServiceVehicleChange() {
       const svcId = document.getElementById('svc-id').value;
-      if (svcId) return; // Jangan timpa saat mode edit
+      if (svcId) return;
 
       const vehId = document.getElementById('svc-vehicle-id').value;
       const v = (appState.vehicles || []).find(item => item.id === vehId);
@@ -6335,7 +7070,7 @@
 
     /**
      * =========================================================================
-     * 12B. HANDLER UI MODAL AUTENTIKASI & PENGATURAN SUPABASE CONFIG
+     * 12B. HANDLER UI MODAL AUTENTIKASI SUPABASE
      * =========================================================================
      */
     function openAuthModal() {
@@ -6472,83 +7207,6 @@
       }
     }
 
-    function openSupabaseConfigModal() {
-      const urlInput = document.getElementById('supabase-url-input');
-      const keyInput = document.getElementById('supabase-key-input');
-      const badge = document.getElementById('config-source-badge');
-      const removeBtn = document.getElementById('btn-remove-supabase-config');
-
-      const savedRaw = localStorage.getItem(CUSTOM_SUPABASE_STORAGE_KEY);
-      if (savedRaw) {
-        try {
-          const parsed = JSON.parse(savedRaw);
-          urlInput.value = parsed.url || '';
-          keyInput.value = parsed.anonKey || '';
-        } catch (e) {
-          urlInput.value = '';
-          keyInput.value = '';
-        }
-        badge.textContent = 'Tersimpan di Browser';
-        badge.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-100 text-emerald-800';
-        removeBtn.classList.remove('hidden');
-      } else if (configSourceType === 'hardcoded') {
-        urlInput.value = CUSTOM_SUPABASE_URL;
-        keyInput.value = CUSTOM_SUPABASE_ANON_KEY;
-        badge.textContent = 'Dari Kode Sumber';
-        badge.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-sky-100 text-sky-800';
-        removeBtn.classList.add('hidden');
-      } else {
-        urlInput.value = '';
-        keyInput.value = '';
-        badge.textContent = 'Belum Terkonfigurasi';
-        badge.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-600';
-        removeBtn.classList.add('hidden');
-      }
-
-      openModal('modal-supabase-config');
-    }
-
-    async function saveCustomSupabaseConfig(event) {
-      event.preventDefault();
-      const url = document.getElementById('supabase-url-input').value.trim();
-      const anonKey = document.getElementById('supabase-key-input').value.trim();
-
-      if (!url.startsWith('https://') || !anonKey) {
-        showToast('Masukkan Project URL (https://...) dan Anon Key Supabase yang valid.', 'error');
-        return;
-      }
-
-      localStorage.setItem(CUSTOM_SUPABASE_STORAGE_KEY, JSON.stringify({ url, anonKey }));
-      closeModal('modal-supabase-config');
-      showToast('Kredensial Supabase disimpan! Menghubungkan...', 'success');
-      await initSupabaseService();
-      if (isCloudConfigured() && !isCloudAuthenticated()) {
-        openAuthModal();
-      }
-    }
-
-    async function removeCustomSupabaseConfig() {
-      localStorage.removeItem(CUSTOM_SUPABASE_STORAGE_KEY);
-      closeModal('modal-supabase-config');
-      showToast('Kredensial Supabase dihapus. Kembali ke Mode Lokal.', 'info');
-      await initSupabaseService();
-    }
-
-    function copySupabaseSQL() {
-      const sqlText = document.getElementById('supabase-sql-code').textContent;
-      const tempArea = document.createElement('textarea');
-      tempArea.value = sqlText;
-      document.body.appendChild(tempArea);
-      tempArea.select();
-      try {
-        document.execCommand('copy');
-        showToast('Skrip SQL Setup Supabase berhasil disalin!', 'success');
-      } catch (err) {
-        showToast('Gagal menyalin teks.', 'error');
-      }
-      document.body.removeChild(tempArea);
-    }
-
     /**
      * =========================================================================
      * 13. UTILITAS MODAL & TOAST NOTIFICATIONS
@@ -6623,7 +7281,8 @@
         'modal-update-odo',
         'modal-pay-bill',
         'modal-confirm',
-        'modal-auth'
+        'modal-auth',
+        'modal-pin-setup'
       ].forEach(id => {
         const modal = document.getElementById(id);
         if (modal && e.target === modal) {
@@ -6632,8 +7291,18 @@
       });
     });
 
-    // Daftarkan seluruh fungsi interaktif ke global window agar tombol HTML berfungsi
+    // Daftarkan seluruh fungsi interaktif ke global window
     Object.assign(window, {
+      togglePrivacyMode,
+      lockAppNow,
+      handleHeaderLockClick,
+      pressPinDigit,
+      backspacePinDigit,
+      clearPinEntry,
+      updateAutoLockMinutes,
+      openPinSetupModal,
+      submitPinSetupForm,
+      confirmForgotPinReset,
       toggleSidebarCollapse,
       switchTab,
       openAuthModal,
@@ -6692,13 +7361,20 @@
       handleGoogleLogin
     });
 
-    // Inisialisasi aplikasi saat halaman siap
-    document.addEventListener('DOMContentLoaded', async () => {
+    // Inisialisasi aplikasi secara aman baik sebelum maupun sesudah DOMContentLoaded
+    async function bootstrapApp() {
+      loadSecurityAndPrivacyState();
       initSidebarState();
       initPeriodControls();
       updateCategoryFilterOptions();
       await initSupabaseService();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootstrapApp);
+    } else {
+      bootstrapApp();
+    }
   </script>
 </body>
 </html>
